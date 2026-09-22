@@ -1,0 +1,52 @@
+# OCR + fuzzy rerank knobs carried from the old project.
+# Image/SIFT confidence and formatter top-3/6 are intentionally absent.
+
+ocr:
+  engine: phocr
+  lang: ru
+  limit_side_len: 1150
+  min_confidence: 0.0
+  min_line_chars: 3
+  drop_spaced_letters: true
+
+hybrid:
+  rerank_top: 10
+  fuzzy:
+    token_min_len: 4
+    token_fuzz_min: 84.0
+    short_field_len: 16
+    short_field_score_floor: 0.92
+    short_field_dampen: 0.1
+    coverage_weight: 1.8
+    token_hit_weight: 0.45
+    mfr_compact_high: 0.85
+    mfr_compact_mid: 0.70
+    mfr_bonus_high: 1.2
+    mfr_bonus_mid: 0.6
+    primary_line_cap: 8
+    prefilter_min_candidates: 3
+    exact_title_token_bonus: 0.75
+    title_token_ratio_min: 90.0
+    shortlist_idf_weight: 2.0
+    token_edit_max: 2
+    token_edit_max_frac: 0.5
+    token_edit_idf_scale: 0.5
+
+confidence:
+  text:
+    field_weights: { title: 1.0, manufacturer: 1.0, category: 0.15 }
+    match_multipliers: { exact: 2.0, partial: 1.0, weak: 0.5 }
+    ratio_mins:
+      exact: 0.92
+      partial: 0.72
+      weak: 0.55
+
+# New-repo policy flags (defaults to define later; not used by copied fuzzy code):
+# policy:
+#   enable_ocr_rerank: true
+#   enable_not_found_gate: true
+#   dino:
+#     abs_min: null
+#     margin_min: null
+#     top_k: 20
+#     rerank_pool: 10

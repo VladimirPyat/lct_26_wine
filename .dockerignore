@@ -1,0 +1,48 @@
+# User-specific stuff
+.idea/
+.gigaide/
+
+# Gradle
+.gradle/
+/build/
+
+
+# IDE-specific files
+*.iml
+*.ipr
+*.iws
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Node.js
+node_modules/
+.next/
+
+
+# Python
+__pycache__
+*.pyc
+.pytest_cache
+
+#cursor
+.cursor/indexing.db
+.cursor/*.tmp
+.cursor/*.lock
+
+docs/
+
+# environment
+.venv/
+
+# secrets
+.env
+
+_data
+_out

@@ -1,0 +1,60 @@
+[project]
+name = "vine-scanner"
+version = "0.1.0"
+description = "Wine label scanner for Svoe Vino (LCT 2026)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.6.0",
+    "pyyaml>=6.0.2",
+    "python-multipart>=0.0.12",
+]
+
+[project.optional-dependencies]
+# Installed in later stages when cropper / OCR / DB paths are wired.
+ml = [
+    "onnxruntime>=1.19.0",
+    "opencv-python-headless>=4.10.0",
+    "numpy>=2.0.0",
+    "rapidfuzz>=3.9.0",
+    "python-Levenshtein>=0.26.0",
+]
+db = [
+    "sqlalchemy>=2.0.36",
+    "psycopg[binary]>=3.2.0",
+    "pgvector>=0.3.0",
+]
+dev = [
+    "pytest>=8.3.0",
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+    "bandit>=1.8.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# Stage 0: install deps only; run via `uv run` + `--app-dir src`.
+[tool.uv]
+package = false
+
+[tool.ruff]
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.mypy]
+python_version = "3.11"
+packages = ["core", "api", "db"]
+mypy_path = "src"
+strict = true
