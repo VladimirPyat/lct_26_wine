@@ -1,8 +1,9 @@
-# OCR + fuzzy rerank knobs carried from the old project.
+# OCR + fuzzy rerank + eval decision policy (Stage 2B).
 # Image/SIFT confidence and formatter top-3/6 are intentionally absent.
 
 ocr:
-  engine: phocr
+  engine: phocr          # phocr | llm | mock
+  llm_task: ocr_label    # used when engine=llm (src/llm/tasks/{name}.yaml)
   lang: ru
   limit_side_len: 1150
   min_confidence: 0.0
@@ -41,12 +42,16 @@ confidence:
       partial: 0.72
       weak: 0.55
 
-# New-repo policy flags (defaults to define later; not used by copied fuzzy code):
-# policy:
-#   enable_ocr_rerank: true
-#   enable_not_found_gate: true
-#   dino:
-#     abs_min: null
-#     margin_min: null
-#     top_k: 20
-#     rerank_pool: 10
+# Eval decision policy (see agent_docs/contracts/eval_predict.md).
+# enable_not_found_gate is Stage 3 product only — must not null eval slug.
+policy:
+  top_k: 5
+  margin_min: 0.1
+  abs_min: 0.2
+  enable_rerank: true
+  enable_not_found_gate: false
+
+# Per-request JSONL decision log (not HTTP body).
+decision_log:
+  path: data/tmp/eval_decisions.jsonl
+  ocr_lines_cap: 32

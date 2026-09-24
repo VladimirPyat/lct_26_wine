@@ -1,6 +1,6 @@
 # RankedHit / retrieval contract (greenfield)
 
-**Status:** Stage 1 — align with [wines_schema.md](wines_schema.md) / [wines_repository.md](wines_repository.md).
+**Status:** Stage 1–2 — align with [wines_schema.md](wines_schema.md) / [wines_repository.md](wines_repository.md). Policy details: [eval_predict.md](eval_predict.md), [ocr_engine.md](ocr_engine.md).
 
 ## RankedHit
 
@@ -23,12 +23,12 @@ class IRetriever(Protocol):
     def retrieve(self, image_path: str, *, top_k: int) -> list[RankedHit]: ...
 ```
 
-Implementation: (optional YOLO crop) → DINO ONNX encode → `search_by_embedding`. Catalog load may encode **without** YOLO when source shots are already bottle crops. Not SIFT. Not FAISS file.
+Implementation: YOLO crop → DINO ONNX encode → `search_by_embedding`. Catalog load may encode **without** YOLO when source shots are already bottle crops. Not SIFT. Not FAISS file.
 
-## Policy input/output
+## Policy input/output (Stage 2)
 
-- In: `list[RankedHit]`, optional OCR lines, flags `enable_ocr_rerank`, `enable_not_found_gate`.
-- Out (eval): `slug | None` (+ optional margin fields for debugging).
-- Out (product): one wine card or not_found (+ analogs later).
+- In: `list[RankedHit]`; OCR via [`IOCREngine`](ocr_engine.md); flags `enable_rerank`, thresholds `top_k` / `margin_min` / `abs_min`.
+- Out (**eval**): always `slug` when candidates exist (see [eval_predict.md](eval_predict.md)); scores only in structured logs.
+- Out (**product**, Stage 3): one wine card or not_found (+ analogs later); may use `abs_min` / not_found gate.
 
-OCR path reuses `FuzzyReranker` from `migration/text/fuzzy.py` on the shortlist only.
+OCR/rerank reuses `FuzzyReranker` (`src/core/text/fuzzy.py`) on the shortlist only. Text backend for lines: `phocr` or `llm` adapter — same `list[str]`.

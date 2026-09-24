@@ -19,6 +19,12 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line(
         "markers", "import_check: Stage 1.2 post-import SQL / repository smoke"
     )
+    config.addinivalue_line(
+        "markers", "integration: optional live external services (skip without key)"
+    )
+    config.addinivalue_line(
+        "markers", "e2e: live API / owner_eval harness (needs running uvicorn)"
+    )
 
 
 @pytest.fixture

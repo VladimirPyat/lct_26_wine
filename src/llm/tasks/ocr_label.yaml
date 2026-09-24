@@ -1,0 +1,13 @@
+# src/llm/tasks/ocr_label.yaml
+name: ocr_label
+provider:
+  name: qwen
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  api_key_env: QWEN_API_KEY
+  model: qwen-vl-plus
+retries: 3
+modality: vision
+prompt_path: prompts/ocr_label_v1.md
+output:
+  kind: text_lines
+temperature: 0.0

@@ -1,40 +1,42 @@
 # Политика выдачи (ТЗ)
 
-**Статус:** черновик порогов; числа — после калибровки на DINO + owner_eval.
+**Статус:** Stage 2 — стартовые пороги зафиксированы; калибровка только правкой YAML после owner_eval.
 
-## Сценарии
+## Сценарии (eval)
 
 | Условие | Действие |
 |---------|----------|
-| `score_1` высокий и `margin = score_1 - score_2` ≥ τ_margin | Выдать top-1 сразу. OCR-rerank **не обязателен** (можно пропустить для SLA). |
-| Несколько близких кандидатов (margin < τ_margin, но score_1 ≥ τ_abs) | Взять top-k → PHOCR + fuzzy rerank → один победитель. |
-| Уверенность сильно ниже порога (score_1 < τ_not_found **или** пустой/мусорный кадр) | «Не найдено». |
+| `margin = score_1 - score_2` ≥ `margin_min` **или** `enable_rerank: false` | Выдать top-1; OCR не вызывать |
+| `margin` < `margin_min` и `enable_rerank: true` | OCR (`IOCREngine`) + fuzzy rerank по top_k → один slug |
+| `score_1` < `abs_min` | Флаг **garbage** в логах; для **eval** всё равно отдать лучший slug |
 
-Пороги `τ_*` и размер k — YAML. Иметь флаги:
+Продуктовый «не найдено» / аналоги — Stage 3 (`enable_not_found_gate`).
+
+## YAML (стартовые значения)
 
 ```yaml
 policy:
-  enable_ocr_rerank: true
-  enable_not_found_gate: true
-  top_k: 20
-  rerank_pool: 10
-  # dino abs_min / margin_min / not_found_max — TBD
+  top_k: 5
+  margin_min: 0.1
+  abs_min: 0.2
+  enable_rerank: true
+  # enable_not_found_gate: false   # eval; product later
 ```
 
-Одна точка входа поиска с аргументами/флагами предпочтительнее трёх отдельных пайплайнов (решим при API).
+OCR backend: `ocr.engine: phocr | llm` — см. [../contracts/ocr_engine.md](../contracts/ocr_engine.md).
 
 ## Eval vs UI
 
 | Контур | При низкой уверенности |
 |--------|-------------------------|
-| Eval `/v1/eval/predict` | Уточнить: всегда лучший slug (F1 организатора) **или** `null` при not_found. Скрипт принимает оба; метрика у организатора. |
-| Product UI | Не сетка «возможно вы искали». Либо одна карточка, либо not_found (+ аналоги из полей каталога — продуктовый плюс). |
+| Eval `/v1/eval/predict` | **Всегда** лучший slug; подробности в structured logs + `scripts/collect_eval_report.py` |
+| Product UI | Одна карточка или not_found (+ аналоги) — Stage 3 |
 
 ## Что берём из старого кода
 
-- Скорер: `text/fuzzy.py` + `normalize.py` + `ocr_postprocess.py`.  
-- Не берём: inliers-матрицу, found/partial_match/top-3/6.
+- Скорер: `text/fuzzy.py` + `normalize.py` + `ocr_postprocess.py`.
+- Не берём: inliers-матрицу, found/partial_match/top-3/6, старый `orchestrator.py`.
 
 ## Вход политики
 
-Список `RankedHit`: `slug`, `score` (больше = лучше), `wine_id` / поля для fuzzy. Источник score — DINO/pgvector, не SIFT.
+Список `RankedHit`: `slug`, `score` (больше = лучше), поля для fuzzy. Score — DINO/pgvector.

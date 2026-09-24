@@ -22,6 +22,8 @@ ml = [
     "rapidfuzz>=3.9.0",
     "python-Levenshtein>=0.26.0",
     "pillow>=12.3.0",
+    "openai>=3.19.2",
+    "phocr>=1.0.3",
 ]
 db = [
     "sqlalchemy>=2.0.36",
@@ -43,6 +45,10 @@ build-backend = "hatchling.build"
 # Stage 0: install deps only; run via `uv run` + `--app-dir src`.
 [tool.uv]
 package = false
+# PHOCR metadata still pins numpy<=1.26.4; project needs numpy 2.x (OpenCV/ORT).
+override-dependencies = [
+    "numpy>=2.0.0",
+]
 
 [tool.ruff]
 target-version = "py311"
@@ -57,6 +63,6 @@ pythonpath = ["src"]
 
 [tool.mypy]
 python_version = "3.11"
-packages = ["core", "api", "db"]
+packages = ["core", "api", "db", "llm"]
 mypy_path = "src"
 strict = true

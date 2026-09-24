@@ -2,71 +2,88 @@
 
 Краткое описание компонентов, границ модулей и потоков данных. Не дублирует контракты и списки классов.
 
-**Статус:** Stage 1.2 — prepare → import → DINO → pgvector.
+**Статус:** Stage 2 — 2A LLM OCR + 2B eval predict.
 
 ## Компоненты
 
 | Компонент | Назначение |
 |-----------|------------|
-| `api` (FastAPI) | HTTP-вход; `/health`, mount `/static/wines` |
-| `core` | Конфиг YAML, cropper/OCR/text; `core/retrieve` — DINO ONNX |
-| `db` | SQLAlchemy-модели + `WineRepository`; CLI `scripts/catalog_import.py` |
-| `scripts/catalog_prepare/` | Аудит размеров + split ready/additional/rejected |
-| Postgres (Compose) | Единая БД каталога и векторов DINO (`pgvector`) |
-| `static/wines/` | Публичные изображения каталога (`image_url`) |
-| `bin/*.onnx` | YOLO cropper, DINO (`dinov2_wine_final.onnx` + `.onnx.data`) |
+| `api` (FastAPI) | HTTP: `/health`, `/static/wines`, `POST /v1/eval/predict` |
+| `api.runtime` | Старт: YOLO + DINO + DB; OCR лениво при первом rerank |
+| `core.retrieve` | DINO ONNX + `WineRetriever` (crop → encode → top-K) |
+| `core.policy` | Decision: margin / abs_min / OCR+fuzzy; JSONL decision log |
+| `core.ocr` | `IOCREngine`: `phocr` \| `llm` \| `mock` (`create_ocr_engine`) |
+| `core.text` | `FuzzyReranker` по shortlist |
+| `llm` | Клиент + factory задач + адаптер LLM-OCR |
+| `db` | SQLAlchemy + `WineRepository.search_by_embedding` |
+| Postgres (Compose) | Каталог + `pgvector` |
+| `static/wines/` | Публичные картинки каталога |
+| `bin/*.onnx` | YOLO, DINO |
 
-Lookup-таблицы: `categories`, `regions`, `sweetness_levels`.  
-Таблица `wines`: метаданные, `dishes TEXT[]`, `embedding vector(N)` (N из `config/database.yaml`).
-
-## Поток данных каталога (Stage 1.2)
+## LLM-слой (Stage 2A)
 
 ```
-data/owner_database + data/site_database   (SSOT, read-only)
+create_ocr_engine("llm", llm_task="ocr_label")
         │
         ▼
-scripts/catalog_prepare/prepare_ready_csv.py
-        │  MIN_SIDE=200, JSON enrich (rating/temp/alcohol/dishes)
-        ▼
-wines_ready.csv + wines_additional.csv (+ rejected on disk)
-        │
-        ▼
-python scripts/catalog_import.py
-        ├─ category/region get-or-create (empty → «н/д»)
-        ├─ sweetness_id ← site JSON category tokens
-        ├─ copy → static/wines/{slug}.webp
-        ├─ DinoOnnxEncoder.encode_image
-        └─ WineRepository.upsert_by_slug
-        ▼
-Postgres wines.embedding + image_url
+LLMOCREngine  →  create_llm_engine("ocr_label")
+                      │
+                      ├─ src/llm/tasks/ocr_label.yaml  (base_url, model, api_key_env, retries)
+                      ├─ src/llm/prompts/ocr_label_v1.md
+                      └─ OpenAI-compatible client (retry 408/429/5xx; default retries=3)
 ```
 
-Rejected CSV не импортируется в первом прогоне (файлы для ручных правок).
+- Вызывающий передаёт только **имя задачи**; URL/model не в `.env`.
+- Выход `text_lines` → `list[str]` — тот же контракт, что у PHOCR.
+- Реестра провайдеров нет: provider inline в task YAML.
 
-## Границы слоёв (retrieve)
+## Eval pipeline (Stage 2B)
+
+```
+multipart image
+    │
+    ▼
+temp upload (data/tmp/uploads) ── cleanup after request
+    │
+    ▼
+YOLO crop → DINO encode → pgvector top_k
+    │
+    ▼
+policy.decide
+    ├─ skip OCR if !enable_rerank OR margin ≥ margin_min OR single hit
+    └─ else IOCREngine.recognize + FuzzyReranker on shortlist
+    │
+    ├── HTTP 200: {"slug": "<winner>"}   # всегда slug при непустых hits
+    └── JSONL decision log (не в теле ответа)
+```
+
+Пустой каталог / 0 hits → HTTP 503.  
+`score_1 < abs_min` → флаг `garbage` в логе; slug всё равно top-1.
+
+## Границы слоёв
 
 ```
 image path
-  → core.retrieve.encode_image / DinoOnnxEncoder   # вне репозитория
-  → db.WineRepository.search_by_embedding          # только вектор top-K
-  → list[RankedHit]                                # score = 1 − cosine_distance
+  → WineRetriever.retrieve_bundle     # crop + encode + search
+  → policy.decide                     # OCR только при rerank
+  → emit_decision_log                 # JSONL на диск
+  → {"slug": ...}                     # HTTP body без scores
 ```
 
-- **Encoder** (`src/core/retrieve/`): preprocess (resize 224, ImageNet mean/std), ORT-инференс, L2-нормализация `pooler_output`.
-- **Repository** (`src/db/repository.py`): CRUD по id, slug/upsert, `get_many_by_ids`, `search_filters` (AND). **Не** комбинирует vector ORDER BY с фильтрами в одном SQL.
-- **RankedHit.image_path** ← `wines.image_url`.
+Retriever не вызывает OCR. Policy не знает FastAPI. LLM и PHOCR — один `IOCREngine`.
 
-## Pipeline / этапы обработки (поиск, позже)
+## Каталог (Stage 1.2, кратко)
 
 ```
-image → YOLO crop → DINO embed → retrieve (pgvector) → OCR rerank / policy → response
+data/owner_database + data/site_database
+  → prepare_ready_csv → wines_ready/additional
+  → catalog_import (DINO + static/wines/{slug}.webp)
+  → Postgres wines.embedding
 ```
-
-Для каталожных кадров YOLO опционален: encode полного кадра бутылки.
 
 ## Внешние зависимости
 
-- **Postgres 16 + pgvector** — `docker compose` (`pgvector/pgvector:pg16`), том `pgdata`
-- **Alembic** — миграции в `alembic/versions/`
-- **ONNX Runtime** + **Pillow** — инференс и prepare (extra `ml`)
-- Картинки-источники: `data/owner_database/`, `data/site_database/` (не в git)
+- **Postgres 16 + pgvector** — `docker compose`
+- **ONNX Runtime** — YOLO (CPU), DINO (cpu|cuda)
+- **PHOCR** — локальный OCR (`ocr.engine=phocr`)
+- **OpenAI-compatible SDK** — LLM OCR (`ocr.engine=llm`, ключ из task YAML)

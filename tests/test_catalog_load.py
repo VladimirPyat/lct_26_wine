@@ -99,7 +99,8 @@ class TestCatalogImportDb:
     """SQL + repository smoke against the already-imported catalog."""
 
     def test_lookup_tables_and_wine_counts(self, db_session: Session) -> None:
-        """[TEST-ID] 1.2-04 tables exist; sweetness ≥6; wines≈ready+additional; no nulls."""
+        """[TEST-ID] 1.2-04 tables exist; sweetness ≥6;
+        wines≈ready+additional; no nulls."""
         present = {
             r[0]
             for r in db_session.execute(

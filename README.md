@@ -12,10 +12,10 @@
 | [manuals/quickstart.md](manuals/quickstart.md) | Быстрый запуск |
 | [manuals/architecture.md](manuals/architecture.md) | Архитектура системы |
 | [manuals/configuration_guide.md](manuals/configuration_guide.md) | Настройки и профили |
+| [manuals/manual_testing.md](manuals/manual_testing.md) | Ручные проверки (HITL), Stage 2 |
 | [agent_docs/plans/stages.md](agent_docs/plans/stages.md) | Дорожная карта этапов |
 | `docs/` | ТЗ и продуктовые требования (read-only для агентов) |
 
-Ручное тестирование (`manuals/manual_testing.md`) появится при необходимости HITL — по решению @Planner.
 
 ## Layout
 

@@ -38,13 +38,25 @@
 
 ---
 
-## Этап 2. Eval API
+## Этап 2. Eval API + LLM
 
-- `POST /v1/eval/predict`, multipart `image` → `{"slug":"..."}`.
-- Пайплайн: YOLO → DINO → pgvector top-K → policy (margin / OCR-rerank / not_found).
-- Харнесс: `data/owner_eval/<set>/participant_test.sh`.
+Контракты (Phase A draft): `llm_engine.md`, `ocr_engine.md`, `eval_predict.md`.  
+Подэтапы **независимы** при готовых контрактах.
 
-**Готово когда:** `predictions.jsonl`; hit@1 / latency на owner_eval.
+### 2A. LLM foundation
+
+- OpenAI-compatible клиент; task YAML под `src/llm/tasks/` с **inline** provider (без registry).
+- `.env` — только API-ключи; `retries` default 3; factory `create_llm_engine(task_name)`.
+- Первая задача: `ocr_label` → `list[str]` через `IOCREngine` adapter.
+
+### 2B. Eval API
+
+- `POST /v1/eval/predict`, multipart `image` → **всегда** `{"slug":"..."}`.
+- Пайплайн: YOLO → DINO → pgvector `top_k=5` → policy (`margin_min=0.1`, `abs_min=0.2`, `enable_rerank`).
+- OCR: `phocr` \| `llm`; fuzzy rerank на shortlist; structured logs + `scripts/collect_eval_report.py`.
+- Харнесс: `data/owner_eval/<set>/participant_test.sh` (set1, затем set2).
+
+**Готово когда:** set1/set2 `predictions.jsonl`; hit@1 / latency в отчёте; anti-cheat swapped golden падает.
 
 ---
 
@@ -71,17 +83,18 @@
 ## Зависимости
 
 ```
-0 каркас ──► 1 каталог ──► 2 eval ──► 3 product API ──► 4 фронт ──► 5 фичи
+0 каркас ──► 1 каталог ──► 2A LLM ┐
+                      └──────────► 2B eval ──► 3 product API ──► 4 фронт ──► 5 фичи
 ```
 
-Параллель: скелет 2 на мок-retriever пока идут 1.3–1.5; вёрстка 4 на мок-JSON 3.
+Параллель: 2A ∥ 2B(phocr); 2B с `ocr.engine=llm` после 2A; вёрстка 4 на мок-JSON 3.
 
 ---
 
 ## Чеклист сдачи
 
 - [ ] Каталог + DINO в pgvector  
-- [ ] `/v1/eval/predict` + скрипт заказчика (`data/owner_eval/`)  
+- [ ] LLM task layer (2A) + `/v1/eval/predict` + скрипт заказчика (`data/owner_eval/`)  
 - [ ] Продуктовый поиск: карточка или аналоги  
 - [ ] UI mobile-first  
 - [ ] README + Compose; CPU и GPU  

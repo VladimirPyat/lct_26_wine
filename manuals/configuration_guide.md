@@ -2,87 +2,93 @@
 
 Зачем и когда менять настройки (профили, YAML, режимы запуска). Полные схемы ключей — в `agent_docs/contracts/`, не здесь.
 
-**Статус:** Stage 1.2 — пути каталога, `MIN_SIDE`, static, флаги import.
+**Статус:** Stage 2 — policy, ocr.engine, LLM tasks, decision log.
 
 ## Где лежат настройки
 
 | Источник | Что задаёт |
 |----------|------------|
-| `.env` (копия с `.env.example`) | `DATABASE_URL` — единственный способ указать хост БД |
-| `config/database.yaml` | `dino_model_path`, `embedding_dim`, блок `dino` (resize/normalize/L2) |
-| `config/compute_cropper.yaml` | `compute.device` / threads (ORT для DINO и др.), YOLO cropper |
-| `config/ocr_rerank.yaml` | OCR / fuzzy / rerank |
-| `docker-compose.yml` | сервис `db`, порт `5432`, том `pgdata` |
-| Константа prepare | `MIN_SIDE = 200` в `scripts/catalog_prepare/image_audit.py` |
+| `.env` (копия с `.env.example`) | `DATABASE_URL`; ключи LLM (`QWEN_API_KEY` / `OPENAI_API_KEY`) — без base_url/model |
+| `config/database.yaml` | `dino_model_path`, `embedding_dim`, preprocess DINO |
+| `config/compute_cropper.yaml` | `compute.device` / threads, YOLO cropper |
+| `config/ocr_rerank.yaml` | OCR backend, fuzzy, **policy**, **decision_log** |
+| `src/llm/tasks/*.yaml` | base_url / model / `api_key_env` / retries для LLM-задач |
+| `src/llm/prompts/` | тексты промптов (путь в task YAML) |
+| `docker-compose.yml` | сервис `db`, порт `5432` |
 
-## Пути данных каталога
+## Eval policy (`config/ocr_rerank.yaml`)
 
-| Путь | Роль |
-|------|------|
-| `data/owner_database/wines_integrated_updated.csv` | Owner truth (SSOT, read-only) |
-| `data/owner_database/images/` | Owner `.webp` |
-| `data/owner_database/wines_problem_images.csv` | Аудит-подсказка; копия в `scripts/catalog_prepare/` |
-| `data/site_database/wines_database_enriched.json` | Enrich по slug + sweetness token |
-| `data/site_database/images/` | Site images для additional |
-| `scripts/catalog_prepare/` | Выход prepare (`wines_ready/additional/rejected`) |
-| `static/wines/` | Публичные файлы после import (`image_url=/static/wines/{slug}.webp`) |
+```yaml
+policy:
+  top_k: 5
+  margin_min: 0.1
+  abs_min: 0.2
+  enable_rerank: true
+  enable_not_found_gate: false   # Stage 3; на eval slug не влияет
+```
 
-Бинарники в `static/wines/*` в gitignore; остаётся `.gitkeep`.
+| Когда | Что сделать |
+|-------|-------------|
+| A/B без OCR | `enable_rerank: false` |
+| Чаще OCR | уменьшить `margin_min` |
+| Калибровка garbage | править `abs_min` после owner_eval |
+
+## OCR backend
+
+```yaml
+ocr:
+  engine: phocr       # phocr | llm | mock
+  llm_task: ocr_label
+  lang: ru
+  limit_side_len: 1150
+```
+
+OCR поднимается **лениво** при первом rerank. При `enable_rerank: false` движок не грузится.
+
+## LLM tasks (Stage 2A)
+
+Задача `ocr_label` — `src/llm/tasks/ocr_label.yaml`:
+
+- Provider inline (по умолчанию Qwen DashScope-compatible).
+- `api_key_env: QWEN_API_KEY` — только имя переменной; значение в `.env`.
+- `retries: 3` — connect/timeout, HTTP 408/429/5xx; другие 4xx без retry.
+- Промпт: `src/llm/prompts/ocr_label_v1.md` (только видимый текст этикетки).
+
+Смена модели/URL — правка task YAML, не `.env`. Другой провайдер — другой `api_key_env` + ключ в `.env.example`.
+
+## Decision log
+
+```yaml
+decision_log:
+  path: data/tmp/eval_decisions.jsonl
+  ocr_lines_cap: 32
+```
+
+```bash
+uv run python scripts/collect_eval_report.py \
+  --log data/tmp/eval_decisions.jsonl \
+  --predictions data/owner_eval/1/predictions.jsonl \
+  --mapping data/owner_eval/1/mapping.json
+```
 
 ## Типовые сценарии
 
-### Локальная БД (приложение на хосте)
+### Локальная БД
 
 1. `docker compose up -d`
-2. `.env` с  
-   `DATABASE_URL=postgresql+psycopg://vine:vine@127.0.0.1:5432/vine`
+2. `.env` с `DATABASE_URL=postgresql+psycopg://vine:vine@127.0.0.1:5432/vine`
 3. `uv run alembic upgrade head`
 
-### Приложение внутри Compose-сети
+### DINO / device
 
-В URL hostname `db` вместо `127.0.0.1` (см. комментарий в `.env.example`).
-
-### Prepare: порог размера
-
-- `MIN_SIDE=200` — `min(width, height)` через Pillow.
-- Менять только осознанно и согласованно с контрактом `catalog_prepare.md` (и перегенерировать CSV).
-
-### Import: флаги CLI
-
-`uv run python scripts/catalog_import.py` (или `PYTHONPATH=src uv run python -m db.import_catalog`):
-
-| Флаг | Назначение |
-|------|------------|
-| `--ready` / `--additional` | Пути к CSV (по умолчанию `scripts/catalog_prepare/…`) |
-| `--owner-images` / `--site-images` | Корни исходных картинок |
-| `--site-json` | JSON для match sweetness по `category` |
-| `--static-dir` | Куда писать `{slug}.webp` |
-| `--progress-every` | Лог прогресса (default 50) |
-| `--limit` | Ограничить число строк (smoke) |
-
-Sweetness: case-insensitive exact token по site `category`, longest first (`экстра брют` перед `брют`); иначе `sweetness_id` NULL.  
-Пустые текстовые поля owner → sentinel `н/д`.
-
-### DINO encode (путь, размерность, device)
-
-1. Веса: `bin/dinov2_wine_final.onnx` (+ sidecar `.onnx.data`); путь — `dino_model_path` в `database.yaml`.
-2. Размерность колонки и выхода: `embedding_dim` (проба `pooler_output`).
-3. Preprocess в `database.yaml` → `dino`: `input_size` (224), ImageNet `normalize_mean` / `normalize_std`, `l2_normalize`.
-4. Device/threads: `compute.device` (`cpu` \| `cuda`) и `ort_threads` в `compute_cropper.yaml`.
-
-Менять preprocess только вместе с переэкспортом ONNX — иначе каталог и query «разъедутся».
+`compute.device: cpu | cuda` в `compute_cropper.yaml`. YOLO всегда CPU EP.
 
 ### Смена размерности эмбеддинга
 
-1. Переэкспорт / смена DINO ONNX → снова прозондировать выход `pooler_output`.
-2. Обновить `embedding_dim` в `config/database.yaml`.
-3. Новая Alembic-миграция на тип `vector(N)` (смена N ломает существующие строки).
-
-### CPU / GPU для моделей
-
-`compute.device: cpu | cuda` в `compute_cropper.yaml` — только ORT (DINO; PHOCR позже). Postgres всегда CPU.
+1. Переэкспорт DINO → `embedding_dim` в `database.yaml`.
+2. Alembic на `vector(N)` + re-import.
 
 ## Чего здесь нет
 
-- Секреты и реальные `.env` значения
-- Полный перечень ключей (см. контракты `wines_schema.md`, `catalog_prepare.md`, `wines_repository.md`)
+- Секреты и реальные значения `.env`
+- Полные схемы ключей (контракты `eval_predict.md`, `llm_engine.md`, `ocr_engine.md`)
