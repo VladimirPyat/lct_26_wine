@@ -1,4 +1,4 @@
-"""OCR engines: MockOCREngine, PHOCREngine (import submodule explicitly to avoid heavy deps)."""
+"""OCR engines: MockOCREngine, PHOCREngine (lazy submodule imports)."""
 
 from __future__ import annotations
 

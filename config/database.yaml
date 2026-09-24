@@ -1,0 +1,13 @@
+# Catalog DB / embedding column (probe ONNX once; do not hardcode in call sites).
+# Probed from bin/dinov2_wine_final.onnx graph output `pooler_output`: [batch, 768]
+# Input: pixel_values [batch, 3, 224, 224] — HF DINOv2 ImageNet preprocess.
+dino_model_path: bin/dinov2_wine_final.onnx
+embedding_dim: 768
+
+dino:
+  input_size: 224
+  # ImageNet mean/std after scaling pixels to [0, 1]
+  normalize_mean: [0.485, 0.456, 0.406]
+  normalize_std: [0.229, 0.224, 0.225]
+  # L2-normalize pooler_output so cosine ≈ inner product
+  l2_normalize: true

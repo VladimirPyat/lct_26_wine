@@ -1,6 +1,6 @@
 # RankedHit / retrieval contract (greenfield)
 
-**Status:** draft for the new repository. Copied fuzzy/OCR code will be adapted to this shape.
+**Status:** Stage 1 — align with [wines_schema.md](wines_schema.md) / [wines_repository.md](wines_repository.md).
 
 ## RankedHit
 
@@ -12,7 +12,7 @@ class RankedHit(TypedDict):
     title: str
     manufacturer: str
     category: str
-    image_path: str
+    image_path: str    # or image_url public path /static/wines/...
     # optional extras for analogs later
 ```
 
@@ -23,7 +23,7 @@ class IRetriever(Protocol):
     def retrieve(self, image_path: str, *, top_k: int) -> list[RankedHit]: ...
 ```
 
-Implementation: DINO ONNX encode → pgvector query. Not SIFT. Not FAISS file.
+Implementation: (optional YOLO crop) → DINO ONNX encode → `search_by_embedding`. Catalog load may encode **without** YOLO when source shots are already bottle crops. Not SIFT. Not FAISS file.
 
 ## Policy input/output
 

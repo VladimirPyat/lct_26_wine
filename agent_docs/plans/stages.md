@@ -23,28 +23,18 @@
 
 ## Этап 1. Подготовка базы и каталога
 
-Самый тяжёлый этап по данным. Детали скриптов — при разработке этапа.
+Контракты: `agent_docs/contracts/wines_schema.md`, `wines_repository.md`, `catalog_prepare.md`.  
+Инструкции: `agent_docs/instructions/coder_1_*.md`, `tester_1_*.md`.
 
-### Данные (реальные; без заглушек)
+### Порядок работ (утверждён)
 
-| Актив | Роль | Кто |
-|-------|------|-----|
-| CSV заказчика (`slug` + фото + поля) | Источник правды | Owner |
-| Дампы страниц (опционально) | Обогащение **только по slug** | Owner |
-| Эталонные фото нормального разрешения | Индекс | Owner |
-| DINO ONNX → `bin/` | Encode | Owner |
-| Postgres (Compose) | Хранение + `vector(N)` | Stage 0 |
+0. Схема таблиц (Alembic) + lookups  
+1. CRUD / slug / vector top-K / filters; тестовая БД 2–3 записи + DINO embeddings (YOLO crop для фикстур не обязателен); unit-тесты  
+2. Prepare CSV (ready/additional/rejected + JSON enrich); Compose Postgres; `.env` из example; import ready+additional; SQL-проверки counts  
 
-### Порядок работ
+Точность hit@1 — Этап 2.
 
-1.1 CSV → staging  
-1.2 Обогащение со страниц по slug  
-1.3 Аудит разрешения фото  
-1.4 Замены мелких фото  
-1.5 YOLO-кропы  
-1.6 Encode DINO → pgvector upsert по slug  
-
-**Готово когда:** полный каталог с эмбеддингами; smoke top-5 по slug.
+**Готово когда:** каталог загружен; CRUD + vector top-K работают на реальных данных; manuals обновлены.
 
 ---
 

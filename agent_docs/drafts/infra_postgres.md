@@ -2,42 +2,16 @@
 
 ## Цель
 
-Одна БД: каталог вин (в т.ч. доп. поля и этикетки вне сайта) + вектор DINO (`vector(N)`).
+Одна БД: каталог вин + вектор DINO (`vector(N)`). Схема: [`../contracts/wines_schema.md`](../contracts/wines_schema.md).
 
 Доступ:
 
 1. Приложение **в Compose** → hostname `db`, порт 5432 внутри сети.  
 2. Приложение **на хосте** (`uv run uvicorn`) → `localhost:5432` (published port).  
-3. Опционально другие машины в LAN → тот же published port (осторожно с firewall).
 
-## Черновик compose
+## Compose
 
-```yaml
-services:
-  db:
-    image: pgvector/pgvector:pg16   # или аналог
-    environment:
-      POSTGRES_USER: vine
-      POSTGRES_PASSWORD: vine        # только dev; в .env
-      POSTGRES_DB: vine
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U vine -d vine"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  # app: optional later
-  #   depends_on: { db: { condition: service_healthy } }
-  #   environment:
-  #     DATABASE_URL: postgresql+psycopg://vine:vine@db:5432/vine
-
-volumes:
-  pgdata:
-```
+См. корневой `docker-compose.yml` (`pgvector/pgvector:pg16`, том `pgdata`, user/db `vine`).
 
 ## DATABASE_URL
 
@@ -46,19 +20,19 @@ volumes:
 | App в compose | `postgresql+psycopg://vine:vine@db:5432/vine` |
 | App на хосте | `postgresql+psycopg://vine:vine@127.0.0.1:5432/vine` |
 
-Один ключ в `.env` / `app.yaml`; не хардкодить hostname в коде.
+Ключ в `.env` (копия с `.env.example`). Не хардкодить hostname в коде.
 
-## Схема (эскиз)
+## Схема
 
-- `wines`: slug UNIQUE, title, manufacturer, category, region, color, product_url, image_path, **extra JSONB**, embedding `vector(N)`  
-- N = размер выхода DINO ONNX (зафиксировать при экспорте).  
-- Индекс: `ivfflat` или `hnsw` по cosine/IP после загрузки каталога.
+См. контракт `wines_schema.md`: `categories`, `regions`, `sweetness_levels`, `wines` (+ `embedding vector(N)`).
+
+Индекс HNSW/IVFFlat — после первой полной загрузки каталога.
 
 ## CPU / GPU
 
-К БД не относится. `compute.device` только для ORT EP (DINO/PHOCR). Postgres всегда CPU.
+К БД не относится. `compute.device` только для ORT (DINO/YOLO/PHOCR).
 
-## Не делать на старте
+## Не делать
 
-- Отдельный FAISS-файл «на всякий случай» — дублирует источник правды.  
-- Требовать GPU для поднятия БД.
+- Отдельный FAISS-файл как второй источник правды.  
+- Папка `db/` для векторов на диске — не нужна (векторы в `pgdata`).

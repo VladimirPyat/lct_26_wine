@@ -1,4 +1,4 @@
-"""Text matching utilities (Levenshtein fuzzy-rerank). Lazy exports avoid heavy deps at import."""
+"""Text matching (Levenshtein fuzzy-rerank). Lazy exports avoid heavy imports."""
 
 from __future__ import annotations
 

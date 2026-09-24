@@ -15,6 +15,26 @@ class LabelCropper(Protocol):
     def crop(self, image_path: str) -> CropResult: ...
 
 
+class RankedHit(TypedDict):
+    """pgvector top-K hit (higher ``score`` = better cosine similarity).
+
+    ``image_path`` holds the public catalog path from ``wines.image_url``
+    (e.g. ``/static/wines/{slug}.webp``).
+    """
+
+    wine_id: int
+    slug: str
+    score: float
+    title: str
+    manufacturer: str
+    category: str
+    image_path: str
+
+
+class IRetriever(Protocol):
+    def retrieve(self, image_path: str, *, top_k: int) -> list[RankedHit]: ...
+
+
 @dataclass
 class WineRecord:
     id: int

@@ -1,7 +1,6 @@
 # Paths to ONNX / weights (new repo will remap)
 yolo_model_path: bin/yolo_detect_labels_2.onnx
-# Placeholders — add when exporting:
-# dino_model_path: bin/dino_wine.onnx
+# DINO path + embedding_dim live in config/database.yaml (Stage 1)
 # phocr_weights_dir: bin/phocr
 
 compute:

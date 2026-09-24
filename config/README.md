@@ -15,6 +15,7 @@
 ## Файлы
 
 - `compute_cropper.yaml` — device, threads, YOLO cropper, пути моделей в `bin/`
+- `database.yaml` — `embedding_dim`, путь к `dinov2_wine_final.onnx`, блок `dino` (input_size / ImageNet normalize / L2)
 - `ocr_rerank.yaml` — PHOCR knobs + fuzzy field weights + rerank_top
 
 Склеить в pydantic-settings в новом проекте (не тащить весь старый `core/config.py`).

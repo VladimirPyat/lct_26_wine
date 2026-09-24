@@ -10,7 +10,7 @@ import Levenshtein
 from rapidfuzz import fuzz
 
 from core.config import FuzzySettings
-from core.contracts import SearchResult
+from core.contracts import SearchResult, WineRecord
 from core.text.normalize import (
     compact_alnum,
     expand_token_aliases,
@@ -22,7 +22,6 @@ from core.text.normalize import (
     transliterate_cyrillic,
 )
 from core.text.ocr_postprocess import postprocess_ocr_lines
-from core.contracts import WineRecord
 
 _REQUIRED_FIELDS: tuple[str, ...] = ("title", "manufacturer", "category")
 _FUZZ_SCALE = 100.0

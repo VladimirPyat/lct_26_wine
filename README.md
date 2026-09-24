@@ -25,6 +25,9 @@
 | `config/` | YAML-настройки |
 | `bin/` | ONNX-веса |
 | `data/owner_eval/` | Eval harness организатора |
+| `data/owner_database/`, `data/site_database/` | Источники каталога (SSOT) |
+| `scripts/catalog_prepare/` | Prepare CSV (ready/additional/rejected) |
+| `static/wines/` | Картинки каталога после import |
 | `docs/` | Требования |
 | `agent_docs/` | Планы, контракты, инструкции, прогресс |
 | `manuals/` | Человекочитаемые мануалы |

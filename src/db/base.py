@@ -1,0 +1,9 @@
+"""SQLAlchemy declarative base for the catalog schema."""
+
+from __future__ import annotations
+
+from sqlalchemy.orm import DeclarativeBase
+
+
+class Base(DeclarativeBase):
+    """Shared metadata for Alembic and ORM models."""
