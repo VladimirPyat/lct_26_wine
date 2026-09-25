@@ -53,3 +53,15 @@
 - Commands: `docker compose ps` exit 0 (healthy); `uv run alembic current` exit 0 (`0001_initial_schema`); `uv run pytest tests/ -v -k "catalog_load or import"` exit 0 (7 passed)
 - Tests: `tests/test_catalog_load.py` (1.2-01…1.2-07); no full re-import
 - Next: stage sign-off / Stage 2 per plan
+
+## 2026-09-24 — BugFixer (catalog YOLO crop encode)
+
+- STATUS: FIXED / READY_FOR_TEST
+- BUG: `agent_docs/reports/bug_catalog_yolo_encode.md` (DESIGN; user ✅ `fix_catalog_yolo_encode.md`)
+- Crop: ok=1944 review=6 (all `no_box`); dirs `data/tmp/catalog_crops/`, `data/tmp/catalog_crops_review/` + `reasons.csv`
+- DB: wipe wines + re-import; wines=1944 embedding_null=0; review slugs not inserted; static full-bottle UI
+- Query: fallback full frame at ERROR; `used_fallback` in decision JSONL
+- Contract: `retrieval.md` updated; manuals architecture/configuration_guide/quickstart
+- Lint: `uv run ruff check src/ scripts/` exit 0
+- Smoke: crop self-retrieve score=1.0 for sample slug
+- Next: parent optional owner_eval set1 for hit@1 delta; @Tester if regression suite desired

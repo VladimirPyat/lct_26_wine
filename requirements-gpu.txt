@@ -1,0 +1,17 @@
+# Local CUDA overlay. Do NOT install on the production CPU server.
+#
+# onnxruntime (CPU, in extra `ml`) and onnxruntime-gpu cannot share one venv.
+# YOLO stays on CPU EP in code; PHOCR/DINO use compute.device.
+#
+# ORT 1.30 GPU needs CUDA 13 + cuDNN 9. Extra [cuda,cudnn] pulls NVIDIA pip
+# wheels (libcublasLt.so.13). Export LD_LIBRARY_PATH before uv run:
+#
+#   uv pip uninstall onnxruntime
+#   uv pip install -r requirements-gpu.txt
+#   export LD_LIBRARY_PATH="$(pwd)/.venv/lib/python3.12/site-packages/nvidia/cu13/lib:$(pwd)/.venv/lib/python3.12/site-packages/nvidia/cudnn/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+#
+# Set config/compute_cropper.yaml → compute.device: cuda
+#
+# Restore CPU wheel: uv sync --extra ml --extra db --extra dev
+#
+onnxruntime-gpu[cuda,cudnn]>=1.29.0

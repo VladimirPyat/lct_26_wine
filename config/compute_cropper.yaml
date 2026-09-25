@@ -4,7 +4,8 @@ yolo_model_path: bin/yolo_detect_labels_2.onnx
 # phocr_weights_dir: bin/phocr
 
 compute:
-  device: cpu          # cpu | cuda — demo GPU; CPU server for test upload
+  # Local demo: cuda. CPU upload server: set cpu (+ keep onnxruntime, not -gpu).
+  device: cuda         # cpu | cuda — PHOCR/DINO ORT EP; YOLO stays CPU
   cv_threads: 0        # 0 = library default
   ort_threads: 0
 
@@ -16,3 +17,7 @@ cropper:
   box_area_min: 0.05
   box_area_max: 0.50
   box_conf_keep_ratio: 0.85
+  # Catalog import: reject crops with width OR height below this (no full-frame embed)
+  min_crop_side: 100
+  catalog_crops_dir: data/tmp/catalog_crops
+  catalog_crops_review_dir: data/tmp/catalog_crops_review

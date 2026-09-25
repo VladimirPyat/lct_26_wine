@@ -44,48 +44,10 @@ _CYR_TO_LAT = str.maketrans(
     }
 )
 
-# Generic label words that must not dominate ranking / distinctive tokens.
-GENERIC_STOPWORDS: frozenset[str] = frozenset(
-    {
-        "красное",
-        "белое",
-        "розовое",
-        "сухое",
-        "полусухое",
-        "полусладкое",
-        "сладкое",
-        "вино",
-        "игристое",
-        "reserve",
-        "wine",
-        "dry",
-        "red",
-        "white",
-        "rose",
-        "brut",
-        "extra",
-        "classic",
-        "крым",
-        "россия",
-        "винодельня",
-        "selection",
-        "the",
-        "and",
-        "de",
-        "la",
-        "le",
-        "du",
-        "года",
-        "урожая",
-        "год",
-        "крепость",
-        "выдержанное",
-        "выдержаннов",
-        "аутентичный",
-        "реки",
-        "кача",
-    }
-)
+# Global stop list is off. Words like «красное» / «белое» / «сухое» / «reserve»
+# distinguish sibling SKUs. Tokens shared by the whole shortlist are zeroed
+# later by shortlist IDF, not by a fixed list.
+GENERIC_STOPWORDS: frozenset[str] = frozenset()
 
 # Bidirectional grape / brand token aliases (Latin ↔ Cyrillic OCR mix).
 _TOKEN_ALIASES: dict[str, str] = {
@@ -141,7 +103,7 @@ def compact_alnum(text: str) -> str:
 
 
 def tokenize(text: str, *, min_len: int) -> list[str]:
-    """Разрезать на буквенно-цифровые токены, отбросить стоп-слова и короткие."""
+    """Разрезать на буквенно-цифровые токены и отбросить короткие."""
     return [
         token
         for token in _TOKEN_SPLIT.split(normalize_text(text))

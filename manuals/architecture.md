@@ -72,14 +72,22 @@ image path
 
 Retriever не вызывает OCR. Policy не знает FastAPI. LLM и PHOCR — один `IOCREngine`.
 
-## Каталог (Stage 1.2, кратко)
+## Каталог (Stage 1.2 + YOLO crop encode)
 
 ```
 data/owner_database + data/site_database
   → prepare_ready_csv → wines_ready/additional
-  → catalog_import (DINO + static/wines/{slug}.webp)
+  → YOLO label crop → data/tmp/catalog_crops/{slug}.webp
+       └─ fail / too small → data/tmp/catalog_crops_review/ (+ reasons.csv)
+  → catalog_import:
+       static/wines/{slug}.webp  = full bottle (UI / image_url)
+       wines.embedding           = DINO(OK crop only); review slugs skipped
   → Postgres wines.embedding
 ```
+
+Query / eval: YOLO crop → DINO; if no/empty box → **full frame** + ERROR log + `used_fallback` in decision JSONL.
+
+**Выбор бокса YOLO (`select_label_box`):** кандидаты `score ≥ confidence`; предпочтение доли площади кадра в `[box_area_min, box_area_max]` и `conf ≥ max_conf * box_conf_keep_ratio`; среди них max `conf * (1 - dist_to_center)`; иначе max confidence.
 
 ## Внешние зависимости
 

@@ -74,3 +74,8 @@
 - HITL: filled `manuals/manual_testing.md`
 - Defects (non-blocking): `collect_eval_report.load_mapping` ignores `cases[]`; soft latency ~3s missed on CPU+phocr
 - Next: stage sign-off; optional @Coder fix mapping loader
+
+## 2026-09-24 — BugFixer (query crop fallback logging)
+
+- Catalog vectors now YOLO crops (see stage_1 note); query no-box → full frame + ERROR log; decision JSONL includes `used_fallback` / `crop_path`
+- Report: `agent_docs/reports/bug_catalog_yolo_encode.md`

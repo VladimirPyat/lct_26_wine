@@ -66,9 +66,10 @@ class OnnxYoloCropper:
         self.box_area_min = cropper.box_area_min
         self.box_area_max = cropper.box_area_max
         self.box_conf_keep_ratio = cropper.box_conf_keep_ratio
+        self.min_crop_side = cropper.min_crop_side
 
     def crop(self, image_path: str) -> CropResult:
-        """Кроп лучшего бокса этикетки или исходный путь при fallback."""
+        """Кроп лучшего бокса этикетки или исходный путь при fallback (query path)."""
         source = Path(image_path)
         if not source.is_file():
             msg = f"Image not found for cropping: {image_path}"
@@ -81,13 +82,19 @@ class OnnxYoloCropper:
 
         bbox = self._detect_best_box(image_bgr)
         if bbox is None:
-            logger.info("YOLO crop fallback to full image (no box): %s", source)
+            logger.error(
+                "YOLO crop fallback to full image reason=no_box path=%s",
+                source,
+            )
             return CropResult(cropped_path=str(source), used_fallback=True)
 
         x1, y1, x2, y2 = bbox
         cropped = image_bgr[y1:y2, x1:x2]
         if cropped.size == 0:
-            logger.info("YOLO crop fallback to full image (empty box): %s", source)
+            logger.error(
+                "YOLO crop fallback to full image reason=empty_crop path=%s",
+                source,
+            )
             return CropResult(cropped_path=str(source), used_fallback=True)
 
         dest = self.output_dir / f"{source.stem}_crop_{uuid.uuid4().hex}{source.suffix}"
@@ -95,6 +102,43 @@ class OnnxYoloCropper:
             msg = f"Failed to write cropped image: {dest}"
             raise OSError(msg)
         return CropResult(cropped_path=str(dest), used_fallback=False)
+
+    def crop_strict_to_path(
+        self,
+        image_path: str,
+        dest: Path,
+        *,
+        min_side: int | None = None,
+    ) -> tuple[bool, str, tuple[int, int] | None]:
+        """Catalog crop: write label crop to ``dest``; never fall back to full frame.
+
+        Returns ``(ok, reason, crop_wh)``. Reasons: ``ok``, ``no_box``,
+        ``empty_crop``, ``too_small``, ``write_fail``, ``read_fail``.
+        """
+        side = self.min_crop_side if min_side is None else min_side
+        source = Path(image_path)
+        image_bgr = cv2.imread(str(source))
+        if image_bgr is None:
+            return False, "read_fail", None
+
+        bbox = self._detect_best_box(image_bgr)
+        if bbox is None:
+            return False, "no_box", None
+
+        x1, y1, x2, y2 = bbox
+        cropped = image_bgr[y1:y2, x1:x2]
+        if cropped.size == 0:
+            return False, "empty_crop", None
+
+        height, width = cropped.shape[:2]
+        crop_wh = (width, height)
+        if width < side or height < side:
+            return False, "too_small", crop_wh
+
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if not cv2.imwrite(str(dest), cropped):
+            return False, "write_fail", crop_wh
+        return True, "ok", crop_wh
 
     def _detect_best_box(
         self, image_bgr: np.ndarray

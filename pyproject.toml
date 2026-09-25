@@ -37,6 +37,11 @@ dev = [
     "mypy>=1.13.0",
     "bandit>=1.8.0",
 ]
+# Local CUDA machine only. Mutually exclusive with `onnxruntime` (CPU wheel in `ml`).
+# Prefer: uv pip install -r requirements-gpu.txt (+ LD_LIBRARY_PATH — see that file).
+gpu = [
+    "onnxruntime-gpu[cuda,cudnn]>=1.29.0",
+]
 
 [build-system]
 requires = ["hatchling"]

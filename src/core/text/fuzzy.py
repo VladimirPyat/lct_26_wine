@@ -191,6 +191,7 @@ class FuzzyReranker:
                 category=wine.category,
             )
             text_score += idf_bonuses[index]
+            text_score -= self._shared_title_bonus(prepared, wine.title, wines)
             updated = dict(candidate)
             updated["text_score"] = text_score
             scored.append((text_score, index, cast(SearchResult, updated)))
@@ -448,21 +449,53 @@ class FuzzyReranker:
             return self.mfr_bonus_mid * best
         return 0.0
 
+    def _shared_title_bonus(
+        self,
+        ocr_lines: Sequence[str],
+        title: str,
+        wines: Sequence[WineRecord],
+    ) -> float:
+        """Drop the short-title bonus when its OCR token also hits a sibling.
+
+        ``score_wine`` still adds the bonus. On a visual shortlist the same
+        token often names the whole line (``гравити``, ``мускат``, ``шардоне``),
+        so a one-word catalog title would outrank the real longer SKU.
+        """
+        trigger = self._exact_title_match_token(ocr_lines, title)
+        if trigger is None or len(wines) < 2:
+            return 0.0
+        matched = 0
+        for wine in wines:
+            field_tokens = self._field_token_set(wine.title, wine.manufacturer)
+            if self._token_matches_any(trigger, field_tokens):
+                matched += 1
+                if matched >= 2:
+                    return self.exact_title_token_bonus
+        return 0.0
+
     def _exact_title_token_bonus(self, ocr_lines: Sequence[str], title: str) -> float:
         """Бонус, если OCR-токен совпадает с коротким title (arena↔Арена)."""
+        if self._exact_title_match_token(ocr_lines, title) is None:
+            return 0.0
+        return self.exact_title_token_bonus
+
+    def _exact_title_match_token(
+        self, ocr_lines: Sequence[str], title: str
+    ) -> str | None:
+        """OCR-токен, который совпал с коротким title целиком, иначе ``None``."""
         title_norm = normalize_text(title)
         title_compact = compact_alnum(title)
         title_lat = compact_alnum(transliterate_cyrillic(title))
         if len(title_compact) < self.token_min_len:
-            return 0.0
+            return None
         # Only for short titles — long titles already get coverage/field scores.
         if len(title_norm.split()) > 3:
-            return 0.0
+            return None
         for line in ocr_lines:
             for token in tokenize(line, min_len=self.token_min_len):
                 for variant in expand_token_aliases(token):
                     if variant in {title_compact, title_lat, title_norm}:
-                        return self.exact_title_token_bonus
+                        return token
                     compact_hit = (
                         float(fuzz.ratio(variant, title_compact))
                         >= self.title_token_ratio_min
@@ -472,8 +505,8 @@ class FuzzyReranker:
                         >= self.title_token_ratio_min
                     )
                     if compact_hit or lat_hit:
-                        return self.exact_title_token_bonus
-        return 0.0
+                        return token
+        return None
 
     def _prefilter_wines(
         self,

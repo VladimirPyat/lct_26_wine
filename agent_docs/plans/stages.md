@@ -91,6 +91,8 @@
 
 ---
 
+Оптимизации «на потом»: [backlog.md](backlog.md) (батч DINO import, YOLO CUDA для bulk crop).
+
 ## Чеклист сдачи
 
 - [ ] Каталог + DINO в pgvector  

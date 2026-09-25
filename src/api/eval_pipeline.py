@@ -51,7 +51,16 @@ def predict_slug(runtime: EvalRuntime, image_path: str | Path) -> str:
         **decision.latency_ms,
         "total": total_ms,
     }
-    _log_decision(runtime, decision, latency_ms)
+    _log_decision(
+        runtime,
+        decision,
+        latency_ms,
+        extra={
+            "used_fallback": bundle.used_fallback,
+            "crop_path": bundle.crop_path,
+            "query_image": str(path),
+        },
+    )
     return decision.slug
 
 
@@ -59,6 +68,8 @@ def _log_decision(
     runtime: EvalRuntime,
     decision: PolicyDecision,
     latency_ms: dict[str, float],
+    *,
+    extra: dict[str, object] | None = None,
 ) -> None:
     emit_decision_log(
         decision,
@@ -67,4 +78,5 @@ def _log_decision(
         ocr=runtime.ocr_rerank.ocr,
         latency_ms=latency_ms,
         repo_root=runtime.repo_root,
+        extra=extra,
     )

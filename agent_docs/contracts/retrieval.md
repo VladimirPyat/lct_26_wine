@@ -23,7 +23,18 @@ class IRetriever(Protocol):
     def retrieve(self, image_path: str, *, top_k: int) -> list[RankedHit]: ...
 ```
 
-Implementation: YOLO crop → DINO ONNX encode → `search_by_embedding`. Catalog load may encode **without** YOLO when source shots are already bottle crops. Not SIFT. Not FAISS file.
+Implementation: YOLO crop → DINO ONNX encode → `search_by_embedding`.
+
+**Catalog vs query (SSOT):**
+
+| Path | Image for DINO | Full bottle file |
+|------|----------------|------------------|
+| Catalog import | YOLO label crop required for insert (`data/tmp/catalog_crops/{slug}.webp`) | `static/wines/{slug}.*` for UI only (`image_url`) |
+| Query / eval | YOLO crop; **fallback = full frame** if no/empty box (log at **ERROR**, `used_fallback` in decision JSONL) | N/A |
+
+Do **not** insert a wine embedding from a full-frame catalog shot when the crop failed or is too small (`min_crop_side`) — quarantine under `data/tmp/catalog_crops_review/` instead. Not SIFT. Not FAISS file.
+
+**YOLO `select_label_box` (keep):** candidates with `score >= confidence`; prefer frame-area fraction in `[box_area_min, box_area_max]` and `conf >= max_conf * box_conf_keep_ratio`; among those maximize `conf * (1 - dist_to_center)`; else max confidence; no candidates → query fallback / catalog review.
 
 ## Policy input/output (Stage 2)
 

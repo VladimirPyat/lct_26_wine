@@ -26,10 +26,13 @@ uv run alembic upgrade head
 
 ```bash
 uv run python scripts/catalog_prepare/prepare_ready_csv.py
-uv run python scripts/catalog_import.py
+# Полный import с YOLO-кропами + wipe wines (вектор = этикетка, static = бутылка):
+uv run python scripts/catalog_import.py --crop-first --recreate-wines
 ```
 
-Ожидаемо ~1950 вин с непустым `embedding` и файлами в `static/wines/`.
+Флаги: `--crops-dir`, `--review-dir`, `--recreate-wines`, `--skip-crop-pass` (только encode из уже готовых кропов), `--limit N` (smoke).
+
+Ожидаемо: число вин в БД ≈ число OK-кропов в `data/tmp/catalog_crops/`; `embedding IS NULL` = 0; review-only slug не вставляются; `static/wines/*.webp` — полные бутылки.
 
 ## API (eval)
 
@@ -73,7 +76,31 @@ Set 2 — те же пути под `data/owner_eval/2/`.
 
 ## CPU / GPU
 
-`compute.device: cpu | cuda` в `config/compute_cropper.yaml`. Postgres всегда на CPU.
+Postgres всегда на CPU. Инференс (PHOCR / DINO) — через `compute.device` в `config/compute_cropper.yaml`. YOLO-кроппер пока всегда CPU (отдельного флага нет).
+
+### По умолчанию — CPU (всегда рабочий путь)
+
+```bash
+uv sync --extra ml --extra db --extra dev   # колесо onnxruntime (CPU)
+# config/compute_cropper.yaml → compute.device: cpu
+```
+
+Так и задумано для сервера заказчика: без GPU-пакетов всё должно подниматься. Если локально GPU «сломался» (нет драйвера / библиотек) — верните `device: cpu` и при необходимости снова `uv sync` (CPU-колесо).
+
+### Опционально — локальный GPU (быстрее OCR)
+
+Нужны NVIDIA-драйвер и overlay поверх venv (колёса `onnxruntime` и `onnxruntime-gpu` **несовместимы** в одном окружении):
+
+```bash
+uv pip uninstall onnxruntime
+uv pip install -r requirements-gpu.txt
+export LD_LIBRARY_PATH="$(pwd)/.venv/lib/python3.12/site-packages/nvidia/cu13/lib:$(pwd)/.venv/lib/python3.12/site-packages/nvidia/cudnn/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+# config/compute_cropper.yaml → compute.device: cuda
+```
+
+Без `LD_LIBRARY_PATH` CUDA EP может числиться, но не загрузиться — PHOCR с `use_cuda=True` тогда падает; безопасный откат: `device: cpu`. Детали и нюансы CUDA 12 vs 13 — в [configuration_guide.md](configuration_guide.md).
+
+После обычного `uv sync --extra ml` CPU-колесо вернётся — для GPU снова поставьте overlay из `requirements-gpu.txt`.
 
 ## Policy без OCR (быстрый smoke)
 

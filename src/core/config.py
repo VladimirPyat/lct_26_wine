@@ -35,6 +35,9 @@ class CropperSettings(BaseModel):
     box_area_min: float
     box_area_max: float
     box_conf_keep_ratio: float
+    min_crop_side: int = Field(gt=0)
+    catalog_crops_dir: str
+    catalog_crops_review_dir: str
 
 
 class FuzzySettings(BaseModel):
