@@ -345,6 +345,8 @@ def import_rows(
     When ``crops_dir`` is set, embedding is taken only from
     ``crops_dir/{slug}.webp`` (YOLO label crop). Missing crop → skip insert
     (same as missing image). Full bottle still copied to ``static_dir`` for UI.
+
+    DINO encode is buffered in chunks of ``encoder.encode_batch_size``.
     """
     repo = WineRepository(session)
     stats = {
@@ -357,6 +359,92 @@ def import_rows(
         "skipped_other": 0,
     }
     sweetness_cache: dict[str, int] = {}
+    pending: list[dict[str, Any]] = []
+    batch_size = encoder.encode_batch_size
+
+    def _upsert_encoded(
+        *,
+        slug: str,
+        row: Mapping[str, str],
+        dest: Path,
+        image_url: str,
+        encode_path: Path,
+        embedding: list[float],
+    ) -> None:
+        category = get_or_create_category(
+            session, _text_or_sentinel(row.get("category"))
+        )
+        region = get_or_create_region(session, _text_or_sentinel(row.get("region")))
+
+        sweetness_id: int | None = None
+        token = match_sweetness_token(site_categories.get(slug))
+        if token is not None:
+            if token not in sweetness_cache:
+                sweetness_cache[token] = get_or_create_sweetness(session, token).id
+            sweetness_id = sweetness_cache[token]
+
+        fields: dict[str, Any] = {
+            "title": (row.get("title") or "").strip(),
+            "category_id": category.id,
+            "color": _text_or_sentinel(row.get("color")),
+            "region_id": region.id,
+            "grape_variety": _text_or_sentinel(row.get("grape_variety")),
+            "description": _text_or_sentinel(row.get("description")),
+            "manufacturer": _text_or_sentinel(row.get("manufacturer")),
+            "public_rating": _parse_optional_float(row.get("public_rating")),
+            "product_url": (row.get("product_url") or "").strip() or None,
+            "serving_temperature": (row.get("serving_temperature") or "").strip()
+            or None,
+            "alcohol_pct": _parse_optional_decimal(row.get("alcohol_pct")),
+            "dishes": _parse_dishes_cell(row.get("dishes")),
+            "sweetness_id": sweetness_id,
+            "image_url": image_url,
+            "embedding": embedding,
+        }
+        try:
+            repo.upsert_by_slug(slug, fields)
+            session.commit()
+            stats["upserted"] += 1
+        except Exception:
+            session.rollback()
+            stats["skipped_other"] += 1
+            logger.exception("skip %s: upsert failed", slug)
+            if dest.is_file():
+                dest.unlink()
+            return
+
+        if progress_every > 0 and stats["upserted"] % progress_every == 0:
+            logger.info(
+                "progress upserted=%s / seen=%s last=%s encode=%s",
+                stats["upserted"],
+                stats["seen"],
+                slug,
+                encode_path.name,
+            )
+
+    def flush_pending() -> None:
+        if not pending:
+            return
+        paths = [str(item["encode_path"]) for item in pending]
+        embeddings = encoder.encode_images(paths)
+        for item, embedding in zip(pending, embeddings, strict=True):
+            slug = item["slug"]
+            dest = item["dest"]
+            if embedding is None:
+                stats["skipped_encode"] += 1
+                logger.warning("skip %s: encode failed", slug)
+                if dest.is_file():
+                    dest.unlink()
+                continue
+            _upsert_encoded(
+                slug=slug,
+                row=item["row"],
+                dest=dest,
+                image_url=item["image_url"],
+                encode_path=item["encode_path"],
+                embedding=embedding,
+            )
+        pending.clear()
 
     for index, row in enumerate(rows, start=1):
         stats["seen"] += 1
@@ -400,66 +488,19 @@ def import_rows(
             logger.warning("skip %s: image copy failed: %s", slug, exc)
             continue
 
-        try:
-            embedding = encoder.encode_image(str(encode_path))
-        except (FileNotFoundError, OSError, RuntimeError) as exc:
-            stats["skipped_encode"] += 1
-            logger.warning("skip %s: encode failed: %s", slug, exc)
-            if dest.is_file():
-                dest.unlink()
-            continue
-
-        category = get_or_create_category(
-            session, _text_or_sentinel(row.get("category"))
+        pending.append(
+            {
+                "slug": slug,
+                "row": row,
+                "encode_path": encode_path,
+                "dest": dest,
+                "image_url": image_url,
+            }
         )
-        region = get_or_create_region(session, _text_or_sentinel(row.get("region")))
+        if len(pending) >= batch_size:
+            flush_pending()
 
-        sweetness_id: int | None = None
-        token = match_sweetness_token(site_categories.get(slug))
-        if token is not None:
-            if token not in sweetness_cache:
-                sweetness_cache[token] = get_or_create_sweetness(session, token).id
-            sweetness_id = sweetness_cache[token]
-
-        fields: dict[str, Any] = {
-            "title": title,
-            "category_id": category.id,
-            "color": _text_or_sentinel(row.get("color")),
-            "region_id": region.id,
-            "grape_variety": _text_or_sentinel(row.get("grape_variety")),
-            "description": _text_or_sentinel(row.get("description")),
-            "manufacturer": _text_or_sentinel(row.get("manufacturer")),
-            "public_rating": _parse_optional_float(row.get("public_rating")),
-            "product_url": (row.get("product_url") or "").strip() or None,
-            "serving_temperature": (row.get("serving_temperature") or "").strip()
-            or None,
-            "alcohol_pct": _parse_optional_decimal(row.get("alcohol_pct")),
-            "dishes": _parse_dishes_cell(row.get("dishes")),
-            "sweetness_id": sweetness_id,
-            "image_url": image_url,
-            "embedding": embedding,
-        }
-        try:
-            repo.upsert_by_slug(slug, fields)
-            session.commit()
-            stats["upserted"] += 1
-        except Exception:
-            session.rollback()
-            stats["skipped_other"] += 1
-            logger.exception("skip %s: upsert failed", slug)
-            if dest.is_file():
-                dest.unlink()
-            continue
-
-        if progress_every > 0 and stats["upserted"] % progress_every == 0:
-            logger.info(
-                "progress upserted=%s / seen=%s last=%s encode=%s",
-                stats["upserted"],
-                stats["seen"],
-                slug,
-                encode_path.name,
-            )
-
+    flush_pending()
     return stats
 
 
@@ -532,6 +573,18 @@ def build_arg_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="With --crop-first semantics via --crops-dir only: reuse existing crops",
     )
+    parser.add_argument(
+        "--encode-batch-size",
+        type=int,
+        default=None,
+        help="Override dino.encode_batch_size for this run (1 = serial)",
+    )
+    parser.add_argument(
+        "--cropper-device",
+        choices=("cpu", "cuda", "auto"),
+        default=None,
+        help="Override cropper.device for YOLO ORT (crop-first / crop pass)",
+    )
     return parser
 
 
@@ -569,6 +622,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 1
 
     settings = load_app_settings()
+    if args.cropper_device is not None:
+        settings = settings.model_copy(
+            update={
+                "cropper": settings.cropper.model_copy(
+                    update={"device": args.cropper_device}
+                )
+            }
+        )
     crops_dir, review_dir, min_crop_side = _paths_from_settings(
         settings, crops_dir=args.crops_dir, review_dir=args.review_dir
     )
@@ -576,10 +637,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     use_crops = args.crop_first or args.crops_dir is not None or args.skip_crop_pass
     if args.crop_first and not args.skip_crop_pass:
         logger.info(
-            "Loading YOLO cropper for catalog pass… crops=%s review=%s min_side=%s",
+            "Loading YOLO cropper for catalog pass… crops=%s review=%s "
+            "min_side=%s device=%s",
             crops_dir,
             review_dir,
             min_crop_side,
+            settings.cropper.device,
         )
         cropper = create_label_cropper(settings)
         if not isinstance(cropper, OnnxYoloCropper):
@@ -602,11 +665,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     args.static_dir.mkdir(parents=True, exist_ok=True)
 
     logger.info("Loading DINO encoder…")
-    encoder = create_dino_encoder()
+    encoder = create_dino_encoder(encode_batch_size=args.encode_batch_size)
     logger.info(
-        "Import start rows=%s embedding_dim=%s static=%s crops=%s",
+        "Import start rows=%s embedding_dim=%s encode_batch_size=%s static=%s crops=%s",
         len(rows),
         encoder.embedding_dim,
+        encoder.encode_batch_size,
         args.static_dir,
         crops_dir if use_crops else None,
     )

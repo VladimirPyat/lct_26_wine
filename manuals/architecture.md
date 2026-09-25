@@ -81,7 +81,8 @@ data/owner_database + data/site_database
        └─ fail / too small → data/tmp/catalog_crops_review/ (+ reasons.csv)
   → catalog_import:
        static/wines/{slug}.webp  = full bottle (UI / image_url)
-       wines.embedding           = DINO(OK crop only); review slugs skipped
+       wines.embedding           = DINO(OK crop only, batched via dino.encode_batch_size);
+                                   review slugs skipped
   → Postgres wines.embedding
 ```
 
@@ -89,9 +90,11 @@ Query / eval: YOLO crop → DINO; if no/empty box → **full frame** + ERROR log
 
 **Выбор бокса YOLO (`select_label_box`):** кандидаты `score ≥ confidence`; предпочтение доли площади кадра в `[box_area_min, box_area_max]` и `conf ≥ max_conf * box_conf_keep_ratio`; среди них max `conf * (1 - dist_to_center)`; иначе max confidence.
 
+**Device:** YOLO EP — `cropper.device` (`cpu` \| `cuda` \| `auto`, default `cpu`). PHOCR + DINO — `compute.device`. Online eval оставляет YOLO на CPU, чтобы не делить VRAM с OCR/DINO.
+
 ## Внешние зависимости
 
 - **Postgres 16 + pgvector** — `docker compose`
-- **ONNX Runtime** — YOLO (CPU), DINO (cpu|cuda)
+- **ONNX Runtime** — YOLO (`cropper.device`: cpu|cuda|auto), DINO (`compute.device`: cpu|cuda)
 - **PHOCR** — локальный OCR (`ocr.engine=phocr`)
 - **OpenAI-compatible SDK** — LLM OCR (`ocr.engine=llm`, ключ из task YAML)

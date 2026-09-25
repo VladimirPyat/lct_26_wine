@@ -9,8 +9,8 @@
 | Источник | Что задаёт |
 |----------|------------|
 | `.env` (копия с `.env.example`) | `DATABASE_URL`; ключи LLM (`QWEN_API_KEY` / `OPENAI_API_KEY`) — без base_url/model |
-| `config/database.yaml` | `dino_model_path`, `embedding_dim`, preprocess DINO |
-| `config/compute_cropper.yaml` | `compute.device` / threads, YOLO cropper, catalog crop dirs / `min_crop_side` |
+| `config/database.yaml` | `dino_model_path`, `embedding_dim`, preprocess DINO, `dino.encode_batch_size` |
+| `config/compute_cropper.yaml` | `compute.device` / threads, `cropper.device`, YOLO cropper, catalog crop dirs / `min_crop_side` |
 | `config/ocr_rerank.yaml` | OCR backend, fuzzy, **policy**, **decision_log** |
 | `src/llm/tasks/*.yaml` | base_url / model / `api_key_env` / retries для LLM-задач |
 | `src/llm/prompts/` | тексты промптов (путь в task YAML) |
@@ -81,9 +81,15 @@ uv run python scripts/collect_eval_report.py \
 
 ### DINO / device
 
-`compute.device: cpu | cuda` в `compute_cropper.yaml` (PHOCR + DINO ORT). YOLO всегда CPU EP (отдельного флага нет).
+`compute.device: cpu | cuda` в `compute_cropper.yaml` — только **PHOCR + DINO** ORT EP.
 
-**Локально GPU:** в конфиге `device: cuda`. Колесо `onnxruntime-gpu[cuda,cudnn]` + `LD_LIBRARY_PATH` на pip-CUDA 13 (системный CUDA 12 / `libcublasLt.so.12` **не** подходит для ORT 1.29+):
+`cropper.device: cpu | cuda | auto` (default **`cpu`**) — только **YOLO** ORT EP. Online `/v1/eval/predict` остаётся на CPU YOLO, пока YAML не переопределён. Bulk `--crop-first` может поставить `cuda` / CLI `--cropper-device`.
+
+**VRAM:** одновременный GPU для YOLO + PHOCR + DINO может исчерпать память. Для online eval держите `cropper.device: cpu`. Для массового crop-only (без OCR) CUDA YOLO допустим.
+
+`dino.encode_batch_size` в `config/database.yaml` (default `16`, `1` = serial) — размер ORT-батча при catalog import / re-encode. CLI: `--encode-batch-size N`.
+
+**Локально GPU:** в конфиге `compute.device: cuda`. Колесо `onnxruntime-gpu[cuda,cudnn]` + `LD_LIBRARY_PATH` на pip-CUDA 13 (системный CUDA 12 / `libcublasLt.so.12` **не** подходит для ORT 1.29+):
 
 ```bash
 uv pip uninstall onnxruntime
@@ -94,7 +100,7 @@ export LD_LIBRARY_PATH="$(pwd)/.venv/lib/python3.12/site-packages/nvidia/cu13/li
 Без `LD_LIBRARY_PATH` CUDA EP «есть», но падает на CPU / PHOCR с `use_cuda=True` может упасть.  
 `uv sync --extra ml` вернёт CPU-колесо — на локали после sync снова поставить gpu overlay.
 
-**CPU-сервер заказчика:** `device: cpu` + `onnxruntime` из extra `ml` (не ставить `requirements-gpu.txt`).
+**CPU-сервер заказчика:** `compute.device: cpu` + `onnxruntime` из extra `ml` (не ставить `requirements-gpu.txt`); `cropper.device: cpu`.
 
 ### Каталог: YOLO crop → embedding
 
@@ -102,17 +108,21 @@ export LD_LIBRARY_PATH="$(pwd)/.venv/lib/python3.12/site-packages/nvidia/cu13/li
 
 | Ключ | Назначение |
 |------|------------|
+| `device` | YOLO ORT: `cpu` \| `cuda` \| `auto` (default `cpu`) |
 | `min_crop_side` | Отвергнуть кроп, если ширина **или** высота меньше (по умолчанию 100) |
 | `catalog_crops_dir` | Успешные кропы для DINO (`data/tmp/catalog_crops`) |
 | `catalog_crops_review_dir` | Карантин: нет бокса / слишком маленький / ошибка + `reasons.csv` |
 | `box_area_min` / `box_area_max` / `box_conf_keep_ratio` | Эвристика `select_label_box` (не argmax conf) |
 
-`static/wines/` остаётся полной бутылкой для UI; в БД пишется только embedding от OK-кропа.
+`static/wines/` остаётся полной бутылкой для UI; в БД пишется только embedding от OK-кропа (батч DINO через `dino.encode_batch_size`).
 
 Import:
 
 ```bash
 uv run python scripts/catalog_import.py --crop-first --recreate-wines
+# GPU YOLO только на crop-pass + батч encode:
+uv run python scripts/catalog_import.py --crop-first --cropper-device cuda \
+  --encode-batch-size 16 --recreate-wines
 # или переиспользовать уже собранные кропы:
 uv run python scripts/catalog_import.py --crops-dir data/tmp/catalog_crops --recreate-wines
 ```

@@ -76,18 +76,18 @@ Set 2 — те же пути под `data/owner_eval/2/`.
 
 ## CPU / GPU
 
-Postgres всегда на CPU. Инференс (PHOCR / DINO) — через `compute.device` в `config/compute_cropper.yaml`. YOLO-кроппер пока всегда CPU (отдельного флага нет).
+Postgres всегда на CPU. Инференс PHOCR / DINO — через `compute.device` в `config/compute_cropper.yaml`. YOLO — отдельно через `cropper.device` (`cpu` \| `cuda` \| `auto`, default **`cpu`** для online-safe). Bulk `--crop-first` может задать `cropper.device: cuda` или CLI `--cropper-device`; catalog encode батчится через `dino.encode_batch_size` / `--encode-batch-size`.
 
 ### По умолчанию — CPU (всегда рабочий путь)
 
 ```bash
 uv sync --extra ml --extra db --extra dev   # колесо onnxruntime (CPU)
-# config/compute_cropper.yaml → compute.device: cpu
+# config/compute_cropper.yaml → compute.device: cpu, cropper.device: cpu
 ```
 
-Так и задумано для сервера заказчика: без GPU-пакетов всё должно подниматься. Если локально GPU «сломался» (нет драйвера / библиотек) — верните `device: cpu` и при необходимости снова `uv sync` (CPU-колесо).
+Так и задумано для сервера заказчика: без GPU-пакетов всё должно подниматься. Если локально GPU «сломался» (нет драйвера / библиотек) — верните `compute.device: cpu` (и при необходимости `cropper.device: cpu`) и снова `uv sync` (CPU-колесо).
 
-### Опционально — локальный GPU (быстрее OCR)
+### Опционально — локальный GPU (быстрее OCR / DINO)
 
 Нужны NVIDIA-драйвер и overlay поверх venv (колёса `onnxruntime` и `onnxruntime-gpu` **несовместимы** в одном окружении):
 
@@ -96,9 +96,10 @@ uv pip uninstall onnxruntime
 uv pip install -r requirements-gpu.txt
 export LD_LIBRARY_PATH="$(pwd)/.venv/lib/python3.12/site-packages/nvidia/cu13/lib:$(pwd)/.venv/lib/python3.12/site-packages/nvidia/cudnn/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 # config/compute_cropper.yaml → compute.device: cuda
+# cropper.device: cpu  (рекомендуется для online; cuda — для bulk crop-only)
 ```
 
-Без `LD_LIBRARY_PATH` CUDA EP может числиться, но не загрузиться — PHOCR с `use_cuda=True` тогда падает; безопасный откат: `device: cpu`. Детали и нюансы CUDA 12 vs 13 — в [configuration_guide.md](configuration_guide.md).
+Без `LD_LIBRARY_PATH` CUDA EP может числиться, но не загрузиться — PHOCR с `use_cuda=True` тогда падает; безопасный откат: `compute.device: cpu`. Детали и нюансы CUDA 12 vs 13 — в [configuration_guide.md](configuration_guide.md).
 
 После обычного `uv sync --extra ml` CPU-колесо вернётся — для GPU снова поставьте overlay из `requirements-gpu.txt`.
 

@@ -28,6 +28,7 @@ class ComputeSettings(BaseModel):
 
 
 class CropperSettings(BaseModel):
+    device: str
     confidence: float
     input_size: int
     letterbox_color: tuple[int, int, int]
@@ -38,6 +39,15 @@ class CropperSettings(BaseModel):
     min_crop_side: int = Field(gt=0)
     catalog_crops_dir: str
     catalog_crops_review_dir: str
+
+    @field_validator("device")
+    @classmethod
+    def device_must_be_known(cls, value: str) -> str:
+        name = value.strip().lower()
+        if name not in {"cpu", "cuda", "auto"}:
+            msg = f"cropper.device must be cpu | cuda | auto, got {value!r}"
+            raise ValueError(msg)
+        return name
 
 
 class FuzzySettings(BaseModel):
@@ -69,6 +79,7 @@ class DinoPreprocessSettings(BaseModel):
     normalize_mean: tuple[float, float, float]
     normalize_std: tuple[float, float, float]
     l2_normalize: bool = True
+    encode_batch_size: int = Field(ge=1)
 
 
 class DatabaseSettings(BaseModel):

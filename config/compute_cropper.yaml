@@ -5,11 +5,12 @@ yolo_model_path: bin/yolo_detect_labels_2.onnx
 
 compute:
   # Local demo: cuda. CPU upload server: set cpu (+ keep onnxruntime, not -gpu).
-  device: cuda         # cpu | cuda — PHOCR/DINO ORT EP; YOLO stays CPU
+  device: cuda         # cpu | cuda — PHOCR + DINO ORT EP only (not YOLO)
   cv_threads: 0        # 0 = library default
   ort_threads: 0
 
 cropper:
+  device: cpu   # cpu | cuda | auto — YOLO ORT only; default cpu (online-safe)
   confidence: 0.5
   input_size: 640
   letterbox_color: [114, 114, 114]

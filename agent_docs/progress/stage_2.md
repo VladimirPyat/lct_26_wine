@@ -79,3 +79,32 @@
 
 - Catalog vectors now YOLO crops (see stage_1 note); query no-box → full frame + ERROR log; decision JSONL includes `used_fallback` / `crop_path`
 - Report: `agent_docs/reports/bug_catalog_yolo_encode.md`
+
+## 2026-09-25 — Planner (OPT-001 / OPT-002)
+
+- STATUS: INSTRUCTIONS_READY (OPT-001 / OPT-002)
+- Contract: `agent_docs/contracts/compute_opt.md` (index updated)
+- Plan: `agent_docs/plans/opt_001_002.md`; backlog tickets marked INSTRUCTIONS_READY (OPT-001 > OPT-002; no YOLO batch)
+- Instructions:
+  - @Coder `agent_docs/instructions/coder_opt_001_002.md` (A batch DINO, then B cropper.device, then manuals)
+  - @Tester `agent_docs/instructions/tester_opt_001_002.md`
+- Locked: `dino.encode_batch_size` in `database.yaml`; `cropper.device` default cpu; online YOLO stays CPU unless overridden; no new packages
+- Next: @Coder `coder_opt_001_002.md`
+
+## 2026-09-25 — Coder (OPT-001 / OPT-002)
+
+- STATUS: READY_FOR_TEST (OPT-001 / OPT-002)
+- OPT-001: `dino.encode_batch_size` (default 16); `DinoOnnxEncoder.encode_images` + import buffer; CLI `--encode-batch-size`
+- OPT-002: `cropper.device` cpu|cuda|auto (default cpu); YOLO EP via `select_yolo_onnx_providers`; CLI `--cropper-device`
+- Manuals: architecture / configuration_guide / quickstart (removed “YOLO always CPU”)
+- Lint: `uv run ruff check src/` OK; `uv run bandit -r src/ -ll` OK
+- Next: @Tester `tester_opt_001_002.md`
+
+## 2026-09-25 — Tester (OPT-001 / OPT-002)
+
+- STATUS: TEST_PASS (OPT-001 / OPT-002)
+- Report: `agent_docs/reports/test_opt_001_002.md`
+- Commands: pytest `-k "compute_opt or dino_batch or yolo_provider or encode_batch or cropper_device"` → 15 passed (exit 0); `ruff check src/ tests/` → exit 0
+- Covered: encode_batch_size YAML/validator; encode_images length/None siblings/serial fallback/batch=1; encode_image raises; select_yolo_onnx_providers cpu|cuda|auto; default cropper.device=cpu; cropper≠compute device
+- Manuals: architecture / configuration_guide / quickstart checked (no “YOLO всегда CPU”)
+- Next: OPT-001/002 sign-off

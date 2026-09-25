@@ -19,6 +19,7 @@ from core.contracts import CropResult, LabelCropper
 logger = logging.getLogger(__name__)
 
 _CPU_EP = "CPUExecutionProvider"
+_CUDA_EP = "CUDAExecutionProvider"
 
 
 class OnnxYoloCropper:
@@ -26,8 +27,9 @@ class OnnxYoloCropper:
 
     Пороги и пути читаются из ``AppSettings.cropper`` (YAML). Числовых дефолтов
     в Python нет. Имя файла кропа уникально, чтобы параллельные запросы с
-    одним stem не перетирали друг друга. YOLO всегда на CPU: ``compute.device=cuda``
-    нужен PHOCR, не кропперу.
+    одним stem не перетирали друг друга. ORT EP выбирается по
+    ``cropper.device`` (default YAML: ``cpu``); ``compute.device`` — только
+    PHOCR/DINO.
     """
 
     def __init__(
@@ -43,7 +45,7 @@ class OnnxYoloCropper:
         chosen = (
             list(providers)
             if providers is not None
-            else select_yolo_onnx_providers(settings.compute.device)
+            else select_yolo_onnx_providers(settings.cropper.device)
         )
         options = onnx_session_options(settings.compute.ort_threads)
         if options is None:
@@ -321,15 +323,23 @@ def select_yolo_onnx_providers(
     *,
     available: Sequence[str] | None = None,
 ) -> list[str]:
-    """YOLO всегда CPU. ``compute.device=cuda`` относится только к PHOCR.
-
-    ``device`` / ``available`` оставлены в сигнатуре: тесты и factory передают
-    их, но на выбор EP не влияют.
-    """
-    del device, available
+    """Pick ORT providers for YOLO from ``cropper.device`` (cpu|cuda|auto)."""
+    if available is not None:
+        available_list = list(available)
+    else:
+        available_list = list(ort.get_available_providers())
+    normalized = device.strip().lower()
+    want_cuda = normalized in {"cuda", "auto"}
+    if want_cuda and _CUDA_EP in available_list:
+        return [_CUDA_EP, _CPU_EP]
+    if normalized == "cuda":
+        logger.warning(
+            "cropper.device=cuda but %s unavailable; falling back to CPU",
+            _CUDA_EP,
+        )
     return [_CPU_EP]
 
 
 def create_label_cropper(settings: AppSettings) -> LabelCropper:
-    """Собрать ONNX-кроппер (CPU ExecutionProvider)."""
+    """Собрать ONNX-кроппер (EP из ``cropper.device``)."""
     return OnnxYoloCropper(settings)

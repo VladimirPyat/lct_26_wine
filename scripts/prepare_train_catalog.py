@@ -272,15 +272,21 @@ def step_by_manufact(*, force: bool, min_wines: int = 3) -> dict[str, int]:
     index_rows: list[dict[str, str | int]] = []
     linked = 0
     for winery, files in sorted(selected.items(), key=lambda x: (-len(x[1]), x[0])):
-        folder = BY_MANUFACT_DIR / _safe_dir_name(winery)
+        n = len(files)
+        folder = BY_MANUFACT_DIR / f"{n:03d}_{_safe_dir_name(winery)}"
         folder.mkdir(parents=True, exist_ok=True)
         for crop in sorted(files, key=lambda p: p.name):
             link = folder / crop.name
             if link.exists() or link.is_symlink():
-                link.unlink()
+                trash = _REPO_ROOT / ".trash" / "by_manufact_links"
+                trash.mkdir(parents=True, exist_ok=True)
+                dest = trash / f"{folder.name}__{link.name}"
+                if dest.exists() or dest.is_symlink():
+                    dest = trash / f"{folder.name}__{link.stem}_{link.stat().st_mtime_ns}{link.suffix}"
+                shutil.move(str(link), str(dest))
             link.symlink_to(crop.resolve())
             linked += 1
-        index_rows.append({"winery": winery, "n_crops": len(files), "dir": folder.name})
+        index_rows.append({"winery": winery, "n_crops": n, "dir": folder.name})
 
     index_path = OUT_ROOT / "by_manufact_index.csv"
     with index_path.open("w", encoding="utf-8", newline="") as f:

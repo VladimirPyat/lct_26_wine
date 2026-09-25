@@ -91,7 +91,7 @@
 
 ---
 
-Оптимизации «на потом»: [backlog.md](backlog.md) (батч DINO import, YOLO CUDA для bulk crop).
+Оптимизации compute: [backlog.md](backlog.md) → [opt_001_002.md](opt_001_002.md) (батч DINO import **OPT-001**, опциональный YOLO CUDA **OPT-002**; без YOLO batch). Статус: INSTRUCTIONS_READY.
 
 ## Чеклист сдачи
 

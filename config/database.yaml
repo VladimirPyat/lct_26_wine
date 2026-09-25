@@ -11,3 +11,4 @@ dino:
   normalize_std: [0.229, 0.224, 0.225]
   # L2-normalize pooler_output so cosine ≈ inner product
   l2_normalize: true
+  encode_batch_size: 16   # 1 = serial; catalog import / re-encode ORT batch
