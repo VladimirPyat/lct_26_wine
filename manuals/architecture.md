@@ -86,7 +86,7 @@ Retriever не вызывает OCR. Policy не знает FastAPI. LLM и PHOC
 ```
 data/owner_database + data/site_database → prepare_ready_csv → wines_ready/additional
   или
-data/clean (wines_integrated_cleared.csv + images) → prepare_clean_csv → wines_clean_ready
+data/owner_database (wines_integrated_updated.csv + images) → prepare_clean_csv → wines_clean_ready
   → YOLO label crop → data/tmp/catalog_crops/{slug}.webp
        └─ fail / too small → data/tmp/catalog_crops_review/ (+ reasons.csv)
   → catalog_import:

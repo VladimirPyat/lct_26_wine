@@ -8,9 +8,15 @@ import sys
 from pathlib import Path
 from types import ModuleType
 
+import cv2
+import numpy as np
 from PIL import Image
 
-from db.import_catalog import build_arg_parser, resolve_source_image
+from db.import_catalog import (
+    build_arg_parser,
+    copy_static_assets,
+    resolve_source_image,
+)
 
 _REPO = Path(__file__).resolve().parents[1]
 _OWNER_HEADER = [
@@ -108,6 +114,55 @@ def test_resolve_source_image_clean(tmp_path: Path) -> None:
     kwargs = {"owner_images": tmp_path / "owner", "site_images": tmp_path / "site"}
     assert resolve_source_image(row, clean_images=clean, **kwargs) == clean / "a.webp"
     assert resolve_source_image(row, **kwargs) is None
+
+
+def _load_verify() -> ModuleType:
+    path = _REPO / "scripts" / "catalog_prepare" / "verify_catalog_assets.py"
+    spec = importlib.util.spec_from_file_location("verify_catalog_assets_t", path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_crop_match_rmse_own_vs_foreign() -> None:
+    rng = np.random.default_rng(1)
+    static = cv2.GaussianBlur(
+        rng.integers(0, 256, (900, 400, 3), dtype=np.uint8), (5, 5), 0
+    )
+    other = cv2.GaussianBlur(
+        rng.integers(0, 256, (900, 400, 3), dtype=np.uint8), (5, 5), 0
+    )
+    crop = static[313:613, 57:337].copy()
+    verify = _load_verify()
+    assert verify.crop_match_rmse(static, crop, 480) < 1.0
+    assert verify.crop_match_rmse(other, crop, 480) > 8.0
+
+
+def test_copy_static_assets_only_for_ok_crops(tmp_path: Path) -> None:
+    clean, crops, static = tmp_path / "clean", tmp_path / "crops", tmp_path / "static"
+    for d in (clean, crops, static):
+        d.mkdir()
+    for name in ("a", "b"):
+        Image.new("RGB", (30, 60), (1, 2, 3)).save(clean / f"{name}.webp")
+    Image.new("RGB", (10, 10)).save(crops / "a.webp")
+    rows = [
+        {"slug": s, "source_image": f"{s}.webp", "image_source": "clean"}
+        for s in ("a", "b", "c")
+    ]
+    stats = copy_static_assets(
+        rows,
+        owner_images=tmp_path,
+        site_images=tmp_path,
+        clean_images=clean,
+        crops_dir=crops,
+        static_dir=static,
+    )
+    assert stats == {
+        "seen": 3, "copied": 1, "skipped_missing_image": 1, "skipped_no_crop": 1
+    }
+    assert (static / "a.webp").read_bytes() == (clean / "a.webp").read_bytes()
+    assert not (static / "b.webp").exists()
 
 
 def test_import_csv_flag_repeatable() -> None:

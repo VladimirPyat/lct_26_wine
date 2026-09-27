@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Convert a cleaned owner-format catalog CSV into the import CSV schema.
 
-Input: ``data/clean/wines_integrated_cleared.csv`` (Russian owner headers +
-``clean_*``) with images under ``data/clean/images/``. Output (import schema,
-``image_source=clean``):
+Input: ``data/owner_database/wines_integrated_updated.csv`` (Russian owner
+headers) with images under ``data/owner_database/images/``; an empty image
+column falls back to ``{slug}.webp``. Output (import schema,
+``image_source=clean`` → resolved against ``--clean-images`` on import):
 
 - ``scripts/catalog_prepare/wines_clean_ready.csv`` — rows with slug, title and image;
 - ``scripts/catalog_prepare/wines_clean_rejected.csv`` — the rest, with ``reason``.
@@ -44,8 +45,8 @@ from prepare_ready_csv import (  # noqa: E402
 
 IMAGE_SOURCE_CLEAN = "clean"
 
-DEFAULT_INPUT = _REPO_ROOT / "data" / "clean" / "wines_integrated_cleared.csv"
-DEFAULT_IMAGES = _REPO_ROOT / "data" / "clean" / "images"
+DEFAULT_INPUT = _REPO_ROOT / "data" / "owner_database" / "wines_integrated_updated.csv"
+DEFAULT_IMAGES = _REPO_ROOT / "data" / "owner_database" / "images"
 DEFAULT_OUT_READY = _SCRIPT_DIR / "wines_clean_ready.csv"
 DEFAULT_OUT_REJECTED = _SCRIPT_DIR / "wines_clean_rejected.csv"
 
@@ -76,6 +77,17 @@ def load_site_by_slug(path: Path) -> dict[str, dict[str, Any]]:
     }
 
 
+def resolve_image_file(row: dict[str, str], images_dir: Path) -> str:
+    """Имя файла картинки: колонка владельца, иначе ``{slug}.webp`` если файл есть."""
+    image_file = _cell(row, COL_OWNER_FILE)
+    if image_file:
+        return image_file
+    slug = _cell(row, COL_SLUG)
+    if slug and (images_dir / f"{slug}.webp").is_file():
+        return f"{slug}.webp"
+    return ""
+
+
 def classify_row(row: dict[str, str], images_dir: Path) -> list[str]:
     """Return rejection reasons (empty list → row is importable)."""
     reasons: list[str] = []
@@ -83,7 +95,7 @@ def classify_row(row: dict[str, str], images_dir: Path) -> list[str]:
         reasons.append("missing_slug")
     if not _cell(row, COL_TITLE):
         reasons.append("missing_title")
-    image_file = _cell(row, COL_OWNER_FILE)
+    image_file = resolve_image_file(row, images_dir)
     if not image_file:
         reasons.append("missing_image_file")
     elif measure_min_side(images_dir / image_file) is None:
@@ -114,7 +126,7 @@ def main(argv: list[str] | None = None) -> int:
             reasons.append("duplicate_slug")
         base = _base_row(
             row,
-            source_image=_cell(row, COL_OWNER_FILE),
+            source_image=resolve_image_file(row, args.images_dir),
             image_source=IMAGE_SOURCE_CLEAN,
         )
         enriched = _enrich_from_json(base, site_by_slug.get(slug) if slug else None)

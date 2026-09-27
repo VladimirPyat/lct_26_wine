@@ -46,27 +46,33 @@ uv run python scripts/catalog_import.py --crop-first --recreate-wines
 
 ## Перезаливка каталога (смена энкодера / очищенный CSV)
 
-Источник — очищенный CSV в owner-формате (`data/clean/wines_integrated_cleared.csv`) и фото в `data/clean/images/`. **Удаляет все строки `wines`.**
+Источник — CSV владельца (`data/owner_database/wines_integrated_updated.csv`) и фото `data/owner_database/images/{slug}.webp`. **Удаляет все строки `wines`.**
+
+В БД идут эмбеддинги **кропов этикетки** (`data/tmp/catalog_crops/`), в статику — **полные бутылки** (`static/wines/`). Оба набора строятся из одного исходника на slug; вино без OK-кропа не попадает ни в статику, ни в БД (карантин `data/tmp/catalog_crops_review/reasons.csv`).
 
 ```bash
-# 1. Только подготовка CSV (БД не трогается) — проверить счётчики и wines_clean_rejected.csv:
+# 1. Подготовка без БД: CSV → старые ассеты в .trash/ → YOLO-кропы + статика → сверка
 scripts/rebuild_catalog_db.sh --prepare-only
+#    сверка: scripts/catalog_prepare/verify_catalog_assets.py → data/tmp/catalog_assets_check.csv
+#    (кроп ⇔ статика, статика == исходник, кроп найден внутри статики по пикселям)
 
-# 2. Полная перезаливка: prepare → VINE_RESET_EMBEDDINGS=1 alembic upgrade head → crop + encode + import
+# 2. БД на уже подготовленных ассетах: VINE_RESET_EMBEDDINGS=1 alembic upgrade head → encode + import
 docker compose up -d
-scripts/rebuild_catalog_db.sh --yes
-# другой CSV / GPU для кропа и батча:
-scripts/rebuild_catalog_db.sh --yes --input data/clean/wines_integrated_cleared.csv \
-  --images-dir data/clean/images -- --cropper-device cuda --encode-batch-size 16
+scripts/rebuild_catalog_db.sh --yes --reuse-assets
+# всё сразу (1 + 2):
+scripts/rebuild_catalog_db.sh --yes -- --encode-batch-size 16
 ```
 
 То же вручную:
 
 ```bash
 uv run python scripts/catalog_prepare/prepare_clean_csv.py
+uv run python scripts/catalog_import.py \
+  --csv scripts/catalog_prepare/wines_clean_ready.csv --crop-first --assets-only
+uv run python scripts/catalog_prepare/verify_catalog_assets.py
 VINE_RESET_EMBEDDINGS=1 uv run alembic upgrade head
 uv run python scripts/catalog_import.py \
-  --csv scripts/catalog_prepare/wines_clean_ready.csv --crop-first --recreate-wines
+  --csv scripts/catalog_prepare/wines_clean_ready.csv --skip-crop-pass --recreate-wines
 ```
 
 Проверка: `SELECT count(*), count(embedding) FROM wines;` и

@@ -29,7 +29,7 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
-from PIL import Image
+from PIL import Image, ImageOps
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
@@ -212,7 +212,8 @@ def copy_catalog_image(source: Path, dest: Path) -> None:
         shutil.copy2(source, dest)
         return
     with Image.open(source) as image:
-        image.save(dest, format="WEBP", quality=90)
+        # cv2.imread (crop pass) honours EXIF orientation; keep static identical.
+        ImageOps.exif_transpose(image).save(dest, format="WEBP", quality=90)
 
 
 def _resolve_under_root(path_str: str) -> Path:
@@ -345,6 +346,40 @@ def run_catalog_crop_pass(
                 )
 
     logger.info("crop pass done: %s reasons=%s", stats, reasons_path)
+    return stats
+
+
+def copy_static_assets(
+    rows: Sequence[Mapping[str, str]],
+    *,
+    owner_images: Path,
+    site_images: Path,
+    clean_images: Path | None,
+    crops_dir: Path,
+    static_dir: Path,
+) -> dict[str, int]:
+    """Copy full bottles to ``static_dir`` only for slugs with an OK crop.
+
+    Same selection as ``import_rows`` with ``crops_dir``: static set == crop set.
+    """
+    stats = {"seen": 0, "copied": 0, "skipped_missing_image": 0, "skipped_no_crop": 0}
+    for row in rows:
+        stats["seen"] += 1
+        slug = (row.get("slug") or "").strip()
+        source = resolve_source_image(
+            row,
+            owner_images=owner_images,
+            site_images=site_images,
+            clean_images=clean_images,
+        )
+        if not slug or source is None:
+            stats["skipped_missing_image"] += 1
+            continue
+        if not (crops_dir / f"{slug}.webp").is_file():
+            stats["skipped_no_crop"] += 1
+            continue
+        copy_catalog_image(source, static_dir / f"{slug}.webp")
+        stats["copied"] += 1
     return stats
 
 
@@ -614,6 +649,14 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="With --crop-first semantics via --crops-dir only: reuse existing crops",
     )
     parser.add_argument(
+        "--assets-only",
+        action="store_true",
+        help=(
+            "Crop pass (with --crop-first) + copy full bottles to --static-dir "
+            "for slugs with an OK crop; no encoder, no DB"
+        ),
+    )
+    parser.add_argument(
         "--encode-batch-size",
         type=int,
         default=None,
@@ -703,8 +746,24 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(json.dumps({"crop": crop_stats}, ensure_ascii=False))
         use_crops = True
 
-    site_categories = _load_site_categories(args.site_json)
     args.static_dir.mkdir(parents=True, exist_ok=True)
+    if args.assets_only:
+        if not use_crops:
+            logger.error("--assets-only needs --crop-first or --crops-dir")
+            return 1
+        asset_stats = copy_static_assets(
+            rows,
+            owner_images=args.owner_images,
+            site_images=args.site_images,
+            clean_images=args.clean_images,
+            crops_dir=crops_dir,
+            static_dir=args.static_dir,
+        )
+        logger.info("Assets done (no DB): %s", asset_stats)
+        print(json.dumps({"assets": asset_stats}, ensure_ascii=False))
+        return 0 if asset_stats["copied"] > 0 else 1
+
+    site_categories = _load_site_categories(args.site_json)
 
     logger.info("Loading DINO encoder…")
     encoder = create_dino_encoder(encode_batch_size=args.encode_batch_size)

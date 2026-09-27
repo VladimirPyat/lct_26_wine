@@ -159,7 +159,7 @@ uv run python scripts/catalog_import.py --crop-first --cropper-device cuda \
 uv run python scripts/catalog_import.py --crops-dir data/tmp/catalog_crops --recreate-wines
 ```
 
-Источник каталога — очищенный CSV (`data/clean/wines_integrated_cleared.csv` + `data/clean/images/`): сначала `scripts/catalog_prepare/prepare_clean_csv.py` конвертирует его в схему импорта (`wines_clean_ready.csv`, строки без фото → `wines_clean_rejected.csv` с `reason`), затем импорт с `--csv scripts/catalog_prepare/wines_clean_ready.csv`. `--csv` можно повторять; он заменяет `--ready`/`--additional`. Строки с `image_source=clean` ищут фото в `--clean-images` (по умолчанию `data/clean/images`).
+Источник каталога — CSV владельца (`data/owner_database/wines_integrated_updated.csv` + `data/owner_database/images/`; пустая колонка «Файл в wines_images» → `{slug}.webp`): сначала `scripts/catalog_prepare/prepare_clean_csv.py` конвертирует его в схему импорта (`wines_clean_ready.csv`, строки без фото → `wines_clean_rejected.csv` с `reason`), затем импорт с `--csv scripts/catalog_prepare/wines_clean_ready.csv`. `--csv` можно повторять; он заменяет `--ready`/`--additional`. Строки с `image_source=clean` ищут фото в `--clean-images` (по умолчанию `data/clean/images`; `rebuild_catalog_db.sh` передаёт `data/owner_database/images`).
 
 ### Смена размерности эмбеддинга
 
