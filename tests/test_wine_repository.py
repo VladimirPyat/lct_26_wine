@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 from sqlalchemy.orm import Session
 
+from core.config import load_database_settings
 from core.retrieve import encode_image
 from db.repository import WineRepository
 from db.test_support import (
@@ -136,7 +137,7 @@ class TestWineRepositorySearch:
             pytest.fail(f"sample image missing for DINO path: {sample}")
 
         target_emb = encode_image(str(sample))
-        assert len(target_emb) == 768
+        assert len(target_emb) == load_database_settings().embedding_dim
 
         repo = WineRepository(db_session)
         target = insert_wine_with_embedding(

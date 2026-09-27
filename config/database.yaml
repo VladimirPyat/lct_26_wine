@@ -1,14 +1,33 @@
 # Catalog DB / embedding column (probe ONNX once; do not hardcode in call sites).
-# Probed from bin/dinov2_wine_final.onnx graph output `pooler_output`: [batch, 768]
-# Input: pixel_values [batch, 3, 224, 224] — HF DINOv2 ImageNet preprocess.
-dino_model_path: bin/dinov2_wine_final.onnx
-embedding_dim: 768
+# Image encoder: SigLIP2 so400m fine-tune (google/siglip2-so400m-patch16-256, tag p1_epoch_3).
+# Probed from bin/siglip2_wine_p1_epoch_3.onnx graph output `pooler_output`: [batch, 1152]
+# Input: pixel_values [batch, 3, 256, 256]. Values must match
+# bin/siglip2_wine_p1_epoch_3_preprocess.json (training preprocess).
+# Encoder refuses to start if the ONNX static output dim != embedding_dim.
+# Changing embedding_dim → VINE_RESET_EMBEDDINGS=1 uv run alembic upgrade head + full reimport.
+dino_model_path: bin/siglip2_wine_p1_epoch_3.onnx
+embedding_dim: 1152
 
 dino:
-  input_size: 224
-  # ImageNet mean/std after scaling pixels to [0, 1]
-  normalize_mean: [0.485, 0.456, 0.406]
-  normalize_std: [0.229, 0.224, 0.225]
+  input_size: 256
+  # letterbox: longest side → input_size, centered, pad with pad_fill_rgb (RGB)
+  resize_mode: letterbox
+  pad_fill_rgb: [123, 116, 103]
+  # mean/std after scaling pixels to [0, 1]
+  normalize_mean: [0.5, 0.5, 0.5]
+  normalize_std: [0.5, 0.5, 0.5]
   # L2-normalize pooler_output so cosine ≈ inner product
   l2_normalize: true
   encode_batch_size: 16   # 1 = serial; catalog import / re-encode ORT batch
+
+# --- Rollback: legacy DINOv2-base (768-d, HF ImageNet preprocess) ---
+# dino_model_path: bin/dinov2_wine_final.onnx
+# embedding_dim: 768
+#
+# dino:
+#   input_size: 224
+#   resize_mode: stretch
+#   normalize_mean: [0.485, 0.456, 0.406]
+#   normalize_std: [0.229, 0.224, 0.225]
+#   l2_normalize: true
+#   encode_batch_size: 16

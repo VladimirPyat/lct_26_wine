@@ -292,8 +292,15 @@ class FuzzyReranker:
                 ocr_tokens |= expand_token_aliases(token)
 
         mfr_tokens = self._distinct_tokens(manufacturer, self._producer_stopwords)
+        # partial_ratio on the full string would let a lone stopword
+        # («винодельня», «поместье») confirm the producer.
+        mfr_core = " ".join(
+            t
+            for t in tokenize(manufacturer, min_len=1)
+            if not (expand_token_aliases(t) & self._producer_stopwords)
+        )
         mfr_ok = self._manufacturer_compact_score(
-            prepared, manufacturer
+            prepared, mfr_core
         ) >= self.mfr_compact_high or any(
             self._ocr_has_token(ocr_tokens, token) for token in mfr_tokens
         )

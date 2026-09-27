@@ -59,6 +59,8 @@ def predict_slug(runtime: EvalRuntime, image_path: str | Path) -> str:
             "used_fallback": bundle.used_fallback,
             "crop_path": bundle.crop_path,
             "query_image": str(path),
+            "encoder_model": runtime.encoder_model,
+            "embedding_dim": runtime.encoder.embedding_dim,
         },
     )
     return decision.slug

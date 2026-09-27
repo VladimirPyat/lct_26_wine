@@ -2,7 +2,7 @@
 
 Фото этикетки вина → одна карточка каталога (или `not_found` + аналоги). API, совместимый с eval организатора — на более поздних этапах.
 
-**Стек (кратко):** Python 3.11+ / `uv`, FastAPI, PostgreSQL + pgvector, DINO/YOLO ONNX, PHOCR (подключение по этапам).
+**Стек (кратко):** Python 3.11+ / `uv`, FastAPI, PostgreSQL + pgvector, SigLIP2 (энкодер изображений) + YOLO ONNX, PHOCR (подключение по этапам).
 
 ## Документация
 

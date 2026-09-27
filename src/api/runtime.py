@@ -39,6 +39,8 @@ class EvalRuntime:
     reranker: FuzzyReranker
     engine: Engine
     session_factory: sessionmaker[Session]
+    # ONNX file name from database.yaml ``dino_model_path`` (decision log trace).
+    encoder_model: str = ""
     _ocr: IOCREngine | None = field(default=None, init=False, repr=False)
 
     def get_ocr(self) -> IOCREngine:
@@ -87,4 +89,5 @@ def build_eval_runtime(repo_root: Path | None = None) -> EvalRuntime:
         reranker=reranker,
         engine=engine,
         session_factory=create_session_factory(engine),
+        encoder_model=Path(database.dino_model_path).name,
     )

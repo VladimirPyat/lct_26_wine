@@ -1,0 +1,34 @@
+---
+description: SSOT for folder access and ownership — Planner owns the working-folder map
+alwaysApply: true
+---
+
+# PATHS ACCESS (SSOT)
+
+**Role:** All agents. Single source of truth for where to read/write.
+
+**Context:** @Planner **creates and maintains** the working-folder list in this file (bootstrap and when the project shape changes). Other rules reference this file — do not copy. Edits to this file itself: propose under `agent_docs/drafts/cursor_rules/`; human copies into `.cursor/rules/`.
+
+**Instruction:**
+1. `docs/` — READ-ONLY; never modify; source of requirements (TZ PDF, product notes).
+2. `agent_docs/plans/`, `contracts/`, `instructions/`, `drafts/` — write: @Planner only.
+3. `agent_docs/progress/` — APPEND-ONLY; never overwrite history.
+4. `agent_docs/reports/` — write: producing role (`test_*` @Tester, `code_review_*` @CodeReviewer, `bug_*` @BugFixer, `BLOCKED.md` any).
+5. Working trees: `src/`, `config/`, `alembic/`, `scripts/`, `bin/` → @Coder; `tests/` → @Tester.
+5a. `src/llm/` — LLM client, task YAML (`tasks/`), prompt markdown (`prompts/`), OCR adapter; @Coder (Stage 2A). Not a new top-level root.
+5b. `src/web/` — server-rendered UI (Stage 4, Jinja2): `routers/` (HTML routes + view models), `templates/` (Jinja `.html`), `static/` (CSS/JS/icons/fonts of the UI); @Coder. Not a new top-level root; there is **no** `frontend/` directory in this project.
+5c. `tests/web/` — UI tests (pytest + TestClient; browser E2E only if approved in `tooling.mdc`); @Tester.
+5d. `agent_docs/design/` — design handoff from colleagues (mockups, endpoint sketches); READ-ONLY for @Coder/@Tester; @Planner adapts into `contracts/` + `instructions/`. Binary mockups may be gitignored.
+6. `data/owner_eval/` — canonical eval harness (script + query sets). Do not invent alternate eval roots.
+6a. `data/owner_database/`, `data/site_database/` — owner/site catalog sources (CSV/JSON/images); **read** for import scripts; do not invent alternate catalog roots.
+6b. `static/wines/` — served catalog images written by import; @Coder / import scripts. Gitignore binary contents; keep folder via `.gitkeep` if needed. UI assets go to `src/web/static/`, never here.
+6c. `scripts/catalog_prepare/` — prepare/audit CSV outputs + scripts; @Coder.
+7. Docs / ignore (policy → `documentation.mdc`): root `README.md`, baseline `.gitignore` (create if missing), `manuals/` stubs/`index.md` — @Planner at bootstrap; optional `manual_testing.md` when HITL appears. Fill architecture / configuration_guide / quickstart — @Coder / @BugFixer; `manual_testing.md` — @Tester when assigned. `/docs-create-diff` may sync manuals. Keep `index.md` + README links in sync. `.trash/` — removals.
+7a. `.cursor/` (rules, hooks, agents, sandbox) — **READ-ONLY for all agents** (read OK). Hard gate: `workspace-boundary.py`. To change rules/hooks/agents: write proposals under `agent_docs/drafts/cursor_rules/` (mirror path); **human** copies into `.cursor/`. Never overwrite `.cursor/` from an agent session.
+8. `_migration/` — **agents READ-ONLY; not part of normal workflow** after Stage 0. Fallback only if a required artifact is missing from the permanent tree. Never write here. Owner may keep it as a gitignored backup.
+9. Forbidden to read/output: `.env`, `.credentials`, `.aws/`, `.ssh/`, and other secret-bearing paths (see `invariants.mdc`).
+10. UI (Stage 4) is Jinja2 server-rendered inside the FastAPI app (`src/web/`, see 5b); no Node/npm tree unless the user approves a stack change (then Planner updates this map + `tooling.mdc`).
+
+**Constraints:**
+1. Agents must **not** create new top-level or project roots (or invent write paths) unless the user or Planner instructions explicitly ask; need a new folder → notify user / `BLOCKED.md`, do not mkdir first.
+2. Missing path from this map → ask user / `BLOCKED.md`; after Planner updates this file, it is the only ownership map.

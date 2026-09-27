@@ -4,6 +4,12 @@ Usage (from repo root)::
 
     uv run python -m db.import_catalog --crop-first --recreate-wines
 
+Cleaned catalog (``data/clean``, prepared by ``prepare_clean_csv.py``)::
+
+    uv run python scripts/catalog_import.py \\
+        --csv scripts/catalog_prepare/wines_clean_ready.csv \\
+        --crop-first --recreate-wines
+
 Copies full-bottle images to ``static/wines/`` (UI only). Embeddings come from
 YOLO label crops under ``data/tmp/catalog_crops/``. Failed/small crops go to
 ``data/tmp/catalog_crops_review/`` and are not inserted.
@@ -38,6 +44,7 @@ logger = logging.getLogger(__name__)
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _SENTINEL = "н/д"
+_IMAGE_SOURCE_CLEAN = "clean"
 
 # Canonical sweetness names (longest first for token match).
 _SWEETNESS_TOKENS: tuple[str, ...] = tuple(
@@ -176,14 +183,23 @@ def resolve_source_image(
     *,
     owner_images: Path,
     site_images: Path,
+    clean_images: Path | None = None,
 ) -> Path | None:
-    """Resolve on-disk source file from prepare CSV columns."""
+    """Resolve on-disk source file from prepare CSV columns.
+
+    ``image_source``: ``site`` → site dir, ``clean`` → ``clean_images``
+    (``data/clean/images``), anything else → owner dir.
+    """
     source_image = (row.get("source_image") or "").strip()
     image_source = (row.get("image_source") or "").strip().lower()
     if not source_image:
         return None
     if image_source == "site":
         path = site_images / source_image
+    elif image_source == _IMAGE_SOURCE_CLEAN:
+        if clean_images is None:
+            return None
+        path = clean_images / source_image
     else:
         path = owner_images / source_image
     return path if path.is_file() else None
@@ -223,6 +239,7 @@ def run_catalog_crop_pass(
     cropper: OnnxYoloCropper,
     min_crop_side: int,
     progress_every: int = 50,
+    clean_images: Path | None = None,
 ) -> dict[str, int]:
     """YOLO-crop each catalog source; OK → crops_dir, else → review_dir + reasons."""
     crops_dir.mkdir(parents=True, exist_ok=True)
@@ -256,7 +273,10 @@ def run_catalog_crop_pass(
                 continue
 
             source = resolve_source_image(
-                row, owner_images=owner_images, site_images=site_images
+                row,
+                owner_images=owner_images,
+                site_images=site_images,
+                clean_images=clean_images,
             )
             if source is None:
                 stats["skipped_missing_image"] += 1
@@ -339,6 +359,7 @@ def import_rows(
     encoder: DinoOnnxEncoder,
     crops_dir: Path | None = None,
     progress_every: int = 50,
+    clean_images: Path | None = None,
 ) -> dict[str, int]:
     """Upsert ready+additional rows; return counters.
 
@@ -456,7 +477,10 @@ def import_rows(
             continue
 
         source = resolve_source_image(
-            row, owner_images=owner_images, site_images=site_images
+            row,
+            owner_images=owner_images,
+            site_images=site_images,
+            clean_images=clean_images,
         )
         if source is None:
             stats["skipped_missing_image"] += 1
@@ -515,6 +539,22 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--additional",
         type=Path,
         default=_REPO_ROOT / "scripts" / "catalog_prepare" / "wines_additional.csv",
+    )
+    parser.add_argument(
+        "--csv",
+        type=Path,
+        action="append",
+        default=None,
+        help=(
+            "Import CSV (repeatable). When set, replaces --ready/--additional, "
+            "e.g. scripts/catalog_prepare/wines_clean_ready.csv"
+        ),
+    )
+    parser.add_argument(
+        "--clean-images",
+        type=Path,
+        default=_REPO_ROOT / "data" / "clean" / "images",
+        help="Image dir for rows with image_source=clean",
     )
     parser.add_argument(
         "--owner-images",
@@ -614,7 +654,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
     args = build_arg_parser().parse_args(list(argv) if argv is not None else None)
-    rows = _read_csv_rows([args.ready, args.additional])
+    csv_paths = args.csv if args.csv else [args.ready, args.additional]
+    rows = _read_csv_rows(csv_paths)
     if args.limit and args.limit > 0:
         rows = rows[: args.limit]
     if not rows:
@@ -657,6 +698,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             cropper=cropper,
             min_crop_side=min_crop_side,
             progress_every=args.progress_every,
+            clean_images=args.clean_images,
         )
         print(json.dumps({"crop": crop_stats}, ensure_ascii=False))
         use_crops = True
@@ -690,6 +732,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             encoder=encoder,
             crops_dir=crops_dir if use_crops else None,
             progress_every=args.progress_every,
+            clean_images=args.clean_images,
         )
     finally:
         session.close()

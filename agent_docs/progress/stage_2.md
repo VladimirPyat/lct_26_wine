@@ -116,3 +116,25 @@
 - Contracts updated: `retrieval.md` (encoder preprocess, `grape_variety`), `wines_schema.md` (dim 1152), `eval_predict.md` (confident rerank, log fields)
 - Already on master `5c34275`: OCR `margin_min 0.08`, `rerank_mode: confident` (offline: SigLIP 49/51, 0 broken; `always` 45/51)
 - Next: @Coder `coder_siglip_prod.md` → @Tester `tester_siglip_prod.md`
+
+## 2026-09-28 — Coder (SIG: SigLIP2 prod switch)
+
+- STATUS: READY_FOR_TEST (SIG) — branch `feat/siglip-prod`
+- SIG-001: `DinoPreprocessSettings.resize_mode` (stretch|letterbox, default stretch) + `pad_fill_rgb` (validator); letterbox helper `src/core/retrieve/preprocess.py::letterbox_rgb`, reused by `scripts/compare_dino_onnx.py` (`_letterbox = letterbox_rgb`); ONNX `pooler_output` static dim ≠ `embedding_dim` → `RuntimeError`; init log has `resize_mode` + model name
+- SIG-002: `config/database.yaml` → `bin/siglip2_wine_p1_epoch_3.onnx`, 1152, letterbox 256, pad (123,116,103), mean/std 0.5; DINO block kept as rollback comment; stale «DINO» comments fixed in `compute_cropper.yaml` / `config/README.md`
+- SIG-003: `alembic/versions/0002_embedding_dim.py` (atttypmod check; non-empty + dim change → refuse unless `VINE_RESET_EMBEDDINGS=1`; downgrade no-op). NOT executed on any DB
+- SIG-004: decision log `extra` → `encoder_model`, `embedding_dim` (`EvalRuntime.encoder_model`)
+- SIG-005: manuals configuration_guide / architecture / quickstart / index + README (margin_min hint fixed: more OCR = increase)
+- Extra (user request, rebuild prep, DB untouched): `scripts/catalog_prepare/prepare_clean_csv.py` (data/clean CSV → import schema, `image_source=clean`; 2037 ready / 66 rejected `missing_image_file`); `db.import_catalog` `--csv` (repeatable) + `--clean-images`; `scripts/rebuild_catalog_db.sh` (`--prepare-only` | `--yes`)
+- Bugfix found by SIG-006 test: `FuzzyReranker.label_evidence` compact producer check ignored `producer_stopwords` (lone «ВИНОДЕЛЬНЯ»/«ПОМЕСТЬЕ» confirmed manufacturer). Now compact check uses manufacturer without stopwords; `eval_ocr_gate --margins 0.08` JSON identical before/after
+- Commands: `ruff check src/` exit 0; `ruff check scripts/catalog_prepare/prepare_clean_csv.py` exit 0 (other scripts: pre-existing E501/F841); `bandit -r src/ -ll` exit 0; `mypy src/` exit 1 (pre-existing onnxruntime stubs; touched files: no new errors with `--ignore-missing-imports --python-version 3.12`)
+- Parity smoke (CPU, 3 files dev_a/queries_crop, `create_dino_encoder` vs script `OnnxEmbedder` letterbox/preprocess.json): cos 1.000000 / 1.000000 / 1.000000 (04f3ce15, 10967716, 170d9123); dim guard on real ONNX with config 768 → RuntimeError
+- Next: @Tester `tester_siglip_prod.md`
+
+## 2026-09-28 — Tester (SIG)
+
+- STATUS: TEST_PASS (SIG, offline scope) — DB-backed tests env-skipped (not passes); rollout E not run (awaiting ✅)
+- Report: `agent_docs/reports/test_siglip_prod.md`
+- Commands: `ruff check src/ tests/` exit 0; `pytest tests/` → 74 passed, 9 failed = Postgres auth (`OperationalError`, env), 1 pre-existing owner_eval artifact failure (stale `predictions.jsonl` null slug)
+- New: `tests/test_encoder_preprocess.py`, `tests/test_policy_confident.py`, `tests/test_catalog_clean_prepare.py`; fixed hardcoded 768 / model-file dependency
+- Offline regression `eval_ocr_gate.py --margins 0.08`: siglip2 confident 49/51, broken 0

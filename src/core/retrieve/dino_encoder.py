@@ -1,4 +1,4 @@
-"""DINO ONNX image encoder (catalog + query embeddings)."""
+"""Image encoder ONNX (SigLIP2 / legacy DINOv2) for catalog + query embeddings."""
 
 from __future__ import annotations
 
@@ -17,6 +17,7 @@ from core.config import (
     load_app_settings,
     load_database_settings,
 )
+from core.retrieve.preprocess import letterbox_rgb
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +27,10 @@ _OUTPUT_POOLER = "pooler_output"
 
 
 class DinoOnnxEncoder:
-    """Encode a bottle/label image to a fixed-dim embedding via DINOv2 ONNX.
+    """Encode a bottle/label image to a fixed-dim embedding via ONNX.
 
-    Preprocess (resize + ImageNet normalize) comes from ``DatabaseSettings.dino``.
+    Class name is historical: weights are SigLIP2 (letterbox) or DINOv2 (stretch).
+    Preprocess (resize mode + mean/std) comes from ``DatabaseSettings.dino``.
     ORT device/threads come from ``ComputeSettings`` (``compute_cropper.yaml``).
     Catalog encode batches via ``dino.encode_batch_size``.
     """
@@ -68,16 +70,21 @@ class DinoOnnxEncoder:
                 providers=chosen,
             )
         self._input_name = self._session.get_inputs()[0].name
-        output_names = {out.name for out in self._session.get_outputs()}
-        if _OUTPUT_POOLER not in output_names:
+        outputs_by_name = {out.name: out for out in self._session.get_outputs()}
+        if _OUTPUT_POOLER not in outputs_by_name:
             msg = (
                 f"DINO ONNX missing output {_OUTPUT_POOLER!r}; "
-                f"have {sorted(output_names)}"
+                f"have {sorted(outputs_by_name)}"
             )
             raise RuntimeError(msg)
+        _check_output_dim(
+            outputs_by_name[_OUTPUT_POOLER], model_path, database.embedding_dim
+        )
         self._embedding_dim = database.embedding_dim
         dino = database.dino
         self._input_size = dino.input_size
+        self._resize_mode = dino.resize_mode
+        self._pad_fill_rgb = dino.pad_fill_rgb
         self._mean = np.asarray(dino.normalize_mean, dtype=np.float32)
         self._std = np.asarray(dino.normalize_std, dtype=np.float32)
         self._l2_normalize = dino.l2_normalize
@@ -89,11 +96,13 @@ class DinoOnnxEncoder:
         else:
             self._encode_batch_size = dino.encode_batch_size
         logger.info(
-            "DINO ONNX providers=%s embedding_dim=%s input_size=%s "
-            "encode_batch_size=%s",
+            "Encoder ONNX model=%s providers=%s embedding_dim=%s input_size=%s "
+            "resize_mode=%s encode_batch_size=%s",
+            model_path.name,
             self._session.get_providers(),
             self._embedding_dim,
             self._input_size,
+            self._resize_mode,
             self._encode_batch_size,
         )
 
@@ -197,13 +206,19 @@ class DinoOnnxEncoder:
         return self._preprocess_chw(image_bgr)
 
     def _preprocess_chw(self, image_bgr: np.ndarray) -> np.ndarray:
-        """BGR → RGB, resize square, ImageNet normalize, CHW (no batch)."""
+        """BGR → RGB, stretch or letterbox to square, normalize, CHW (no batch)."""
         rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
-        resized = cv2.resize(
-            rgb,
-            (self._input_size, self._input_size),
-            interpolation=cv2.INTER_LINEAR,
-        )
+        if self._resize_mode == "letterbox":
+            if self._pad_fill_rgb is None:
+                msg = "letterbox preprocess requires pad_fill_rgb"
+                raise RuntimeError(msg)
+            resized = letterbox_rgb(rgb, self._input_size, self._pad_fill_rgb)
+        else:
+            resized = cv2.resize(
+                rgb,
+                (self._input_size, self._input_size),
+                interpolation=cv2.INTER_LINEAR,
+            )
         scaled = resized.astype(np.float32) / 255.0
         normalized = (scaled - self._mean) / self._std
         chw = np.transpose(normalized, (2, 0, 1))
@@ -237,6 +252,26 @@ class DinoOnnxEncoder:
         except Exception as exc:
             logger.debug("DINO serial ORT skip path=%s: %s", path, exc)
             return None
+
+
+def _check_output_dim(output: object, model_path: Path, config_dim: int) -> None:
+    """Fail fast when the ONNX static output dim differs from ``embedding_dim``.
+
+    Symbolic / unknown dims (``None``, ``str``) are not checked.
+    """
+    shape = getattr(output, "shape", None)
+    if not isinstance(shape, (list, tuple)) or not shape:
+        return
+    onnx_dim = shape[-1]
+    if isinstance(onnx_dim, bool) or not isinstance(onnx_dim, int):
+        return
+    if onnx_dim != config_dim:
+        msg = (
+            f"Encoder ONNX output dim mismatch for {model_path}: "
+            f"ONNX {_OUTPUT_POOLER} dim={onnx_dim}, "
+            f"config embedding_dim={config_dim} (config/database.yaml)"
+        )
+        raise RuntimeError(msg)
 
 
 def select_dino_onnx_providers(

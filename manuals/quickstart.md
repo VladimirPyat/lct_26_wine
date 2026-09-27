@@ -12,6 +12,16 @@ uv sync --extra ml --extra db --extra dev
 
 Для локального OCR (`ocr.engine=phocr`) нужен пакет `phocr` в окружении (если отсутствует — см. `agent_docs/reports/BLOCKED.md` или временно `policy.enable_rerank: false` / `ocr.engine=llm`).
 
+## Модели в `bin/`
+
+Файлы не в git — положить вручную:
+
+- `bin/siglip2_wine_p1_epoch_3.onnx` — энкодер изображений (выход 1152);
+- `bin/siglip2_wine_p1_epoch_3_preprocess.json` — параметры препроцесса обучения (сверка с `config/database.yaml`);
+- `bin/yolo_detect_labels_2.onnx` — YOLO-детектор этикетки.
+
+Если размерность ONNX не совпадает с `embedding_dim`, API и импорт падают при старте с понятной ошибкой.
+
 ## База данных
 
 ```bash
@@ -22,6 +32,8 @@ cp .env.example .env   # если ещё нет
 uv run alembic upgrade head
 ```
 
+На свежей БД `0001` сразу создаёт `vector(1152)`, `0002` — no-op. На БД, где каталог уже залит DINO (768), `alembic upgrade head` откажется работать — см. «Перезаливка каталога».
+
 ## Каталог (если ещё не загружен)
 
 ```bash
@@ -30,7 +42,37 @@ uv run python scripts/catalog_prepare/prepare_ready_csv.py
 uv run python scripts/catalog_import.py --crop-first --recreate-wines
 ```
 
-Флаги: `--crops-dir`, `--review-dir`, `--recreate-wines`, `--skip-crop-pass` (только encode из уже готовых кропов), `--limit N` (smoke).
+Флаги: `--csv PATH` (повторяемый, заменяет ready/additional), `--clean-images`, `--crops-dir`, `--review-dir`, `--recreate-wines`, `--skip-crop-pass` (только encode из уже готовых кропов), `--limit N` (smoke).
+
+## Перезаливка каталога (смена энкодера / очищенный CSV)
+
+Источник — очищенный CSV в owner-формате (`data/clean/wines_integrated_cleared.csv`) и фото в `data/clean/images/`. **Удаляет все строки `wines`.**
+
+```bash
+# 1. Только подготовка CSV (БД не трогается) — проверить счётчики и wines_clean_rejected.csv:
+scripts/rebuild_catalog_db.sh --prepare-only
+
+# 2. Полная перезаливка: prepare → VINE_RESET_EMBEDDINGS=1 alembic upgrade head → crop + encode + import
+docker compose up -d
+scripts/rebuild_catalog_db.sh --yes
+# другой CSV / GPU для кропа и батча:
+scripts/rebuild_catalog_db.sh --yes --input data/clean/wines_integrated_cleared.csv \
+  --images-dir data/clean/images -- --cropper-device cuda --encode-batch-size 16
+```
+
+То же вручную:
+
+```bash
+uv run python scripts/catalog_prepare/prepare_clean_csv.py
+VINE_RESET_EMBEDDINGS=1 uv run alembic upgrade head
+uv run python scripts/catalog_import.py \
+  --csv scripts/catalog_prepare/wines_clean_ready.csv --crop-first --recreate-wines
+```
+
+Проверка: `SELECT count(*), count(embedding) FROM wines;` и
+`SELECT atttypmod FROM pg_attribute WHERE attrelid = 'wines'::regclass AND attname = 'embedding';` → `1152`.
+
+Откат на DINO: вернуть закомментированный DINO-блок в `config/database.yaml`, положить его ONNX в `bin/`, повторить перезаливку.
 
 Ожидаемо: число вин в БД ≈ число OK-кропов в `data/tmp/catalog_crops/`; `embedding IS NULL` = 0; review-only slug не вставляются; `static/wines/*.webp` — полные бутылки.
 
@@ -76,7 +118,7 @@ Set 2 — те же пути под `data/owner_eval/2/`.
 
 ## CPU / GPU
 
-Postgres всегда на CPU. Инференс PHOCR / DINO — через `compute.device` в `config/compute_cropper.yaml`. YOLO — отдельно через `cropper.device` (`cpu` \| `cuda` \| `auto`, default **`cpu`** для online-safe). Bulk `--crop-first` может задать `cropper.device: cuda` или CLI `--cropper-device`; catalog encode батчится через `dino.encode_batch_size` / `--encode-batch-size`.
+Postgres всегда на CPU. Инференс PHOCR / SigLIP2 — через `compute.device` в `config/compute_cropper.yaml`. YOLO — отдельно через `cropper.device` (`cpu` \| `cuda` \| `auto`, default **`cpu`** для online-safe). Bulk `--crop-first` может задать `cropper.device: cuda` или CLI `--cropper-device`; catalog encode батчится через `dino.encode_batch_size` / `--encode-batch-size`.
 
 ### По умолчанию — CPU (всегда рабочий путь)
 
@@ -87,7 +129,9 @@ uv sync --extra ml --extra db --extra dev   # колесо onnxruntime (CPU)
 
 Так и задумано для сервера заказчика: без GPU-пакетов всё должно подниматься. Если локально GPU «сломался» (нет драйвера / библиотек) — верните `compute.device: cpu` (и при необходимости `cropper.device: cpu`) и снова `uv sync` (CPU-колесо).
 
-### Опционально — локальный GPU (быстрее OCR / DINO)
+### Опционально — локальный GPU (быстрее OCR / SigLIP2)
+
+SigLIP2 so400m заметно тяжелее DINOv2-base: полный реимпорт каталога на CPU идёт долго, на GPU — в разы быстрее. Замеры и нюансы ORT CUDA — `agent_docs/reports/siglip2_embedding_results.md`.
 
 Нужны NVIDIA-драйвер и overlay поверх venv (колёса `onnxruntime` и `onnxruntime-gpu` **несовместимы** в одном окружении):
 
@@ -105,4 +149,4 @@ export LD_LIBRARY_PATH="$(pwd)/.venv/lib/python3.12/site-packages/nvidia/cu13/li
 
 ## Policy без OCR (быстрый smoke)
 
-В `config/ocr_rerank.yaml`: `policy.enable_rerank: false` — только YOLO→DINO→top-1, без PHOCR/LLM.
+В `config/ocr_rerank.yaml`: `policy.enable_rerank: false` — только YOLO→SigLIP2→top-1, без PHOCR/LLM.

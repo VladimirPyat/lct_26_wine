@@ -184,10 +184,13 @@ def test_encode_images_batch_size_one_ok() -> None:
 
 def test_dino_encoder_ctor_rejects_encode_batch_size_below_one(
     monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
 ) -> None:
     """[OPT-001] explicit encode_batch_size < 1 raises ValueError."""
+    fake_model = tmp_path / "fake_encoder.onnx"
+    fake_model.write_bytes(b"onnx-stub")
     db = DatabaseSettings(
-        dino_model_path="bin/dinov2_wine_final.onnx",
+        dino_model_path=str(fake_model),
         embedding_dim=4,
         dino=_dino_preprocess(encode_batch_size=16),
     )
@@ -197,6 +200,7 @@ def test_dino_encoder_ctor_rejects_encode_batch_size_below_one(
     mock_session.get_inputs.return_value = [MagicMock(name="pixel_values")]
     mock_out = MagicMock()
     mock_out.name = "pooler_output"
+    mock_out.shape = [None, 4]
     mock_session.get_outputs.return_value = [mock_out]
     mock_session.get_providers.return_value = [_CPU]
 
@@ -204,7 +208,6 @@ def test_dino_encoder_ctor_rejects_encode_batch_size_below_one(
         "core.retrieve.dino_encoder.ort.InferenceSession",
         lambda *a, **k: mock_session,
     )
-    # Bypass real file check by pointing at existing model path.
     with pytest.raises(ValueError, match="encode_batch_size must be >= 1"):
         DinoOnnxEncoder(
             db,

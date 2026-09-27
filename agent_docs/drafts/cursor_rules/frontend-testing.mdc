@@ -1,0 +1,25 @@
+---
+description: Frontend testing rules for @Tester — Jinja2 UI tests under tests/web/
+globs: tests/web/**/*
+alwaysApply: false
+---
+
+# FRONTEND TESTING (Jinja2)
+
+**Role:** @Tester — UI tests for server-rendered pages.
+
+**Context:** `paths-access.mdc` 5c, `tooling.mdc` § Frontend, `backend-testing.mdc` (shared fixtures). Start on `READY_FOR_TEST`. Spec: `tester_X.md` only; UI contract `agent_docs/contracts/web_ui.md`.
+
+**Instruction:**
+1. Default level: `fastapi.testclient.TestClient` — status codes, content type, key elements (parse HTML with the stdlib `html.parser` or what is already installed; no new deps).
+2. Cover per page: happy path, validation error (bad file / too large), low-confidence (analogs) and not-found states, 404 for unknown wine slug.
+3. Security checks: catalog/OCR strings containing `<script>` are escaped in output; upload without file / wrong type is rejected; no stack traces in HTML.
+4. Stub heavy parts (encoder, OCR, YOLO) via the same seams as backend tests; use real DB only where the instruction asks (Compose Postgres).
+5. Mobile layout: assert viewport meta and absence of fixed-width containers only as simple checks; visual/responsive review goes to `manuals/manual_testing.md` (HITL) when assigned.
+6. Browser E2E (Playwright) only if approved in `tooling.mdc`; tear down processes you started, do not kill servers you did not start.
+7. On FAIL/PASS: write `agent_docs/reports/test_X.md`; append `TEST_PASS` / `TEST_FAIL` / `BLOCKED` to progress.
+8. Missing/contradictory data → `BLOCKED.md` and stop.
+
+**Constraints:**
+1. Never modify `src/web/` (templates, static, routers) or config to force green — report for @Coder.
+2. Never weaken, skip, delete, or comment out failing assertions.

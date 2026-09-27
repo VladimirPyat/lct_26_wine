@@ -1,11 +1,11 @@
 # Paths to ONNX / weights (new repo will remap)
 yolo_model_path: bin/yolo_detect_labels_2.onnx
-# DINO path + embedding_dim live in config/database.yaml (Stage 1)
+# Image encoder (SigLIP2) path + embedding_dim live in config/database.yaml
 # phocr_weights_dir: bin/phocr
 
 compute:
   # Local demo: cuda. CPU upload server: set cpu (+ keep onnxruntime, not -gpu).
-  device: cuda         # cpu | cuda — PHOCR + DINO ORT EP only (not YOLO)
+  device: cuda         # cpu | cuda — PHOCR + image encoder ORT EP only (not YOLO)
   cv_threads: 0        # 0 = library default
   ort_threads: 0
 

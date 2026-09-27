@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Literal
 
 import yaml  # type: ignore[import-untyped]
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _DEFAULT_DATABASE_YAML = _REPO_ROOT / "config" / "database.yaml"
@@ -77,13 +77,33 @@ class FuzzySettings(BaseModel):
 
 
 class DinoPreprocessSettings(BaseModel):
-    """DINO ONNX image preprocess (must match export / HF DINOv2)."""
+    """Image encoder ONNX preprocess (must match training / export)."""
 
     input_size: int = Field(gt=0)
+    # stretch = legacy DINO square resize; letterbox = SigLIP2 training preprocess.
+    resize_mode: Literal["stretch", "letterbox"] = "stretch"
+    pad_fill_rgb: tuple[int, int, int] | None = None
     normalize_mean: tuple[float, float, float]
     normalize_std: tuple[float, float, float]
     l2_normalize: bool = True
     encode_batch_size: int = Field(ge=1)
+
+    @field_validator("pad_fill_rgb")
+    @classmethod
+    def pad_fill_must_be_byte_range(
+        cls, value: tuple[int, int, int] | None
+    ) -> tuple[int, int, int] | None:
+        if value is not None and any(c < 0 or c > 255 for c in value):
+            msg = f"pad_fill_rgb channels must be in 0..255, got {value}"
+            raise ValueError(msg)
+        return value
+
+    @model_validator(mode="after")
+    def letterbox_requires_pad_fill(self) -> DinoPreprocessSettings:
+        if self.resize_mode == "letterbox" and self.pad_fill_rgb is None:
+            msg = "dino.pad_fill_rgb is required when resize_mode == 'letterbox'"
+            raise ValueError(msg)
+        return self
 
 
 class DatabaseSettings(BaseModel):

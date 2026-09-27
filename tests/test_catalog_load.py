@@ -12,6 +12,7 @@ import pytest
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from core.config import load_database_settings
 from core.retrieve import encode_image
 from db.repository import WineRepository
 
@@ -181,7 +182,7 @@ class TestCatalogImportDb:
         assert image.is_file()
 
         emb = encode_image(str(image))
-        assert len(emb) == 768
+        assert len(emb) == load_database_settings().embedding_dim
 
         repo = WineRepository(db_session)
         hits = repo.search_by_embedding(emb, top_k=5)

@@ -27,6 +27,11 @@ import onnxruntime as ort
 
 _REPO = Path(__file__).resolve().parents[1]
 _SRC = _REPO / "src"
+if str(_SRC) not in sys.path:
+    sys.path.insert(0, str(_SRC))
+
+from core.retrieve.preprocess import letterbox_rgb  # noqa: E402
+
 _IMG_EXT = {".jpg", ".jpeg", ".png", ".webp"}
 _MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
 _STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
@@ -42,15 +47,7 @@ def _list_images(folder: Path) -> list[Path]:
     )
 
 
-def _letterbox(rgb: np.ndarray, size: int, fill: tuple[int, int, int]) -> np.ndarray:
-    h, w = rgb.shape[:2]
-    scale = size / max(h, w)
-    nw, nh = max(1, round(w * scale)), max(1, round(h * scale))
-    resized = cv2.resize(rgb, (nw, nh), interpolation=cv2.INTER_LINEAR)
-    out = np.full((size, size, 3), fill, dtype=np.uint8)
-    top, left = (size - nh) // 2, (size - nw) // 2
-    out[top : top + nh, left : left + nw] = resized
-    return out
+_letterbox = letterbox_rgb
 
 
 def _preprocess(
@@ -285,13 +282,17 @@ def _retrieval_metrics(
         gap = float(s_sorted[0] - s_sorted[1]) if len(s_sorted) > 1 else 0.0
         gaps.append(gap)
         top = [cat_ids[j] for j in order[:topk]]
+        n_dump = max(topk, 10)
         flips_detail.append(
             {
                 "query": q_names[i],
                 "gt": gt,
                 "rank": rank,
                 "gap12": gap,
+                "score_gt": float(sims[i, gt_i]),
                 "top": top,
+                "top10": [cat_ids[j] for j in order[:n_dump]],
+                "top10_scores": [float(s) for s in s_sorted[:n_dump]],
             }
         )
     n = len(ranks)
