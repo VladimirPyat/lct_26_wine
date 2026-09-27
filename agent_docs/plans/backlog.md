@@ -42,6 +42,15 @@
 | **TICKET-VEC-001** | [`../reports/ticket_vec_001_embedding_recall.md`](../reports/ticket_vec_001_embedding_recall.md) | Поднять vector recall / margin; дообучение без leakage на owner_eval |
 | **TICKET-RERANK-001** | [`../reports/ticket_rerank_001_dino_shortlist.md`](../reports/ticket_rerank_001_dino_shortlist.md) | Rerank hurt на near-duplicates; калибровка под DINO (не SIFT) |
 
+## SigLIP2 switch (2026-09-27)
+
+| ID | File | Status |
+|----|------|--------|
+| **SIG** | [`siglip_prod.md`](siglip_prod.md) | INSTRUCTIONS_READY — `coder_siglip_prod.md` / `tester_siglip_prod.md` |
+| DATA-DEDUP-001 | — | Склеить дубли SKU (напр. `alma-valley-shardone-rezerv-beloe-suhoe-14` / `-135`) |
+| SIG-ABS-001 | — | Калибровка `abs_min` под шкалу SigLIP (нужно для not-found gate Stage 3) |
+| SIG-REF-001 | — | Рефакторинг имён `dino_*` → `encoder_*` |
+
 ## Related (done / not tickets)
 
 - Query OCR on GPU + `requirements-gpu.txt` / `LD_LIBRARY_PATH` — done locally 2026-09-24.

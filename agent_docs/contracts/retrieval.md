@@ -8,13 +8,25 @@
 class RankedHit(TypedDict):
     wine_id: int
     slug: str
-    score: float       # higher better; DINO cosine/IP; comparable within one query
+    score: float       # higher better; encoder cosine (SigLIP2); comparable within one query
     title: str
     manufacturer: str
     category: str
     image_path: str    # or image_url public path /static/wines/...
-    # optional extras for analogs later
+    grape_variety: NotRequired[str]   # used by confident OCR rerank evidence
 ```
+
+## Encoder preprocess (must equal training)
+
+| Key (`database.yaml` → `dino:`) | SigLIP2 value | Note |
+|---|---|---|
+| `input_size` | 256 | |
+| `resize_mode` | `letterbox` | longest side → `input_size`, centered, pad `pad_fill_rgb`; `stretch` = legacy DINO |
+| `pad_fill_rgb` | `[123, 116, 103]` | same as notebooks (`PadIfNeeded`) |
+| `normalize_mean` / `normalize_std` | `[0.5]*3` / `[0.5]*3` | after `/255` |
+| `l2_normalize` | true | |
+
+ONNX output `pooler_output [B, embedding_dim]`; encoder refuses to start if the static output dim ≠ `embedding_dim`.
 
 ## IRetriever
 
@@ -23,7 +35,7 @@ class IRetriever(Protocol):
     def retrieve(self, image_path: str, *, top_k: int) -> list[RankedHit]: ...
 ```
 
-Implementation: YOLO crop → DINO ONNX encode → `search_by_embedding`.
+Implementation: YOLO crop → encoder ONNX (`DinoOnnxEncoder` class, SigLIP2 weights) → `search_by_embedding`.
 
 **Catalog vs query (SSOT):**
 

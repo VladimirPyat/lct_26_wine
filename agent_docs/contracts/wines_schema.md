@@ -53,7 +53,7 @@ Seed these six names on migrate (or get-or-create on first import). Matching fro
 | dishes | TEXT[] | NULL | JSON `dishes` list |
 | sweetness_id | BIGINT FK → sweetness_levels | NULL | From JSON category tokens only (not in prepare CSV) |
 | image_url | TEXT | NOT NULL | Public path e.g. `/static/wines/{slug}.webp` |
-| embedding | vector(N) | NOT NULL | DINO output; **N** = ONNX output dim (probe at encode; dinov2 typically 768) |
+| embedding | vector(N) | NOT NULL | Image encoder output, L2-normalized; **N** = `database.yaml` `embedding_dim` = ONNX output dim (SigLIP2 so400m: **1152**; DINOv2-base was 768). Dim change → alembic `0002_embedding_dim` + full reimport |
 | created_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | |
 | modified_at | TIMESTAMPTZ | NOT NULL DEFAULT now() | Bump on UPDATE |
 

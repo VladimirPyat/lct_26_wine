@@ -108,3 +108,11 @@
 - Covered: encode_batch_size YAML/validator; encode_images length/None siblings/serial fallback/batch=1; encode_image raises; select_yolo_onnx_providers cpu|cuda|auto; default cropper.device=cpu; cropper≠compute device
 - Manuals: architecture / configuration_guide / quickstart checked (no “YOLO всегда CPU”)
 - Next: OPT-001/002 sign-off
+
+## 2026-09-27 — Planner (SIG: SigLIP2 prod switch)
+
+- STATUS: INSTRUCTIONS_READY (SIG) — branch `feat/siglip-prod`; @Coder starts after user ✅; rollout (DB reset + reimport) needs separate ✅
+- Plan: `agent_docs/plans/siglip_prod.md`; audit: `agent_docs/reports/siglip_prod_migration_audit.md`
+- Contracts updated: `retrieval.md` (encoder preprocess, `grape_variety`), `wines_schema.md` (dim 1152), `eval_predict.md` (confident rerank, log fields)
+- Already on master `5c34275`: OCR `margin_min 0.08`, `rerank_mode: confident` (offline: SigLIP 49/51, 0 broken; `always` 45/51)
+- Next: @Coder `coder_siglip_prod.md` → @Tester `tester_siglip_prod.md`
