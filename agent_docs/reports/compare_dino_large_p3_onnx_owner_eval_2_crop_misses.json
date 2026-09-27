@@ -1,0 +1,201 @@
+{
+  "tag": "dinov2_large_wine_phase3",
+  "topk": 5,
+  "n_scored": 24,
+  "n_miss": 1,
+  "n_hit": 23,
+  "R_at_k": 0.9583333333333334,
+  "gt_missing": [
+    {
+      "query": "a0c040fc.jpg",
+      "gt_file": "skalistyy-bereg-veter-v-travah-kaberne-fran-krasnoe-suhoe-13.webp",
+      "gt": {
+        "file": "skalistyy-bereg-veter-v-travah-kaberne-fran-krasnoe-suhoe-13.webp",
+        "in_csv": true,
+        "slug": "skalistyy-bereg-veter-v-travah-kaberne-fran-krasnoe-suhoe-13",
+        "name": "Ветер в травах",
+        "winery": "Скалистый берег",
+        "color": "Светло-вишневый",
+        "grape": "Каберне Совиньон, Каберне Фран, Мерло",
+        "category": "Красное",
+        "region": "Кубань"
+      }
+    }
+  ],
+  "slot_relations_on_miss": {
+    "other": 4,
+    "same_winery": 1
+  },
+  "top_intruders": [
+    [
+      "golubitskoe-estate-merlo-krasnoe-suhoe-135.webp",
+      1
+    ],
+    [
+      "golubitskoe-estate-kaberne-sovinon-krasnoe-suhoe-137.webp",
+      1
+    ],
+    [
+      "golubitskoe-estate-sovinon-blan-beloe-suhoe-11.webp",
+      1
+    ],
+    [
+      "golubitskoe-estate-chardonnay.webp",
+      1
+    ],
+    [
+      "golubitskoe-estate-risling.webp",
+      1
+    ]
+  ],
+  "top_intruder_wineries": [
+    [
+      "Golubitskoe Estate",
+      4
+    ],
+    [
+      "Поместье Голубицкое",
+      1
+    ]
+  ],
+  "color_confusion": [
+    [
+      "Светло-розовое → Светло-соломенный",
+      2
+    ],
+    [
+      "Светло-розовое → Темно-рубиновый",
+      1
+    ],
+    [
+      "Светло-розовое → Темно-рубиновый с гранатовым ободком",
+      1
+    ],
+    [
+      "Светло-розовое → Золотисто-соломенный",
+      1
+    ]
+  ],
+  "winery_confusion": [
+    [
+      "Поместье Голубицкое → Golubitskoe Estate",
+      4
+    ],
+    [
+      "Поместье Голубицкое → Поместье Голубицкое",
+      1
+    ]
+  ],
+  "misses": [
+    {
+      "query": "9b891f99.jpg",
+      "rank": 6,
+      "gap12": 0.05451613664627075,
+      "gt": {
+        "file": "golubitskoe-rose.webp",
+        "in_csv": true,
+        "slug": "golubitskoe-rose",
+        "name": "Golubitskoe Rose",
+        "winery": "Поместье Голубицкое",
+        "color": "Светло-розовое",
+        "grape": "Каберне Совиньон, Мерло, Пино Гриджио, Пино Нуар",
+        "category": "Розовое",
+        "region": "Кубань"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "golubitskoe-estate-merlo-krasnoe-suhoe-135.webp",
+          "in_csv": true,
+          "slug": "golubitskoe-estate-merlo-krasnoe-suhoe-135",
+          "name": "Мерло",
+          "winery": "Golubitskoe Estate",
+          "color": "Темно-рубиновый",
+          "grape": "Мерло",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 2,
+          "file": "golubitskoe-estate-kaberne-sovinon-krasnoe-suhoe-137.webp",
+          "in_csv": true,
+          "slug": "golubitskoe-estate-kaberne-sovinon-krasnoe-suhoe-137",
+          "name": "Каберне Совиньон",
+          "winery": "Golubitskoe Estate",
+          "color": "Темно-рубиновый с гранатовым ободком",
+          "grape": "Каберне Совиньон",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 3,
+          "file": "golubitskoe-estate-sovinon-blan-beloe-suhoe-11.webp",
+          "in_csv": true,
+          "slug": "golubitskoe-estate-sovinon-blan-beloe-suhoe-11",
+          "name": "Совиньон Блан",
+          "winery": "Golubitskoe Estate",
+          "color": "Светло-соломенный",
+          "grape": "Совиньон Блан",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 4,
+          "file": "golubitskoe-estate-chardonnay.webp",
+          "in_csv": true,
+          "slug": "golubitskoe-estate-chardonnay",
+          "name": "Golubitskoe Estate Chardonnay",
+          "winery": "Поместье Голубицкое",
+          "color": "Светло-соломенный",
+          "grape": "Шардоне",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 5,
+          "file": "golubitskoe-estate-risling.webp",
+          "in_csv": true,
+          "slug": "golubitskoe-estate-risling",
+          "name": "Golubitskoe Estate Рислинг",
+          "winery": "Golubitskoe Estate",
+          "color": "Золотисто-соломенный",
+          "grape": "Рислинг",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        }
+      ],
+      "top_relations": {
+        "other": 4,
+        "same_winery": 1
+      },
+      "n_same_winery_in_top": 1,
+      "n_same_color_in_top": 0,
+      "n_same_category_in_top": 0
+    }
+  ]
+}

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Literal
 
 import yaml  # type: ignore[import-untyped]
 from pydantic import BaseModel, Field, field_validator
@@ -70,6 +71,9 @@ class FuzzySettings(BaseModel):
     token_edit_max: int
     token_edit_max_frac: float
     token_edit_idf_scale: float
+    # Label evidence (confident rerank): words that never identify a producer / brand.
+    producer_stopwords: list[str] = Field(default_factory=list)
+    generic_title_tokens: list[str] = Field(default_factory=list)
 
 
 class DinoPreprocessSettings(BaseModel):
@@ -127,6 +131,23 @@ class PolicySettings(BaseModel):
     abs_min: float
     enable_rerank: bool
     enable_not_found_gate: bool = False
+    # always: text leader wins; confident: only on strong label evidence.
+    rerank_mode: Literal["always", "confident"] = "always"
+    strong_combos: list[list[str]] = Field(
+        default_factory=lambda: [["manufacturer", "grape"], ["manufacturer", "brand"]]
+    )
+    max_img_drop: float | None = None
+
+    @field_validator("strong_combos")
+    @classmethod
+    def combos_must_use_known_signals(cls, value: list[list[str]]) -> list[list[str]]:
+        known = {"manufacturer", "grape", "brand"}
+        for combo in value:
+            unknown = set(combo) - known
+            if not combo or unknown:
+                msg = f"strong_combos entries must be non-empty subsets of {known}"
+                raise ValueError(msg)
+        return value
 
 
 class DecisionLogSettings(BaseModel):

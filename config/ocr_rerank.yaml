@@ -32,6 +32,13 @@ hybrid:
     token_edit_max: 2
     token_edit_max_frac: 0.5
     token_edit_idf_scale: 0.5
+    # Confident rerank evidence: producer words that do not identify a producer,
+    # and title words that are color / sweetness / generic (not a brand).
+    producer_stopwords: [винодельня, винодельни, поместье, estate, шато, chateau,
+      domaine, winery, wines, wine, вино, вина, усадьба, хозяйство, компания, ооо, ао, зао]
+    generic_title_tokens: [красное, белое, розовое, оранжевое, сухое, полусухое,
+      полусладкое, сладкое, брют, экстра, игристое, вино, wine, red, white, rose, розе,
+      dry, brut, blend, бленд]
 
 confidence:
   text:
@@ -46,10 +53,15 @@ confidence:
 # enable_not_found_gate is Stage 3 product only — must not null eval slug.
 policy:
   top_k: 5
-  margin_min: 0.1
+  margin_min: 0.08       # OCR only when s1 - s2 < this (was 0.1)
   abs_min: 0.2
   enable_rerank: true
   enable_not_found_gate: false
+  # always: text leader replaces top-1; confident: only with strong label evidence
+  rerank_mode: confident
+  strong_combos: [[manufacturer, grape], [manufacturer, brand]]
+  # Optional guard: skip a text leader whose cosine is > this below top-1 (null = off).
+  max_img_drop: null
 
 # Per-request JSONL decision log (not HTTP body).
 decision_log:

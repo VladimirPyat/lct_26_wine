@@ -1,0 +1,482 @@
+{
+  "model": "siglip2_wine_p1_epoch_3",
+  "results": {
+    "0.06/off": {
+      "r1": 49,
+      "ocr_calls": 0,
+      "fixed": 0,
+      "broken": 0,
+      "n": 51
+    },
+    "0.06/always": {
+      "r1": 47,
+      "ocr_calls": 10,
+      "fixed": 0,
+      "broken": 2,
+      "n": 51
+    },
+    "0.06/confident": {
+      "r1": 49,
+      "ocr_calls": 10,
+      "fixed": 0,
+      "broken": 0,
+      "n": 51
+    },
+    "0.07/off": {
+      "r1": 49,
+      "ocr_calls": 0,
+      "fixed": 0,
+      "broken": 0,
+      "n": 51
+    },
+    "0.07/always": {
+      "r1": 47,
+      "ocr_calls": 13,
+      "fixed": 0,
+      "broken": 2,
+      "n": 51
+    },
+    "0.07/confident": {
+      "r1": 49,
+      "ocr_calls": 13,
+      "fixed": 0,
+      "broken": 0,
+      "n": 51
+    },
+    "0.08/off": {
+      "r1": 49,
+      "ocr_calls": 0,
+      "fixed": 0,
+      "broken": 0,
+      "n": 51
+    },
+    "0.08/always": {
+      "r1": 45,
+      "ocr_calls": 15,
+      "fixed": 0,
+      "broken": 4,
+      "n": 51
+    },
+    "0.08/confident": {
+      "r1": 49,
+      "ocr_calls": 15,
+      "fixed": 0,
+      "broken": 0,
+      "n": 51
+    },
+    "0.10/off": {
+      "r1": 49,
+      "ocr_calls": 0,
+      "fixed": 0,
+      "broken": 0,
+      "n": 51
+    },
+    "0.10/always": {
+      "r1": 45,
+      "ocr_calls": 17,
+      "fixed": 0,
+      "broken": 4,
+      "n": 51
+    },
+    "0.10/confident": {
+      "r1": 49,
+      "ocr_calls": 17,
+      "fixed": 0,
+      "broken": 0,
+      "n": 51
+    }
+  },
+  "details": [
+    {
+      "mode": "always",
+      "query": "dev_a/2039dd8a.jpg",
+      "gt": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14",
+      "margin": 0.0158,
+      "image_top1": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14",
+      "text_leader": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14",
+      "winner": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14",
+      "reason": "always",
+      "evidence": {}
+    },
+    {
+      "mode": "always",
+      "query": "dev_a/b50cf052.jpg",
+      "gt": "soyuz-vino-kanonicheskie-traditsii-krasnoe-sladkoe-kaberne-sovinon-115",
+      "margin": 0.0444,
+      "image_top1": "soyuz-vino-kanonicheskie-traditsii-krasnoe-sladkoe-kaberne-sovinon-115",
+      "text_leader": "soyuz-vino-kanonicheskie-traditsii-krasnoe-sladkoe-kaberne-sovinon-115",
+      "winner": "soyuz-vino-kanonicheskie-traditsii-krasnoe-sladkoe-kaberne-sovinon-115",
+      "reason": "always",
+      "evidence": {}
+    },
+    {
+      "mode": "always",
+      "query": "dev_a/7bf0507b.jpg",
+      "gt": "belbek-belbek-muskat-beloe-suhoe-128",
+      "margin": 0.0291,
+      "image_top1": "belbek-belbek-muskat-beloe-suhoe-128",
+      "text_leader": "belbek-belbek-muskat-beloe-suhoe-128",
+      "winner": "belbek-belbek-muskat-beloe-suhoe-128",
+      "reason": "always",
+      "evidence": {}
+    },
+    {
+      "mode": "always",
+      "query": "dev_a/a263fc7c.jpeg",
+      "gt": "abrau-dyurso-abrau-estates-krasnoe-kaberne-sovinon-suhoe-13",
+      "margin": 0.067,
+      "image_top1": "abrau-dyurso-abrau-estates-krasnoe-kaberne-sovinon-suhoe-13",
+      "text_leader": "abrau-dyurso-abrau-estates-krasnoe-kaberne-sovinon-suhoe-13",
+      "winner": "abrau-dyurso-abrau-estates-krasnoe-kaberne-sovinon-suhoe-13",
+      "reason": "always",
+      "evidence": {}
+    },
+    {
+      "mode": "always",
+      "query": "dev_a/e2591aad.jpg",
+      "gt": "alma-valley-tempranilo-krasnoe-suhoe-13",
+      "margin": 0.0717,
+      "image_top1": "alma-valley-tempranilo-krasnoe-suhoe-13",
+      "text_leader": "vinodelnya-byurne-krasnostop-krasnoe-suhoe-145",
+      "winner": "vinodelnya-byurne-krasnostop-krasnoe-suhoe-145",
+      "reason": "always",
+      "evidence": {}
+    },
+    {
+      "mode": "always",
+      "query": "dev_a/bd78e0f6.jpg",
+      "gt": "alma-valley-graviti-pino-blan-beloe-suhoe-135",
+      "margin": 0.011,
+      "image_top1": "alma-valley-graviti-pino-blan-beloe-suhoe-135",
+      "text_leader": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14",
+      "winner": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14",
+      "reason": "always",
+      "evidence": {}
+    },
+    {
+      "mode": "always",
+      "query": "dev_a/35f764ae.jpg",
+      "gt": "alma-valley-shardone-rezerv-beloe-suhoe-14",
+      "margin": 0.0366,
+      "image_top1": "alma-valley-shardone-rezerv-beloe-suhoe-135",
+      "text_leader": "alma-valley-shardone-rezerv-beloe-suhoe-135",
+      "winner": "alma-valley-shardone-rezerv-beloe-suhoe-135",
+      "reason": "always",
+      "evidence": {}
+    },
+    {
+      "mode": "always",
+      "query": "dev_a/2343a532.jpg",
+      "gt": "aristov-kyuve-aleksandr-blan-de-blan",
+      "margin": 0.0692,
+      "image_top1": "aristov-kyuve-aleksandr-blan-de-blan",
+      "text_leader": "aristov-kyuve-aleksandr-blan-de-blan",
+      "winner": "aristov-kyuve-aleksandr-blan-de-blan",
+      "reason": "always",
+      "evidence": {}
+    },
+    {
+      "mode": "always",
+      "query": "dev_b/0c5e3b2b.jpg",
+      "gt": "abrau-dyurso-abrau-estates-dostoynyy-krasnoe-suhoe-135",
+      "margin": 0.0637,
+      "image_top1": "abrau-dyurso-abrau-estates-dostoynyy-krasnoe-suhoe-135",
+      "text_leader": "abrau-dyurso-abrau-estates-dostoynyy-krasnoe-suhoe-135",
+      "winner": "abrau-dyurso-abrau-estates-dostoynyy-krasnoe-suhoe-135",
+      "reason": "always",
+      "evidence": {}
+    },
+    {
+      "mode": "always",
+      "query": "dev_b/4c01cccd.jpg",
+      "gt": "alma-valley-pino-nuar-krasnoe-suhoe-13",
+      "margin": 0.0764,
+      "image_top1": "alma-valley-pino-nuar-krasnoe-suhoe-13",
+      "text_leader": "bakla-vines-pino-nuar-krasnoe-suhoe-125",
+      "winner": "bakla-vines-pino-nuar-krasnoe-suhoe-125",
+      "reason": "always",
+      "evidence": {}
+    },
+    {
+      "mode": "always",
+      "query": "dev_b/6a687bbd.jpg",
+      "gt": "chateau-de-talu-uroki-frantsuzskogo-kaberne-sovinon-krasnoe-suhoe-14",
+      "margin": 0.0372,
+      "image_top1": "chateau-de-talu-uroki-frantsuzskogo-kaberne-sovinon-krasnoe-suhoe-14",
+      "text_leader": "chateau-de-talu-uroki-frantsuzskogo-kaberne-sovinon-krasnoe-suhoe-14",
+      "winner": "chateau-de-talu-uroki-frantsuzskogo-kaberne-sovinon-krasnoe-suhoe-14",
+      "reason": "always",
+      "evidence": {}
+    },
+    {
+      "mode": "always",
+      "query": "dev_b/7b6281cd.jpg",
+      "gt": "vinodelnya-vedernikov-vedernikov-dolina-dona-beloe-suhoe-aligote-12",
+      "margin": 0.0502,
+      "image_top1": "vinodelnya-vedernikov-vedernikov-dolina-dona-beloe-suhoe-aligote-12",
+      "text_leader": "vinodelnya-vedernikov-vedernikov-dolina-dona-beloe-suhoe-aligote-12",
+      "winner": "vinodelnya-vedernikov-vedernikov-dolina-dona-beloe-suhoe-aligote-12",
+      "reason": "always",
+      "evidence": {}
+    },
+    {
+      "mode": "always",
+      "query": "dev_b/750a209e.jpg",
+      "gt": "derbent-vino-endemy-kaberne-sovinon-krasnoe-suhoe-13",
+      "margin": 0.0562,
+      "image_top1": "vino-suhoe-rozovoe-endemy-kaberne-sovinon",
+      "text_leader": "vino-suhoe-rozovoe-endemy-kaberne-sovinon",
+      "winner": "vino-suhoe-rozovoe-endemy-kaberne-sovinon",
+      "reason": "always",
+      "evidence": {}
+    },
+    {
+      "mode": "always",
+      "query": "dev_b/445971e6.jpg",
+      "gt": "fanagoriya-cru-lermont-cabernet-sauvignon-kaberne-sovinon-krasnoe-suhoe-13",
+      "margin": 0.0266,
+      "image_top1": "fanagoriya-cru-lermont-cabernet-sauvignon-kaberne-sovinon-krasnoe-suhoe-13",
+      "text_leader": "fanagoriya-cru-lermont-cabernet-sauvignon-kaberne-sovinon-krasnoe-suhoe-13",
+      "winner": "fanagoriya-cru-lermont-cabernet-sauvignon-kaberne-sovinon-krasnoe-suhoe-13",
+      "reason": "always",
+      "evidence": {}
+    },
+    {
+      "mode": "always",
+      "query": "dev_b/deab3b0b.jpg",
+      "gt": "vinodelnya-vedernikov-vedernikov-dolina-dona-krasnoe-suhoe-kaberne-sovinon-125",
+      "margin": 0.0244,
+      "image_top1": "vinodelnya-vedernikov-vedernikov-dolina-dona-krasnoe-suhoe-kaberne-sovinon-125",
+      "text_leader": "vinodelnya-vedernikov-krasnostop-zolotovskiy-krasnoe-suhoe-13",
+      "winner": "vinodelnya-vedernikov-krasnostop-zolotovskiy-krasnoe-suhoe-13",
+      "reason": "always",
+      "evidence": {}
+    },
+    {
+      "mode": "confident",
+      "query": "dev_a/2039dd8a.jpg",
+      "gt": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14",
+      "margin": 0.0158,
+      "image_top1": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14",
+      "text_leader": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14",
+      "winner": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14",
+      "reason": "text_agrees",
+      "evidence": {}
+    },
+    {
+      "mode": "confident",
+      "query": "dev_a/b50cf052.jpg",
+      "gt": "soyuz-vino-kanonicheskie-traditsii-krasnoe-sladkoe-kaberne-sovinon-115",
+      "margin": 0.0444,
+      "image_top1": "soyuz-vino-kanonicheskie-traditsii-krasnoe-sladkoe-kaberne-sovinon-115",
+      "text_leader": "soyuz-vino-kanonicheskie-traditsii-krasnoe-sladkoe-kaberne-sovinon-115",
+      "winner": "soyuz-vino-kanonicheskie-traditsii-krasnoe-sladkoe-kaberne-sovinon-115",
+      "reason": "text_agrees",
+      "evidence": {}
+    },
+    {
+      "mode": "confident",
+      "query": "dev_a/7bf0507b.jpg",
+      "gt": "belbek-belbek-muskat-beloe-suhoe-128",
+      "margin": 0.0291,
+      "image_top1": "belbek-belbek-muskat-beloe-suhoe-128",
+      "text_leader": "belbek-belbek-muskat-beloe-suhoe-128",
+      "winner": "belbek-belbek-muskat-beloe-suhoe-128",
+      "reason": "text_agrees",
+      "evidence": {}
+    },
+    {
+      "mode": "confident",
+      "query": "dev_a/a263fc7c.jpeg",
+      "gt": "abrau-dyurso-abrau-estates-krasnoe-kaberne-sovinon-suhoe-13",
+      "margin": 0.067,
+      "image_top1": "abrau-dyurso-abrau-estates-krasnoe-kaberne-sovinon-suhoe-13",
+      "text_leader": "abrau-dyurso-abrau-estates-krasnoe-kaberne-sovinon-suhoe-13",
+      "winner": "abrau-dyurso-abrau-estates-krasnoe-kaberne-sovinon-suhoe-13",
+      "reason": "text_agrees",
+      "evidence": {}
+    },
+    {
+      "mode": "confident",
+      "query": "dev_a/e2591aad.jpg",
+      "gt": "alma-valley-tempranilo-krasnoe-suhoe-13",
+      "margin": 0.0717,
+      "image_top1": "alma-valley-tempranilo-krasnoe-suhoe-13",
+      "text_leader": "vinodelnya-byurne-krasnostop-krasnoe-suhoe-145",
+      "winner": "alma-valley-tempranilo-krasnoe-suhoe-13",
+      "reason": "weak_text",
+      "evidence": {
+        "vinodelnya-byurne-krasnostop-krasnoe-suhoe-145": {
+          "manufacturer": false,
+          "grapes": [],
+          "brand": []
+        },
+        "alma-valley-tempranilo-krasnoe-suhoe-13": {
+          "manufacturer": false,
+          "grapes": [
+            "темпранильо"
+          ],
+          "brand": []
+        }
+      }
+    },
+    {
+      "mode": "confident",
+      "query": "dev_a/bd78e0f6.jpg",
+      "gt": "alma-valley-graviti-pino-blan-beloe-suhoe-135",
+      "margin": 0.011,
+      "image_top1": "alma-valley-graviti-pino-blan-beloe-suhoe-135",
+      "text_leader": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14",
+      "winner": "alma-valley-graviti-pino-blan-beloe-suhoe-135",
+      "reason": "not_distinguishing",
+      "evidence": {
+        "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14": {
+          "manufacturer": true,
+          "grapes": [],
+          "brand": [
+            "гравити"
+          ]
+        },
+        "alma-valley-graviti-pino-blan-beloe-suhoe-135": {
+          "manufacturer": true,
+          "grapes": [],
+          "brand": [
+            "гравити"
+          ]
+        }
+      }
+    },
+    {
+      "mode": "confident",
+      "query": "dev_a/35f764ae.jpg",
+      "gt": "alma-valley-shardone-rezerv-beloe-suhoe-14",
+      "margin": 0.0366,
+      "image_top1": "alma-valley-shardone-rezerv-beloe-suhoe-135",
+      "text_leader": "alma-valley-shardone-rezerv-beloe-suhoe-135",
+      "winner": "alma-valley-shardone-rezerv-beloe-suhoe-135",
+      "reason": "text_agrees",
+      "evidence": {}
+    },
+    {
+      "mode": "confident",
+      "query": "dev_a/2343a532.jpg",
+      "gt": "aristov-kyuve-aleksandr-blan-de-blan",
+      "margin": 0.0692,
+      "image_top1": "aristov-kyuve-aleksandr-blan-de-blan",
+      "text_leader": "aristov-kyuve-aleksandr-blan-de-blan",
+      "winner": "aristov-kyuve-aleksandr-blan-de-blan",
+      "reason": "text_agrees",
+      "evidence": {}
+    },
+    {
+      "mode": "confident",
+      "query": "dev_b/0c5e3b2b.jpg",
+      "gt": "abrau-dyurso-abrau-estates-dostoynyy-krasnoe-suhoe-135",
+      "margin": 0.0637,
+      "image_top1": "abrau-dyurso-abrau-estates-dostoynyy-krasnoe-suhoe-135",
+      "text_leader": "abrau-dyurso-abrau-estates-dostoynyy-krasnoe-suhoe-135",
+      "winner": "abrau-dyurso-abrau-estates-dostoynyy-krasnoe-suhoe-135",
+      "reason": "text_agrees",
+      "evidence": {}
+    },
+    {
+      "mode": "confident",
+      "query": "dev_b/4c01cccd.jpg",
+      "gt": "alma-valley-pino-nuar-krasnoe-suhoe-13",
+      "margin": 0.0764,
+      "image_top1": "alma-valley-pino-nuar-krasnoe-suhoe-13",
+      "text_leader": "bakla-vines-pino-nuar-krasnoe-suhoe-125",
+      "winner": "alma-valley-pino-nuar-krasnoe-suhoe-13",
+      "reason": "weak_text",
+      "evidence": {
+        "bakla-vines-pino-nuar-krasnoe-suhoe-125": {
+          "manufacturer": false,
+          "grapes": [
+            "пино нуар"
+          ],
+          "brand": []
+        },
+        "alma-valley-pino-nuar-krasnoe-suhoe-13": {
+          "manufacturer": false,
+          "grapes": [
+            "пино нуар"
+          ],
+          "brand": []
+        }
+      }
+    },
+    {
+      "mode": "confident",
+      "query": "dev_b/6a687bbd.jpg",
+      "gt": "chateau-de-talu-uroki-frantsuzskogo-kaberne-sovinon-krasnoe-suhoe-14",
+      "margin": 0.0372,
+      "image_top1": "chateau-de-talu-uroki-frantsuzskogo-kaberne-sovinon-krasnoe-suhoe-14",
+      "text_leader": "chateau-de-talu-uroki-frantsuzskogo-kaberne-sovinon-krasnoe-suhoe-14",
+      "winner": "chateau-de-talu-uroki-frantsuzskogo-kaberne-sovinon-krasnoe-suhoe-14",
+      "reason": "text_agrees",
+      "evidence": {}
+    },
+    {
+      "mode": "confident",
+      "query": "dev_b/7b6281cd.jpg",
+      "gt": "vinodelnya-vedernikov-vedernikov-dolina-dona-beloe-suhoe-aligote-12",
+      "margin": 0.0502,
+      "image_top1": "vinodelnya-vedernikov-vedernikov-dolina-dona-beloe-suhoe-aligote-12",
+      "text_leader": "vinodelnya-vedernikov-vedernikov-dolina-dona-beloe-suhoe-aligote-12",
+      "winner": "vinodelnya-vedernikov-vedernikov-dolina-dona-beloe-suhoe-aligote-12",
+      "reason": "text_agrees",
+      "evidence": {}
+    },
+    {
+      "mode": "confident",
+      "query": "dev_b/750a209e.jpg",
+      "gt": "derbent-vino-endemy-kaberne-sovinon-krasnoe-suhoe-13",
+      "margin": 0.0562,
+      "image_top1": "vino-suhoe-rozovoe-endemy-kaberne-sovinon",
+      "text_leader": "vino-suhoe-rozovoe-endemy-kaberne-sovinon",
+      "winner": "vino-suhoe-rozovoe-endemy-kaberne-sovinon",
+      "reason": "text_agrees",
+      "evidence": {}
+    },
+    {
+      "mode": "confident",
+      "query": "dev_b/445971e6.jpg",
+      "gt": "fanagoriya-cru-lermont-cabernet-sauvignon-kaberne-sovinon-krasnoe-suhoe-13",
+      "margin": 0.0266,
+      "image_top1": "fanagoriya-cru-lermont-cabernet-sauvignon-kaberne-sovinon-krasnoe-suhoe-13",
+      "text_leader": "fanagoriya-cru-lermont-cabernet-sauvignon-kaberne-sovinon-krasnoe-suhoe-13",
+      "winner": "fanagoriya-cru-lermont-cabernet-sauvignon-kaberne-sovinon-krasnoe-suhoe-13",
+      "reason": "text_agrees",
+      "evidence": {}
+    },
+    {
+      "mode": "confident",
+      "query": "dev_b/deab3b0b.jpg",
+      "gt": "vinodelnya-vedernikov-vedernikov-dolina-dona-krasnoe-suhoe-kaberne-sovinon-125",
+      "margin": 0.0244,
+      "image_top1": "vinodelnya-vedernikov-vedernikov-dolina-dona-krasnoe-suhoe-kaberne-sovinon-125",
+      "text_leader": "vinodelnya-vedernikov-krasnostop-zolotovskiy-krasnoe-suhoe-13",
+      "winner": "vinodelnya-vedernikov-vedernikov-dolina-dona-krasnoe-suhoe-kaberne-sovinon-125",
+      "reason": "not_distinguishing",
+      "evidence": {
+        "vinodelnya-vedernikov-krasnostop-zolotovskiy-krasnoe-suhoe-13": {
+          "manufacturer": true,
+          "grapes": [
+            "красностоп золотовский"
+          ],
+          "brand": []
+        },
+        "vinodelnya-vedernikov-vedernikov-dolina-dona-krasnoe-suhoe-kaberne-sovinon-125": {
+          "manufacturer": true,
+          "grapes": [
+            "красностоп золотовский"
+          ],
+          "brand": [
+            "долина",
+            "дона"
+          ]
+        }
+      }
+    }
+  ]
+}

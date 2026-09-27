@@ -50,6 +50,11 @@ def emit_decision_log(
         "winner_before_rerank": decision.winner_before_rerank,
         "winner_after_rerank": decision.winner_after_rerank,
         "winner": decision.slug,
+        "rerank_mode": policy.rerank_mode,
+        "rerank_reason": decision.rerank_reason,
+        "text_leader": decision.text_leader,
+        "text_scores": decision.text_scores,
+        "evidence": decision.evidence,
         "latency_ms": latency_ms,
     }
     if extra:

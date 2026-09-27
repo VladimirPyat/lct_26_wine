@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
+from dataclasses import dataclass
 from typing import cast
 
 import Levenshtein
@@ -26,6 +27,36 @@ from core.text.ocr_postprocess import postprocess_ocr_lines
 _REQUIRED_FIELDS: tuple[str, ...] = ("title", "manufacturer", "category")
 _FUZZ_SCALE = 100.0
 TEXT_SCORE_FORMULA_SHORTLIST_IDF = "additive+shortlist_idf"
+# Grape words like «гри» / «фран» are short but still must match exactly.
+_SHORT_TOKEN_LEN = 3
+
+
+@dataclass(frozen=True)
+class LabelEvidence:
+    """OCR-confirmed catalog signals for one candidate wine."""
+
+    manufacturer: bool
+    grapes: list[str]
+    brand: list[str]
+    grape_names: list[str]
+    title_tokens: frozenset[str]
+
+    def signals(self) -> set[str]:
+        out: set[str] = set()
+        if self.manufacturer:
+            out.add("manufacturer")
+        if self.grapes:
+            out.add("grape")
+        if self.brand:
+            out.add("brand")
+        return out
+
+    def as_log(self) -> dict[str, object]:
+        return {
+            "manufacturer": self.manufacturer,
+            "grapes": self.grapes,
+            "brand": self.brand,
+        }
 
 
 class FuzzyReranker:
@@ -88,6 +119,8 @@ class FuzzyReranker:
         self.token_edit_max = fuzzy.token_edit_max
         self.token_edit_max_frac = fuzzy.token_edit_max_frac
         self.token_edit_idf_scale = fuzzy.token_edit_idf_scale
+        self._producer_stopwords = _alias_closure(fuzzy.producer_stopwords)
+        self._generic_title_tokens = _alias_closure(fuzzy.generic_title_tokens)
 
     def normalize(self, text: str) -> str:
         """Нижний регистр, схлопывание пробелов, ё/Ё → е."""
@@ -236,6 +269,81 @@ class FuzzyReranker:
 
         scored.sort(key=lambda item: (-item[0], item[1]))
         return [item[2] for item in scored[:top_n]]
+
+    def label_evidence(
+        self,
+        ocr_lines: Sequence[str],
+        *,
+        title: str,
+        manufacturer: str,
+        grape_variety: str,
+    ) -> LabelEvidence:
+        """Which catalog fields of one wine are confirmed by OCR tokens.
+
+        ``manufacturer``: compact producer string or a non-generic producer
+        token found in OCR. ``grapes``: grape names (comma-separated field)
+        whose every token is in OCR. ``brand``: title tokens that are neither
+        grape, producer, nor generic wine words (color / sweetness / «вино»).
+        """
+        prepared = self._prepare_lines(ocr_lines)
+        ocr_tokens: set[str] = set()
+        for line in prepared:
+            for token in tokenize(line, min_len=_SHORT_TOKEN_LEN):
+                ocr_tokens |= expand_token_aliases(token)
+
+        mfr_tokens = self._distinct_tokens(manufacturer, self._producer_stopwords)
+        mfr_ok = self._manufacturer_compact_score(
+            prepared, manufacturer
+        ) >= self.mfr_compact_high or any(
+            self._ocr_has_token(ocr_tokens, token) for token in mfr_tokens
+        )
+
+        grape_names = _split_grapes(grape_variety)
+        grape_tokens: set[str] = set()
+        grapes: list[str] = []
+        for name in grape_names:
+            tokens = tokenize(name, min_len=_SHORT_TOKEN_LEN)
+            grape_tokens.update(tokens)
+            if tokens and all(self._ocr_has_token(ocr_tokens, t) for t in tokens):
+                grapes.append(name)
+
+        excluded = (
+            self._generic_title_tokens
+            | self._producer_stopwords
+            | _alias_closure([*grape_tokens, *mfr_tokens])
+        )
+        brand_tokens = self._distinct_tokens(title, excluded)
+        brand = sorted(t for t in brand_tokens if self._ocr_has_token(ocr_tokens, t))
+        return LabelEvidence(
+            manufacturer=mfr_ok,
+            grapes=grapes,
+            brand=brand,
+            grape_names=grape_names,
+            title_tokens=frozenset(_alias_closure(tokenize(title, min_len=1))),
+        )
+
+    def _distinct_tokens(self, text: str, excluded: set[str]) -> list[str]:
+        tokens = tokenize(text, min_len=self.token_min_len)
+        # Vintage / volume digits are not an identity signal.
+        return [
+            t
+            for t in tokens
+            if not t.isdigit() and not (expand_token_aliases(t) & excluded)
+        ]
+
+    def _ocr_has_token(self, ocr_tokens: set[str], token: str) -> bool:
+        """Exact alias hit; fuzzy ratio only for tokens long enough to be safe."""
+        variants = expand_token_aliases(token)
+        if variants & ocr_tokens:
+            return True
+        if len(normalize_text(token)) < self.token_min_len:
+            return False
+        return any(
+            float(fuzz.ratio(variant, ocr)) >= self.token_fuzz_min
+            for variant in variants
+            for ocr in ocr_tokens
+            if len(ocr) >= self.token_min_len
+        )
 
     def _ocr_content_tokens(self, lines: Sequence[str]) -> list[str]:
         """Unique OCR tokens after stopword / min-length filter."""
@@ -425,7 +533,7 @@ class FuzzyReranker:
                     return True
         return False
 
-    def _manufacturer_compact_bonus(
+    def _manufacturer_compact_score(
         self, ocr_lines: Sequence[str], manufacturer: str
     ) -> float:
         mfr_compact = compact_alnum(manufacturer)
@@ -443,6 +551,12 @@ class FuzzyReranker:
                 float(fuzz.ratio(line_compact, mfr_compact)) / _FUZZ_SCALE,
                 float(fuzz.partial_ratio(line_compact, mfr_lat)) / _FUZZ_SCALE,
             )
+        return best
+
+    def _manufacturer_compact_bonus(
+        self, ocr_lines: Sequence[str], manufacturer: str
+    ) -> float:
+        best = self._manufacturer_compact_score(ocr_lines, manufacturer)
         if best >= self.mfr_compact_high:
             return self.mfr_bonus_high * best
         if best >= self.mfr_compact_mid:
@@ -529,6 +643,18 @@ class FuzzyReranker:
         if len(preferred) >= self.prefilter_min_candidates:
             return preferred
         return wines
+
+
+def _alias_closure(tokens: Iterable[str]) -> set[str]:
+    out: set[str] = set()
+    for token in tokens:
+        out |= expand_token_aliases(token)
+    return out
+
+
+def _split_grapes(grape_variety: str) -> list[str]:
+    names = (normalize_text(part) for part in grape_variety.split(","))
+    return [name for name in names if compact_alnum(name)]
 
 
 def _merge_alias_groups(tokens: Sequence[str] | set[str]) -> list[frozenset[str]]:

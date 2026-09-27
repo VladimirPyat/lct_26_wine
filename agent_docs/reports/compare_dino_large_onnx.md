@@ -26,6 +26,22 @@ Colab numbers above were also measured on full frames (same `dev_*/queries`), so
 - [miss table with crop](compare_dino_large_onnx_crop_miss_instead_table.md) — 3 misses, 93% of intruder slots are same-house wines
 - [set1 crop misses](compare_dino_large_onnx_owner_eval_1_crop_misses.md) · [set2 crop misses](compare_dino_large_onnx_owner_eval_2_crop_misses.md)
 
+## Phase3 vs Phase1 (both with YOLO query crop)
+
+Model `bin/dinov2_large_wine_phase3.onnx`; own catalog cache `compare_dino_large_p3_onnx_catalog_cache.npz`.
+
+| Set | Model | R@1 | R@5 | MRR |
+|-----|-------|----:|----:|----:|
+| 1 | P1 | 0.778 | 0.963 (26/27) | 0.875 |
+| 1 | **P3** | 0.778 | 0.963 (26/27) | 0.874 |
+| 2 | P1 | 0.667 | 0.917 (22/24) | 0.761 |
+| 2 | **P3** | 0.625 | **0.958** (23/24) | 0.746 |
+
+Rank changes P1 → P3: `750a209e` 8→3 (win @5), `e3f116c0` 8→10, `4ce9195c` 3→4, `4c01cccd` 1→2.
+
+- [P3 miss table](compare_dino_large_p3_onnx_crop_miss_instead_table.md) — 2 misses, all intruders are same-house wines
+- [P3 set1 misses](compare_dino_large_p3_onnx_owner_eval_1_crop_misses.md) · [P3 set2 misses](compare_dino_large_p3_onnx_owner_eval_2_crop_misses.md)
+
 ## Reports (full frame)
 
 - [set1 / Dev-A](compare_dino_large_onnx_owner_eval_1.md)

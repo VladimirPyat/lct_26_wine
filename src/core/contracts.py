@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol, TypedDict
+from typing import NotRequired, Protocol, TypedDict
 
 
 class CropResult(TypedDict):
@@ -29,6 +29,7 @@ class RankedHit(TypedDict):
     manufacturer: str
     category: str
     image_path: str
+    grape_variety: NotRequired[str]
 
 
 class IRetriever(Protocol):

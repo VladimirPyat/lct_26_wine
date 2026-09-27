@@ -130,6 +130,7 @@ class WineRepository:
                     manufacturer=wine.manufacturer,
                     category=wine.category.name,
                     image_path=wine.image_url,
+                    grape_variety=wine.grape_variety,
                 )
             )
         return hits
