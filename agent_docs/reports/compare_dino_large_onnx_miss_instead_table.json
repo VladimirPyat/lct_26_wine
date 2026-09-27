@@ -1,0 +1,525 @@
+{
+  "totals": {
+    "close": 26,
+    "other": 34,
+    "slots": 60
+  },
+  "rows": [
+    {
+      "set": "1",
+      "query": "ef930b69.jpg",
+      "rank": 7,
+      "gt": "Арена",
+      "gt_winery": "Криница",
+      "close": 0,
+      "other": 5,
+      "close_pct": 0.0,
+      "other_pct": 100.0,
+      "instead": [
+        {
+          "pos": 1,
+          "name": "Лесная просека",
+          "winery": "Кубань-Вино",
+          "kind": "чужое"
+        },
+        {
+          "pos": 2,
+          "name": "Contadina",
+          "winery": "Винодельня Батрак",
+          "kind": "чужое"
+        },
+        {
+          "pos": 3,
+          "name": "Реликта Первенец Мускат",
+          "winery": "Реликта",
+          "kind": "чужое"
+        },
+        {
+          "pos": 4,
+          "name": "Кюве №2 Блан Де Нуар",
+          "winery": "Cock t'est belle",
+          "kind": "чужое"
+        },
+        {
+          "pos": 5,
+          "name": "Граф Воронцов. Брют белое",
+          "winery": "Дербент Вино",
+          "kind": "чужое"
+        }
+      ]
+    },
+    {
+      "set": "1",
+      "query": "8a8ad5d7.jpeg",
+      "rank": 8,
+      "gt": "БЮРНЬЕ.ЛЮБЛЮ сухое красное",
+      "gt_winery": "Винодельня Бюрнье",
+      "close": 0,
+      "other": 5,
+      "close_pct": 0.0,
+      "other_pct": 100.0,
+      "instead": [
+        {
+          "pos": 1,
+          "name": "Пти Вердо",
+          "winery": "Villa di Alma",
+          "kind": "чужое"
+        },
+        {
+          "pos": 2,
+          "name": "Реликта Первенец Мускат",
+          "winery": "Реликта",
+          "kind": "чужое"
+        },
+        {
+          "pos": 3,
+          "name": "Кюве №2 Блан Де Нуар",
+          "winery": "Cock t'est belle",
+          "kind": "чужое"
+        },
+        {
+          "pos": 4,
+          "name": "Сибирьковый Оранж",
+          "winery": "Дача Сердюка",
+          "kind": "чужое"
+        },
+        {
+          "pos": 5,
+          "name": "Эндемы Совиньон",
+          "winery": "Дербент Вино",
+          "kind": "чужое"
+        }
+      ]
+    },
+    {
+      "set": "1",
+      "query": "3c11e5b0.jpeg",
+      "rank": 11,
+      "gt": "Мускатель розовый",
+      "gt_winery": "Массандра",
+      "close": 5,
+      "other": 0,
+      "close_pct": 100.0,
+      "other_pct": 0.0,
+      "instead": [
+        {
+          "pos": 1,
+          "name": "Мускатель черный",
+          "winery": "Массандра",
+          "kind": "близк."
+        },
+        {
+          "pos": 2,
+          "name": "Мускат Белый Южнобережный",
+          "winery": "Массандра",
+          "kind": "близк."
+        },
+        {
+          "pos": 3,
+          "name": "Кагор Гурзуф",
+          "winery": "Массандра",
+          "kind": "близк."
+        },
+        {
+          "pos": 4,
+          "name": "Портвейн красный Ливадия",
+          "winery": "Массандра",
+          "kind": "близк."
+        },
+        {
+          "pos": 5,
+          "name": "Бастардо",
+          "winery": "Массандра",
+          "kind": "близк."
+        }
+      ]
+    },
+    {
+      "set": "1",
+      "query": "7bf0507b.jpg",
+      "rank": 19,
+      "gt": "Бельбек Мускат",
+      "gt_winery": "Бельбек",
+      "close": 4,
+      "other": 1,
+      "close_pct": 80.0,
+      "other_pct": 20.0,
+      "instead": [
+        {
+          "pos": 1,
+          "name": "Совиньон Блан",
+          "winery": "Бельбек",
+          "kind": "близк."
+        },
+        {
+          "pos": 2,
+          "name": "Пино Нуар",
+          "winery": "Бельбек",
+          "kind": "близк."
+        },
+        {
+          "pos": 3,
+          "name": "Пино Нуар Резерв",
+          "winery": "Бельбек",
+          "kind": "близк."
+        },
+        {
+          "pos": 4,
+          "name": "Бельбек Пино Нуар",
+          "winery": "Бельбек",
+          "kind": "близк."
+        },
+        {
+          "pos": 5,
+          "name": "AGORA Саперави",
+          "winery": "AGORA WINERY",
+          "kind": "чужое"
+        }
+      ]
+    },
+    {
+      "set": "1",
+      "query": "bd78e0f6.jpg",
+      "rank": 34,
+      "gt": "Гравити",
+      "gt_winery": "Alma Valley",
+      "close": 0,
+      "other": 5,
+      "close_pct": 0.0,
+      "other_pct": 100.0,
+      "instead": [
+        {
+          "pos": 1,
+          "name": "Riesling, 2024",
+          "winery": "WINEMAFIA",
+          "kind": "чужое"
+        },
+        {
+          "pos": 2,
+          "name": "Orange, 2023",
+          "winery": "WINEMAFIA",
+          "kind": "чужое"
+        },
+        {
+          "pos": 3,
+          "name": "Vermentino-Viognier 2022",
+          "winery": "Vibes",
+          "kind": "чужое"
+        },
+        {
+          "pos": 4,
+          "name": "Appassimento",
+          "winery": "WINEMAFIA",
+          "kind": "чужое"
+        },
+        {
+          "pos": 5,
+          "name": "Ренессанс Блауфранкиш",
+          "winery": "Раевское",
+          "kind": "чужое"
+        }
+      ]
+    },
+    {
+      "set": "1",
+      "query": "2039dd8a.jpg",
+      "rank": 100,
+      "gt": "Альма Гравити. Пино Нуар - Мерло - Каберне Совиньон",
+      "gt_winery": "Alma Valley",
+      "close": 0,
+      "other": 5,
+      "close_pct": 0.0,
+      "other_pct": 100.0,
+      "instead": [
+        {
+          "pos": 1,
+          "name": "Губернаторское. Рислинг",
+          "winery": "Ведерниковъ",
+          "kind": "чужое"
+        },
+        {
+          "pos": 2,
+          "name": "Primum Alveus. Blanc de Noirs. Meunier. Экстра брют 2019",
+          "winery": "Фанагория",
+          "kind": "чужое"
+        },
+        {
+          "pos": 3,
+          "name": "Аристов Анима Пино Неро Санджовезе",
+          "winery": "Кубань-Вино",
+          "kind": "чужое"
+        },
+        {
+          "pos": 4,
+          "name": "Ди Каспико",
+          "winery": "Дербент Вино",
+          "kind": "чужое"
+        },
+        {
+          "pos": 5,
+          "name": "Primum Alveus Blanc de Blancs 2017",
+          "winery": "Фанагория",
+          "kind": "чужое"
+        }
+      ]
+    },
+    {
+      "set": "2",
+      "query": "9b891f99.jpg",
+      "rank": 7,
+      "gt": "Golubitskoe Rose",
+      "gt_winery": "Поместье Голубицкое",
+      "close": 5,
+      "other": 0,
+      "close_pct": 100.0,
+      "other_pct": 0.0,
+      "instead": [
+        {
+          "pos": 1,
+          "name": "Мерло",
+          "winery": "Golubitskoe Estate",
+          "kind": "близк."
+        },
+        {
+          "pos": 2,
+          "name": "Golubitskoe Estate Рислинг",
+          "winery": "Golubitskoe Estate",
+          "kind": "близк."
+        },
+        {
+          "pos": 3,
+          "name": "Каберне Совиньон",
+          "winery": "Golubitskoe Estate",
+          "kind": "близк."
+        },
+        {
+          "pos": 4,
+          "name": "Совиньон Блан",
+          "winery": "Golubitskoe Estate",
+          "kind": "близк."
+        },
+        {
+          "pos": 5,
+          "name": "Рислинг",
+          "winery": "Golubitskoe Estate",
+          "kind": "близк."
+        }
+      ]
+    },
+    {
+      "set": "2",
+      "query": "1978bd14.jpg",
+      "rank": 8,
+      "gt": "Legend of Crimea \"Cabernet Sauvignon\"",
+      "gt_winery": "Золотое Поле",
+      "close": 1,
+      "other": 4,
+      "close_pct": 20.0,
+      "other_pct": 80.0,
+      "instead": [
+        {
+          "pos": 1,
+          "name": "Полусладкое Красное",
+          "winery": "Усадьба Перовских",
+          "kind": "чужое"
+        },
+        {
+          "pos": 2,
+          "name": "Legend of Crimea \"Malbec\"",
+          "winery": "Золотое Поле",
+          "kind": "близк."
+        },
+        {
+          "pos": 3,
+          "name": "Каберне Отборное",
+          "winery": "ESSE",
+          "kind": "чужое"
+        },
+        {
+          "pos": 4,
+          "name": "Розе экстра брют",
+          "winery": "Винодельня Узунов",
+          "kind": "чужое"
+        },
+        {
+          "pos": 5,
+          "name": "Мерло Отборное",
+          "winery": "ESSE",
+          "kind": "чужое"
+        }
+      ]
+    },
+    {
+      "set": "2",
+      "query": "4ce9195c.jpg",
+      "rank": 10,
+      "gt": "Пино Нуар Резерв",
+      "gt_winery": "Golubitskoe Estate",
+      "close": 4,
+      "other": 1,
+      "close_pct": 80.0,
+      "other_pct": 20.0,
+      "instead": [
+        {
+          "pos": 1,
+          "name": "Каберне Совиньон Резерв",
+          "winery": "Golubitskoe Estate",
+          "kind": "близк."
+        },
+        {
+          "pos": 2,
+          "name": "Шардоне Резерв",
+          "winery": "Golubitskoe Estate",
+          "kind": "близк."
+        },
+        {
+          "pos": 3,
+          "name": "Каберне Совиньон Noble Selection",
+          "winery": "Golubitskoe Estate",
+          "kind": "близк."
+        },
+        {
+          "pos": 4,
+          "name": "Perfekt Klassik Мерло",
+          "winery": "Винодельня Батрак",
+          "kind": "чужое"
+        },
+        {
+          "pos": 5,
+          "name": "Noble Selection Red Blend",
+          "winery": "Golubitskoe Estate",
+          "kind": "близк."
+        }
+      ]
+    },
+    {
+      "set": "2",
+      "query": "1f973b82.jpg",
+      "rank": 44,
+      "gt": "Эндемы Саперави",
+      "gt_winery": "Дербент Вино",
+      "close": 0,
+      "other": 5,
+      "close_pct": 0.0,
+      "other_pct": 100.0,
+      "instead": [
+        {
+          "pos": 1,
+          "name": "Кюве №2 Блан Де Нуар",
+          "winery": "Cock t'est belle",
+          "kind": "чужое"
+        },
+        {
+          "pos": 2,
+          "name": "Реликта Первенец Мускат",
+          "winery": "Реликта",
+          "kind": "чужое"
+        },
+        {
+          "pos": 3,
+          "name": "Усадьба Мезыбь. Мерло",
+          "winery": "Усадьба Мезыбь",
+          "kind": "чужое"
+        },
+        {
+          "pos": 4,
+          "name": "Трезвая голова. Цимлянский+Голубок",
+          "winery": "Собер Баш",
+          "kind": "чужое"
+        },
+        {
+          "pos": 5,
+          "name": "Трезвая голова. Каберне Фран + Красностоп",
+          "winery": "Собер Баш",
+          "kind": "чужое"
+        }
+      ]
+    },
+    {
+      "set": "2",
+      "query": "54aa8496.jpg",
+      "rank": 58,
+      "gt": "Мерло Резерв",
+      "gt_winery": "Golubitskoe Estate",
+      "close": 2,
+      "other": 3,
+      "close_pct": 40.0,
+      "other_pct": 60.0,
+      "instead": [
+        {
+          "pos": 1,
+          "name": "Грани. Плечистик",
+          "winery": "Собер Баш",
+          "kind": "чужое"
+        },
+        {
+          "pos": 2,
+          "name": "Каберне Совиньон Резерв",
+          "winery": "Golubitskoe Estate",
+          "kind": "близк."
+        },
+        {
+          "pos": 3,
+          "name": "Шардоне Резерв",
+          "winery": "Golubitskoe Estate",
+          "kind": "близк."
+        },
+        {
+          "pos": 4,
+          "name": "Мерло",
+          "winery": "Бельбек",
+          "kind": "чужое"
+        },
+        {
+          "pos": 5,
+          "name": "Пино Менье",
+          "winery": "Бельбек",
+          "kind": "чужое"
+        }
+      ]
+    },
+    {
+      "set": "2",
+      "query": "750a209e.jpg",
+      "rank": 150,
+      "gt": "Эндемы Каберне Совиньон",
+      "gt_winery": "Дербент Вино",
+      "close": 5,
+      "other": 0,
+      "close_pct": 100.0,
+      "other_pct": 0.0,
+      "instead": [
+        {
+          "pos": 1,
+          "name": "Эндемы Шардоне",
+          "winery": "Дербент Вино",
+          "kind": "близк."
+        },
+        {
+          "pos": 2,
+          "name": "Эндемы Пино Нуар",
+          "winery": "Дербент Вино",
+          "kind": "близк."
+        },
+        {
+          "pos": 3,
+          "name": "Эндемы Совиньон",
+          "winery": "Дербент Вино",
+          "kind": "близк."
+        },
+        {
+          "pos": 4,
+          "name": "Эндемы Шардоне",
+          "winery": "Дербент Вино",
+          "kind": "близк."
+        },
+        {
+          "pos": 5,
+          "name": "Эндемы Совиньон",
+          "winery": "Дербент Вино",
+          "kind": "близк."
+        }
+      ]
+    }
+  ]
+}

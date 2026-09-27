@@ -152,6 +152,190 @@ def _encode_folder(paths: list[Path]) -> np.ndarray:
     return mat / norms
 
 
+def _sim_clusters(
+    emb: np.ndarray,
+    a: list[int],
+    b: list[int],
+    *,
+    metric: str = "max_member",
+) -> float:
+    if metric == "centroid":
+        return float(np.dot(_centroid(emb, a), _centroid(emb, b)))
+    return float((emb[a] @ emb[b].T).max())
+
+
+def _cc_on_indices(
+    emb: np.ndarray,
+    idxs: list[int],
+    threshold: float,
+) -> tuple[list[list[int]], int]:
+    """Connected components on a subset of embedding rows. Returns clusters of global idxs."""
+    if len(idxs) < 2:
+        return [[i] for i in idxs], 0
+    uf = _UnionFind(len(idxs))
+    links = 0
+    for a in range(len(idxs)):
+        for b in range(a + 1, len(idxs)):
+            if float(np.dot(emb[idxs[a]], emb[idxs[b]])) >= threshold:
+                uf.union(a, b)
+                links += 1
+    groups: dict[int, list[int]] = defaultdict(list)
+    for local_i, global_i in enumerate(idxs):
+        groups[uf.find(local_i)].append(global_i)
+    return list(groups.values()), links
+
+
+def pipeline_three_pass(
+    clusters: list[list[int]],
+    emb: np.ndarray,
+    *,
+    soft_threshold: float = 0.60,
+    small_max: int = 3,
+    metric: str = "max_member",
+) -> tuple[list[list[int]], list[dict]]:
+    """Clean 3-step refine after hard CC:
+
+    1) (assumed done) hard clusters already in ``clusters``
+    2) singletons: CC at soft_threshold, then attach leftovers to nearest multi
+    3) merge small clusters (size 2..small_max) into nearest cluster if sim >= soft
+    """
+    events: list[dict] = []
+    multis = [list(c) for c in clusters if len(c) >= 2]
+    singles = [c[0] for c in clusters if len(c) == 1]
+
+    # --- step 2a: CC among singletons at soft threshold ---
+    if len(singles) >= 2:
+        parts, links = _cc_on_indices(emb, singles, soft_threshold)
+        new_multi = [p for p in parts if len(p) >= 2]
+        still = [p[0] for p in parts if len(p) == 1]
+        events.append(
+            {
+                "action": "step2_singleton_cc",
+                "threshold": soft_threshold,
+                "links": links,
+                "new_multi": len(new_multi),
+                "sizes": sorted((len(p) for p in new_multi), reverse=True),
+                "still_singles": len(still),
+            }
+        )
+        multis.extend(new_multi)
+        singles = still
+    else:
+        events.append({"action": "step2_singleton_cc", "skipped": True})
+
+    # --- step 2b: attach remaining singletons to nearest multi ---
+    leftover: list[int] = []
+    for idx in singles:
+        if not multis:
+            leftover.append(idx)
+            continue
+        best_i, best_s = -1, -1.0
+        for i, m in enumerate(multis):
+            s = _sim_clusters(emb, [idx], m, metric=metric)
+            if s > best_s:
+                best_s, best_i = s, i
+        if best_i >= 0 and best_s >= soft_threshold:
+            multis[best_i].append(idx)
+            events.append(
+                {
+                    "action": "step2_singleton_attach",
+                    "file_idx": idx,
+                    "into": best_i,
+                    "sim": round(best_s, 6),
+                }
+            )
+        else:
+            leftover.append(idx)
+            events.append(
+                {
+                    "action": "step2_singleton_kept",
+                    "file_idx": idx,
+                    "best_sim": round(best_s, 6) if best_i >= 0 else None,
+                }
+            )
+
+    # --- step 3: merge small clusters (2..small_max) greedily ---
+    # Repeat until no merge
+    merged_any = True
+    round_i = 0
+    while merged_any:
+        merged_any = False
+        round_i += 1
+        # refresh small vs rest
+        order = sorted(range(len(multis)), key=lambda i: len(multis[i]))
+        used = set()
+        new_multis: list[list[int]] = []
+        for i in order:
+            if i in used:
+                continue
+            cur = list(multis[i])
+            if len(cur) > small_max or len(cur) < 2:
+                # large or will handle; keep for now if not absorbed
+                continue
+            # find best partner among all other multis
+            best_j, best_s = -1, -1.0
+            for j, other in enumerate(multis):
+                if j == i or j in used:
+                    continue
+                s = _sim_clusters(emb, cur, other, metric=metric)
+                if s > best_s:
+                    best_s, best_j = s, j
+            if best_j >= 0 and best_s >= soft_threshold:
+                # merge into partner (keep partner slot)
+                if best_j in used:
+                    # partner already merged away — skip
+                    new_multis.append(cur)
+                    used.add(i)
+                    continue
+                partner = list(multis[best_j])
+                combined = partner + cur
+                used.add(i)
+                used.add(best_j)
+                new_multis.append(combined)
+                merged_any = True
+                events.append(
+                    {
+                        "action": "step3_merge_small",
+                        "round": round_i,
+                        "small_n": len(cur),
+                        "partner_n": len(partner),
+                        "result_n": len(combined),
+                        "sim": round(best_s, 6),
+                    }
+                )
+            else:
+                used.add(i)
+                new_multis.append(cur)
+                events.append(
+                    {
+                        "action": "step3_small_kept",
+                        "round": round_i,
+                        "small_n": len(cur),
+                        "best_sim": round(best_s, 6) if best_j >= 0 else None,
+                    }
+                )
+        # add untouched (large clusters not in used as small)
+        for j, m in enumerate(multis):
+            if j not in used:
+                new_multis.append(list(m))
+        multis = new_multis
+        if round_i >= 10:
+            break
+
+    final = [c for c in multis if c]
+    final.extend([[i] for i in leftover])
+    final = sorted(final, key=lambda c: (-len(c), c[0]))
+    events.append(
+        {
+            "action": "pipeline_done",
+            "n_multi": sum(1 for c in final if len(c) >= 2),
+            "n_in_multi": sum(len(c) for c in final if len(c) >= 2),
+            "n_singletons": sum(1 for c in final if len(c) == 1),
+        }
+    )
+    return final, events
+
+
 def _centroid(emb: np.ndarray, idxs: list[int]) -> np.ndarray:
     c = emb[idxs].mean(axis=0)
     n = float(np.linalg.norm(c))
@@ -465,6 +649,9 @@ def cluster_folder(
     out_root: Path = OUT_ROOT,
     tag: str | None = None,
     absorb: bool = False,
+    pipeline: bool = False,
+    soft_threshold: float = 0.60,
+    small_max: int = 3,
     core_min: int = 3,
     absorb_singletons: bool = True,
     absorb_threshold: float | None = None,
@@ -472,23 +659,26 @@ def cluster_folder(
     absorb_metric: str = "max_member",
     singleton_low_threshold: float | None = 0.55,
 ) -> dict:
-    """Connected components at cosine >= threshold (+ optional centroid absorb)."""
+    """Hard CC at ``threshold``, optional refine (``pipeline`` or legacy ``absorb``)."""
     paths = _list_images(folder)
     if len(paths) < 2:
         logger.warning("%s has <2 images, skip", folder)
         return {"folder": folder.name, "n": len(paths), "skipped": True}
 
     abs_thr = threshold if absorb_threshold is None else absorb_threshold
+    mode = "cc"
+    if pipeline:
+        mode = "pipeline"
+    elif absorb:
+        mode = "absorb"
+
     logger.info(
-        "clustering %s n=%s threshold=%.3f absorb=%s absorb_thr=%.3f "
-        "second_pass=%s metric=%s",
+        "clustering %s n=%s hard=%.3f mode=%s soft=%.3f",
         folder.name,
         len(paths),
         threshold,
-        absorb,
-        abs_thr,
-        second_pass_threshold,
-        absorb_metric,
+        mode,
+        soft_threshold if pipeline else abs_thr,
     )
     emb = _encode_folder(paths)
     sims = emb @ emb.T
@@ -513,7 +703,22 @@ def cluster_folder(
     base_singles = sum(1 for c in cluster_list if len(c) == 1)
 
     events: list[dict] | None = None
-    if absorb:
+    if pipeline:
+        cluster_list, events = pipeline_three_pass(
+            cluster_list,
+            emb,
+            soft_threshold=soft_threshold,
+            small_max=small_max,
+            metric=absorb_metric,
+        )
+        done = next(e for e in events if e["action"] == "pipeline_done")
+        logger.info(
+            "pipeline: multi=%s in_multi=%s singletons=%s",
+            done["n_multi"],
+            done["n_in_multi"],
+            done["n_singletons"],
+        )
+    elif absorb:
         cluster_list, events = _absorb_pass(
             cluster_list,
             emb,
@@ -525,23 +730,19 @@ def cluster_folder(
             metric=absorb_metric,
             singleton_low_threshold=singleton_low_threshold,
         )
-        n_absorbed_small = sum(1 for e in events if e["action"] == "small_to_core")
-        n_absorbed_sing = sum(
-            1 for e in events if e["action"] == "singleton_to_cluster"
-        )
-        logger.info(
-            "absorb: small_to_core=%s singleton_to_cluster=%s",
-            n_absorbed_small,
-            n_absorbed_sing,
-        )
 
     if tag is None:
         tag = f"t{threshold:.2f}".replace(".", "p")
-        if absorb:
+        if pipeline:
+            tag = f"{tag}_pipe_s{soft_threshold:.2f}".replace(".", "p")
+        elif absorb:
             tag = (
                 f"{tag}_absorb_a{abs_thr:.2f}".replace(".", "p")
-                + (f"_s{second_pass_threshold:.2f}".replace(".", "p")
-                   if second_pass_threshold is not None else "")
+                + (
+                    f"_s{second_pass_threshold:.2f}".replace(".", "p")
+                    if second_pass_threshold is not None
+                    else ""
+                )
             )
 
     out_dir = out_root / folder.name / tag
@@ -555,13 +756,15 @@ def cluster_folder(
         events=events,
         extra_summary={
             "folder": folder.name,
-            "mode": "absorb" if absorb else "connected_components",
+            "mode": mode,
+            "soft_threshold": soft_threshold if pipeline else None,
+            "small_max": small_max if pipeline else None,
             "core_min": core_min if absorb else None,
             "absorb_threshold": abs_thr if absorb else None,
             "second_pass_threshold": second_pass_threshold if absorb else None,
-            "absorb_metric": absorb_metric if absorb else None,
+            "absorb_metric": absorb_metric if (absorb or pipeline) else None,
             "singleton_low_threshold": singleton_low_threshold if absorb else None,
-            "before_absorb": {
+            "before_refine": {
                 "n_multi_clusters": base_multi,
                 "n_in_multi": base_in_multi,
                 "n_singletons": base_singles,
@@ -796,11 +999,28 @@ def main(argv: list[str] | None = None) -> int:
         default=15,
         help="Cluster all folders with >= this many images (if --folder not set)",
     )
+    parser.add_argument(
+        "--pipeline",
+        action="store_true",
+        help="3-pass: hard CC → singleton soft → merge small(2..small_max) at soft thr",
+    )
+    parser.add_argument(
+        "--soft-threshold",
+        type=float,
+        default=0.60,
+        help="Soft cosine for pipeline steps 2–3 (default 0.60)",
+    )
+    parser.add_argument(
+        "--small-max",
+        type=int,
+        default=3,
+        help="Max size treated as 'small' for step-3 merge (default 3)",
+    )
     parser.add_argument("--threshold", type=float, default=0.85)
     parser.add_argument(
         "--absorb",
         action="store_true",
-        help="After CC: second-pass among singletons + soft absorb to multis",
+        help="Legacy absorb refine (prefer --pipeline)",
     )
     parser.add_argument(
         "--core-min",
@@ -898,6 +1118,9 @@ def main(argv: list[str] | None = None) -> int:
     kwargs = {
         "threshold": args.threshold,
         "absorb": args.absorb,
+        "pipeline": args.pipeline,
+        "soft_threshold": args.soft_threshold,
+        "small_max": args.small_max,
         "core_min": args.core_min,
         "absorb_singletons": not args.no_absorb_singletons,
         "absorb_threshold": args.absorb_threshold,

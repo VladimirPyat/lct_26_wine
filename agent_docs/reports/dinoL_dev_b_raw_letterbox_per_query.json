@@ -1,0 +1,316 @@
+{
+  "dinov2_large_wine_phase1": [
+    {
+      "query": "0a235276.jpg",
+      "gt": "golubitskoe-estate-red-blend-kaberne-sovinon-krasnoe-suhoe-136.webp",
+      "rank": 5,
+      "gap12": 0.008888393640518188,
+      "top": [
+        "golubitskoe-estate-kaberne-sovinon-krasnoe-suhoe-137.webp",
+        "golubitskoe-estate-merlo-krasnoe-suhoe-135.webp",
+        "usadba-divnomorskoe-marselan-marselan-krasnoe-suhoe-149.webp",
+        "usadba-divnomorskoe-yuzhnyy-les-merlo-krasnoe-suhoe-137.webp",
+        "golubitskoe-estate-red-blend-kaberne-sovinon-krasnoe-suhoe-136.webp"
+      ]
+    },
+    {
+      "query": "0c5e3b2b.jpg",
+      "gt": "abrau-dyurso-abrau-estates-dostoynyy-krasnoe-suhoe-135.webp",
+      "rank": 1,
+      "gap12": 0.06879711151123047,
+      "top": [
+        "abrau-dyurso-abrau-estates-dostoynyy-krasnoe-suhoe-135.webp",
+        "abrau-dyurso-abrau-estates-amurskiy-potapenko-krasnoe-suhoe-105.webp",
+        "abrau-dyurso-abrau-estates-krasnoe-kaberne-sovinon-suhoe-13.webp",
+        "abrau-dyurso-abrau-estates-oranzh-tsitronnyy-magaracha-oranzhevoe-suhoe-105.webp",
+        "vinodelnya-byurne-krasnostop-krasnoe-suhoe-145.webp"
+      ]
+    },
+    {
+      "query": "1f973b82.jpg",
+      "gt": "vino-suhoe-krasnoe-endemy-saperavi.webp",
+      "rank": 208,
+      "gap12": 0.021484196186065674,
+      "top": [
+        "uva-vallis-sira.webp",
+        "usadba-mezyb-usadba-mezyb-kaberne-sovinon-krasnoe-suhoe-143.webp",
+        "riesling.webp",
+        "usadba-mezyb-usadba-mezyb-kaberne-sovinon-kaberne-fran-merlo-krasnoe-suhoe-148.webp",
+        "ferrum-winery-merlot-merlo-krasnoe-suhoe-13.webp"
+      ]
+    },
+    {
+      "query": "2fe84eca.jpg",
+      "gt": "agora-yachting-cabernet-sauvignon.webp",
+      "rank": 4,
+      "gap12": 3.5256147384643555e-05,
+      "top": [
+        "agora-yachting-shiraz.webp",
+        "agora-yachting-merlot.webp",
+        "agora-yachting-chardonnay.webp",
+        "agora-yachting-cabernet-sauvignon.webp",
+        "chateau-andre-kaberne-fran-krasnoe-suhoe-14.webp"
+      ]
+    },
+    {
+      "query": "4c01cccd.jpg",
+      "gt": "alma-valley-pino-nuar-krasnoe-suhoe-13.webp",
+      "rank": 3,
+      "gap12": 0.05863216519355774,
+      "top": [
+        "alma-valley-kaberne-fran-krasnoe-suhoe-145.webp",
+        "sober-bash-krasnostop-amfora-krasnostop-zolotovskiy-krasnoe-suhoe-13.webp",
+        "alma-valley-pino-nuar-krasnoe-suhoe-13.webp",
+        "nesterov-winery-saperavi-krasnoe-suhoe-135.webp",
+        "alma-valley-semilon-beloe-suhoe-135.webp"
+      ]
+    },
+    {
+      "query": "4ce9195c.jpg",
+      "gt": "golubitskoe-estate-pino-nuar-rezerv-krasnoe-suhoe-132.webp",
+      "rank": 4,
+      "gap12": 0.01481485366821289,
+      "top": [
+        "golubitskoe-estate-kaberne-sovinon-rezerv-krasnoe-suhoe-125.webp",
+        "golubitskoe-estate-merlo-rezerv-krasnoe-suhoe-135.webp",
+        "golubitskoe-estate-shardone-rezerv-beloe-suhoe-135.webp",
+        "golubitskoe-estate-pino-nuar-rezerv-krasnoe-suhoe-132.webp",
+        "pomeste-golubitskoe-kaberne-sovinon-rezerv-krasnoe-suhoe-143.webp"
+      ]
+    },
+    {
+      "query": "6a4e19f9.jpg",
+      "gt": "valeriy-zaharin-avtohtonnoe-vino-kryma-ot-valeriya-zaharina-bastardo-kefesiya-bastardo-magarachskiy-krasnoe-suhoe-115.webp",
+      "rank": 1,
+      "gap12": 0.004401087760925293,
+      "top": [
+        "valeriy-zaharin-avtohtonnoe-vino-kryma-ot-valeriya-zaharina-bastardo-kefesiya-bastardo-magarachskiy-krasnoe-suhoe-115.webp",
+        "valeriy-zaharin-avtohtonnoe-vino-kryma-ot-valeriya-zaharina-kokur-sary-pandas-kokur-belyy-beloe-suhoe-115.webp",
+        "valeriy-zaharin-aleatiko-kefesiya-avtohtonnoe-vino-kryma-ot-valeriya-zaharina-rozovoe-suhoe-125.webp",
+        "valeriy-zaharin-avtohtonnoe-vino-kryma-ot-valeriya-zaharina-aleatiko-kefesiya-rozovoe-suhoe-11.webp",
+        "uppa-winery-pavel-shvets-cabernet-sauvignon-merlot-kaberne-sovinon-krasnoe-suhoe-14.webp"
+      ]
+    },
+    {
+      "query": "6a687bbd.jpg",
+      "gt": "chateau-de-talu-uroki-frantsuzskogo-kaberne-sovinon-krasnoe-suhoe-14.webp",
+      "rank": 1,
+      "gap12": 0.060641199350357056,
+      "top": [
+        "chateau-de-talu-uroki-frantsuzskogo-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "chateau-de-talu-uroki-frantsuzskogo-sovinon-blan-beloe-suhoe-115.webp",
+        "chateau-de-talu-uroki-frantsuzskogo-merlo-krasnoe-suhoe-147.webp",
+        "chateau-de-talu-uroki-frantsuzskogo-sira-krasnoe-suhoe-13.webp",
+        "chateau-de-talu-uroki-frantsuzskogo-kaberne-fran-krasnoe-suhoe-14.webp"
+      ]
+    },
+    {
+      "query": "6dd708dd.jpg",
+      "gt": "di-kaspiko-di-caspico-fiori-di-mare-verde.webp",
+      "rank": 1,
+      "gap12": 0.2190711796283722,
+      "top": [
+        "di-kaspiko-di-caspico-fiori-di-mare-verde.webp",
+        "oxana-istratova-wine-saperavi-2023-krasnoe-suhoe-13.webp",
+        "marquetry-syrah.webp",
+        "belbek-belbek-fiolent-muskat-beloe-polusladkoe-125.webp",
+        "derbent-vino-di-kaspiko-fiori-di-mare-verde-avgustin-rozovoe-polusuhoe-10.webp"
+      ]
+    },
+    {
+      "query": "7b6281cd.jpg",
+      "gt": "vinodelnya-vedernikov-vedernikov-dolina-dona-beloe-suhoe-aligote-12.webp",
+      "rank": 1,
+      "gap12": 0.12426447868347168,
+      "top": [
+        "vinodelnya-vedernikov-vedernikov-dolina-dona-beloe-suhoe-aligote-12.webp",
+        "vinodelnya-vedernikov-vedernikov-gubernatorskoe-golubok-krasnoe-suhoe-115.webp",
+        "vinodelnya-vedernikov-sibirkovyy-beloe-suhoe-11.webp",
+        "vinodelnya-vedernikov-vedernikov-dolina-dona-krasnoe-suhoe-kaberne-sovinon-125.webp",
+        "domaine-lipko-kaberne-sovinon-merlo-pomeste-trenzina-krasnoe-suhoe-15.webp"
+      ]
+    },
+    {
+      "query": "9b891f99.jpg",
+      "gt": "golubitskoe-rose.webp",
+      "rank": 7,
+      "gap12": 0.011177629232406616,
+      "top": [
+        "golubitskoe-estate-sovinon-blan-beloe-suhoe-11.webp",
+        "golubitskoe-estate-merlo-krasnoe-suhoe-135.webp",
+        "golubitskoe-estate-chardonnay.webp",
+        "golubitskoe-estate-risling.webp",
+        "usadba-rodnoe-gnezdo-4-elements-kaberne-sovinon-krasnoe-suhoe-15.webp"
+      ]
+    },
+    {
+      "query": "54aa8496.jpg",
+      "gt": "golubitskoe-estate-merlo-rezerv-krasnoe-suhoe-135.webp",
+      "rank": 23,
+      "gap12": 0.002801835536956787,
+      "top": [
+        "vinodelnya-myshako-quintessence-new-generation-tempranilo-krasnoe-suhoe-134.webp",
+        "vinodelnya-myshako-quintessence-new-generation-kaberne-fran-krasnoe-suhoe-145.webp",
+        "vinodelnya-myshako-quintessence-kaberne-sovinon-ripasso-krasnoe-suhoe-152.webp",
+        "vinodelnya-myshako-quintessence-gevyurtstraminer-beloe-suhoe-128.webp",
+        "vinodelnya-myshako-quintessence-vione-beloe-suhoe-128.webp"
+      ]
+    },
+    {
+      "query": "750a209e.jpg",
+      "gt": "derbent-vino-endemy-kaberne-sovinon-krasnoe-suhoe-13.webp",
+      "rank": 75,
+      "gap12": 0.057396531105041504,
+      "top": [
+        "uva-vallis-sira.webp",
+        "usadba-mezyb-usadba-mezyb-kaberne-sovinon-krasnoe-suhoe-143.webp",
+        "riesling.webp",
+        "derbent-vino-endemy-pino-nuar-rozovoe-bryut-105-125.webp",
+        "usadba-mezyb-usadba-mezyb-kaberne-sovinon-kaberne-fran-merlo-krasnoe-suhoe-148.webp"
+      ]
+    },
+    {
+      "query": "1978bd14.jpg",
+      "gt": "zolotoe-pole-legend-of-crimea-cabernet-sauvignon-kaberne-sovinon-krasnoe-suhoe-125.webp",
+      "rank": 3,
+      "gap12": 0.04867959022521973,
+      "top": [
+        "zolotoe-pole-legend-of-crimea-malbec-malbek-krasnoe-suhoe-125.webp",
+        "agora-muskat-chernyj.webp",
+        "zolotoe-pole-legend-of-crimea-cabernet-sauvignon-kaberne-sovinon-krasnoe-suhoe-125.webp",
+        "skalistyy-bereg-skb-roze-pino-nuar-beloe-ekstra-bryut-122.webp",
+        "skalistyy-bereg-skb-blan-de-nuar-pino-nuar-beloe-ekstra-bryut-118.webp"
+      ]
+    },
+    {
+      "query": "111496cb.jpg",
+      "gt": "alma-valley-kaberne-fran-krasnoe-suhoe-145.webp",
+      "rank": 1,
+      "gap12": 0.13157230615615845,
+      "top": [
+        "alma-valley-kaberne-fran-krasnoe-suhoe-145.webp",
+        "alma-valley-pino-gri-beloe-polusuhoe-15.webp",
+        "alma-valley-risling-beloe-polusuhoe-125.webp",
+        "alma-valley-sovinon-blan-beloe-suhoe-14.webp",
+        "alma-valley-pino-nuar-krasnoe-suhoe-13.webp"
+      ]
+    },
+    {
+      "query": "445971e6.jpg",
+      "gt": "fanagoriya-cru-lermont-cabernet-sauvignon-kaberne-sovinon-krasnoe-suhoe-13.webp",
+      "rank": 2,
+      "gap12": 0.041989803314208984,
+      "top": [
+        "fanagoriya-cru-lermont-rubinovyy-magaracha-krasnoe-suhoe-13.webp",
+        "fanagoriya-cru-lermont-cabernet-sauvignon-kaberne-sovinon-krasnoe-suhoe-13.webp",
+        "fanagoriya-cru-lermont-cabernet-franc-kaberne-fran-krasnoe-suhoe-13.webp",
+        "fanagoriya-cru-lermont-saperavi-saperavi-krasnoe-suhoe-135.webp",
+        "fanagoriya-cru-lermont-merlo-merlo-krasnoe-suhoe-14.webp"
+      ]
+    },
+    {
+      "query": "9057658e.jpg",
+      "gt": "soyuz-vino-terra-pia-kaldera-blend-risling-reynskiy-beloe-suhoe-11.webp",
+      "rank": 1,
+      "gap12": 0.08785200119018555,
+      "top": [
+        "soyuz-vino-terra-pia-kaldera-blend-risling-reynskiy-beloe-suhoe-11.webp",
+        "soyuz-vino-terra-pia-lava-blend-merlo-krasnoe-suhoe-12.webp",
+        "abrau-dyurso-risling-beloe-suhoe-12.webp",
+        "olymp-winery-adagum-cabernet-sauvignon-kaberne-sovinon-krasnoe-suhoe-11.webp",
+        "soyuz-vino-sheremetevskie-pogreba-kaberne-sovinon-krasnoe-suhoe-11.webp"
+      ]
+    },
+    {
+      "query": "09581769.jpg",
+      "gt": "chateau-andre-mado-pino-nuar-rozovoe-suhoe-13.webp",
+      "rank": 1,
+      "gap12": 0.06430739164352417,
+      "top": [
+        "chateau-andre-mado-pino-nuar-rozovoe-suhoe-13.webp",
+        "domaine-lipko-penpalo-chardonnay-domaine-lipko-shardone-beloe-suhoe-122.webp",
+        "domaine-lipko-penpalo-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "perovskih_muskat_orange.webp",
+        "domaine-lipko-penpalo-cabernet-sauvignon-domaine-lipko-kaberne-sovinon-krasnoe-suhoe-14.webp"
+      ]
+    },
+    {
+      "query": "15899457.jpg",
+      "gt": "derbent-vino-kavkazian-saperavi-krasnoe-suhoe-105-125.webp",
+      "rank": 97,
+      "gap12": 0.029345333576202393,
+      "top": [
+        "agora-muskat.webp",
+        "olymp-winery-adagum-cabernet-sauvignon-kaberne-sovinon-krasnoe-suhoe-11.webp",
+        "agora-bastardo.webp",
+        "agora-sovinon.webp",
+        "belbek-pino-nuar-krasnoe-suhoe-133.webp"
+      ]
+    },
+    {
+      "query": "aa9448c1.jpg",
+      "gt": "agora-rosa-viva-cabernet-franc.webp",
+      "rank": 3,
+      "gap12": 0.04831826686859131,
+      "top": [
+        "riesling.webp",
+        "agora-rosa-viva-cabernet-sauvignon-shiraz.webp",
+        "agora-rosa-viva-cabernet-franc.webp",
+        "cabernet-franc-pinot-noir-2021.webp",
+        "vinodelnya-raevskoe-renessans-blaufrankish-krasnoe-suhoe-128.webp"
+      ]
+    },
+    {
+      "query": "b5fc1c4a.jpg",
+      "gt": "zolotoe-pole-legend-of-crimea-red-blend-kaberne-sovinon-krasnoe-suhoe-14.webp",
+      "rank": 1,
+      "gap12": 0.03341534733772278,
+      "top": [
+        "zolotoe-pole-legend-of-crimea-red-blend-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "vinodelnya-batrak-contadina-merlo-krasnoe-suhoe-14.webp",
+        "aya-organic-wine-vineyards-evolution-pinot-noir-pino-nuar-krasnoe-suhoe-125.webp",
+        "relikta-relikta-merlo-krasnoe-suhoe-135.webp",
+        "imenie-sikory-gerts-sikory-kaberne-sovinon-krasnoe-suhoe-14.webp"
+      ]
+    },
+    {
+      "query": "c22cead9.jpg",
+      "gt": "agora-bastardo.webp",
+      "rank": 3,
+      "gap12": 0.0445399284362793,
+      "top": [
+        "agora-pino-nuar.webp",
+        "agora-saperavi.webp",
+        "agora-bastardo.webp",
+        "agora-muskat-chernyj.webp",
+        "vinodelnya-batrak-contadina-merlo-krasnoe-suhoe-14.webp"
+      ]
+    },
+    {
+      "query": "deab3b0b.jpg",
+      "gt": "vinodelnya-vedernikov-vedernikov-dolina-dona-krasnoe-suhoe-kaberne-sovinon-125.webp",
+      "rank": 2,
+      "gap12": 0.0007685422897338867,
+      "top": [
+        "vinodelnya-vedernikov-vedernikov-gubernatorskoe-golubok-krasnoe-suhoe-115.webp",
+        "vinodelnya-vedernikov-vedernikov-dolina-dona-krasnoe-suhoe-kaberne-sovinon-125.webp",
+        "vinodelnya-vedernikov-vedernikov-dolina-dona-beloe-suhoe-aligote-12.webp",
+        "esse-mama-marselan-krasnoe-suhoe-115.webp",
+        "vinodelnya-byurne-krasnostop-krasnoe-suhoe-145.webp"
+      ]
+    },
+    {
+      "query": "ec080c0f.jpg",
+      "gt": "soyuz-vino-terra-pia-lava-blend-merlo-krasnoe-suhoe-12.webp",
+      "rank": 1,
+      "gap12": 0.21544578671455383,
+      "top": [
+        "soyuz-vino-terra-pia-lava-blend-merlo-krasnoe-suhoe-12.webp",
+        "soyuz-vino-terra-pia-kaldera-blend-risling-reynskiy-beloe-suhoe-11.webp",
+        "privat.webp",
+        "vinodelnya-myshako-aligote-vione-kyuve-beloe-polusladkoe-125.webp",
+        "vinodelnya-myshako-merlo-tempranilo-kyuve-krasnoe-polusladkoe-135.webp"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,980 @@
+{
+  "tag": "dinov2_large_wine_phase1",
+  "topk": 5,
+  "n_scored": 24,
+  "n_miss": 6,
+  "n_hit": 18,
+  "R_at_k": 0.75,
+  "gt_missing": [
+    {
+      "query": "a0c040fc.jpg",
+      "gt_file": "skalistyy-bereg-veter-v-travah-kaberne-fran-krasnoe-suhoe-13.webp",
+      "gt": {
+        "file": "skalistyy-bereg-veter-v-travah-kaberne-fran-krasnoe-suhoe-13.webp",
+        "in_csv": true,
+        "slug": "skalistyy-bereg-veter-v-travah-kaberne-fran-krasnoe-suhoe-13",
+        "name": "Ветер в травах",
+        "winery": "Скалистый берег",
+        "color": "Светло-вишневый",
+        "grape": "Каберне Совиньон, Каберне Фран, Мерло",
+        "category": "Красное",
+        "region": "Кубань"
+      }
+    }
+  ],
+  "slot_relations_on_miss": {
+    "other": 18,
+    "same_winery": 12
+  },
+  "top_intruders": [
+    [
+      "pomeste-golubitskoe-kaberne-sovinon-rezerv-krasnoe-suhoe-143.webp",
+      2
+    ],
+    [
+      "pomeste-golubitskoe-shardone-rezerv-beloe-suhoe-132.webp",
+      2
+    ],
+    [
+      "golubitskoe-estate-merlo-krasnoe-suhoe-135.webp",
+      1
+    ],
+    [
+      "golubitskoe-estate-risling.webp",
+      1
+    ],
+    [
+      "golubitskoe-estate-kaberne-sovinon-krasnoe-suhoe-137.webp",
+      1
+    ],
+    [
+      "golubitskoe-estate-sovinon-blan-beloe-suhoe-11.webp",
+      1
+    ],
+    [
+      "golubitskoe-estate-risling-beloe-suhoe-125.webp",
+      1
+    ],
+    [
+      "perovskih_polusladkoe_krasnoe.webp",
+      1
+    ],
+    [
+      "zolotoe-pole-legend-of-crimea-malbec-malbek-krasnoe-suhoe-125.webp",
+      1
+    ],
+    [
+      "esse-kaberne-otbornoe-kaberne-sovinon-krasnoe-suhoe-12.webp",
+      1
+    ],
+    [
+      "vinodelnya-uzunov-roze-ekstra-bryut-kaberne-sovinon-rozovoe-127.webp",
+      1
+    ],
+    [
+      "esse-merlo-otbornoe-krasnoe-suhoe-13.webp",
+      1
+    ],
+    [
+      "golubitskoe-estate-kaberne-sovinon-noble-selection-krasnoe-suhoe-133.webp",
+      1
+    ],
+    [
+      "vinodelnya-batrak-perfekt-klassik-merlo-krasnoe-suhoe-135.webp",
+      1
+    ],
+    [
+      "golubitskoe-estate-noble-selection-red-blend-kaberne-sovinon-krasnoe-suhoe-136.webp",
+      1
+    ],
+    [
+      "cock-test-belle-kyuve-2-blan-de-nuar-pino-mene-beloe-ekstra-bryut-12.webp",
+      1
+    ],
+    [
+      "relikta-relikta-pervenets-muskat-pervenets-magaracha-beloe-polusladkoe-125.webp",
+      1
+    ],
+    [
+      "usadba-mezyb-usadba-mezyb-merlo-krasnoe-suhoe-15.webp",
+      1
+    ],
+    [
+      "sober-bash-trezvaya-golova-tsimlyanskiygolubok-tsimlyanskiy-chernyy-krasnoe-suhoe-135.webp",
+      1
+    ],
+    [
+      "sober-bash-trezvaya-golova-kaberne-fran-krasnostop-krasnoe-suhoe-13.webp",
+      1
+    ],
+    [
+      "sober-bash-grani-plechistik-krasnoe-suhoe-12.webp",
+      1
+    ],
+    [
+      "belbek-merlo-krasnoe-suhoe-13.webp",
+      1
+    ],
+    [
+      "belbek-pino-mene-krasnoe-suhoe-128.webp",
+      1
+    ],
+    [
+      "vino-suhoe-beloe-endemy-shardone.webp",
+      1
+    ],
+    [
+      "derbent-vino-endemy-pino-nuar-rozovoe-bryut-105-125.webp",
+      1
+    ]
+  ],
+  "top_intruder_wineries": [
+    [
+      "Golubitskoe Estate",
+      11
+    ],
+    [
+      "Дербент Вино",
+      5
+    ],
+    [
+      "Собер Баш",
+      3
+    ],
+    [
+      "ESSE",
+      2
+    ],
+    [
+      "Бельбек",
+      2
+    ],
+    [
+      "Усадьба Перовских",
+      1
+    ],
+    [
+      "Золотое Поле",
+      1
+    ],
+    [
+      "Винодельня Узунов",
+      1
+    ],
+    [
+      "Винодельня Батрак",
+      1
+    ],
+    [
+      "Cock t'est belle",
+      1
+    ],
+    [
+      "Реликта",
+      1
+    ],
+    [
+      "Усадьба Мезыбь",
+      1
+    ]
+  ],
+  "color_confusion": [
+    [
+      "Рубиновый с легким пурпурным оттенком → Светло-соломенный",
+      2
+    ],
+    [
+      "Светло-розовое → Темно-рубиновый",
+      1
+    ],
+    [
+      "Светло-розовое → Золотисто-соломенный",
+      1
+    ],
+    [
+      "Светло-розовое → Темно-рубиновый с гранатовым ободком",
+      1
+    ],
+    [
+      "Светло-розовое → Светло-соломенный",
+      1
+    ],
+    [
+      "Светло-розовое → Соломенный с переливающимися зеленоватыми искрами.",
+      1
+    ],
+    [
+      "Насыщенный рубиновый → Вино с глубоким гранатовым оттенком.",
+      1
+    ],
+    [
+      "Насыщенный рубиновый → Яркий рубиновый с пурпурным оттенком",
+      1
+    ],
+    [
+      "Насыщенный рубиновый → Насыщенный красный",
+      1
+    ],
+    [
+      "Насыщенный рубиновый → Бледно-розовый",
+      1
+    ],
+    [
+      "Насыщенный рубиновый → Ярко-рубиновый",
+      1
+    ],
+    [
+      "Глубокий рубиново-красный → Глубокий рубиново-красный цвет с гранатовыми оттенками.",
+      1
+    ],
+    [
+      "Глубокий рубиново-красный → Вино бледно-лимонного цвета с зеленоватыми бликами.",
+      1
+    ],
+    [
+      "Глубокий рубиново-красный → Насыщенный рубиново-вишневый",
+      1
+    ],
+    [
+      "Глубокий рубиново-красный → Пурпурный",
+      1
+    ],
+    [
+      "Глубокий рубиново-красный → Красивый гранатово-красный",
+      1
+    ],
+    [
+      "Ягодно-красный → Бледно-соломенный",
+      1
+    ],
+    [
+      "Ягодно-красный → Светло-соломенный",
+      1
+    ],
+    [
+      "Ягодно-красный → Тёмно-рубиновый",
+      1
+    ],
+    [
+      "Ягодно-красный → Гранатовый",
+      1
+    ]
+  ],
+  "winery_confusion": [
+    [
+      "Golubitskoe Estate → Golubitskoe Estate",
+      6
+    ],
+    [
+      "Поместье Голубицкое → Golubitskoe Estate",
+      5
+    ],
+    [
+      "Дербент Вино → Дербент Вино",
+      5
+    ],
+    [
+      "Золотое Поле → ESSE",
+      2
+    ],
+    [
+      "Дербент Вино → Собер Баш",
+      2
+    ],
+    [
+      "Golubitskoe Estate → Бельбек",
+      2
+    ],
+    [
+      "Золотое Поле → Усадьба Перовских",
+      1
+    ],
+    [
+      "Золотое Поле → Золотое Поле",
+      1
+    ],
+    [
+      "Золотое Поле → Винодельня Узунов",
+      1
+    ],
+    [
+      "Golubitskoe Estate → Винодельня Батрак",
+      1
+    ],
+    [
+      "Дербент Вино → Cock t'est belle",
+      1
+    ],
+    [
+      "Дербент Вино → Реликта",
+      1
+    ],
+    [
+      "Дербент Вино → Усадьба Мезыбь",
+      1
+    ],
+    [
+      "Golubitskoe Estate → Собер Баш",
+      1
+    ]
+  ],
+  "misses": [
+    {
+      "query": "9b891f99.jpg",
+      "rank": 7,
+      "gap12": 0.02214375138282776,
+      "gt": {
+        "file": "golubitskoe-rose.webp",
+        "in_csv": true,
+        "slug": "golubitskoe-rose",
+        "name": "Golubitskoe Rose",
+        "winery": "Поместье Голубицкое",
+        "color": "Светло-розовое",
+        "grape": "Каберне Совиньон, Мерло, Пино Гриджио, Пино Нуар",
+        "category": "Розовое",
+        "region": "Кубань"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "golubitskoe-estate-merlo-krasnoe-suhoe-135.webp",
+          "in_csv": true,
+          "slug": "golubitskoe-estate-merlo-krasnoe-suhoe-135",
+          "name": "Мерло",
+          "winery": "Golubitskoe Estate",
+          "color": "Темно-рубиновый",
+          "grape": "Мерло",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 2,
+          "file": "golubitskoe-estate-risling.webp",
+          "in_csv": true,
+          "slug": "golubitskoe-estate-risling",
+          "name": "Golubitskoe Estate Рислинг",
+          "winery": "Golubitskoe Estate",
+          "color": "Золотисто-соломенный",
+          "grape": "Рислинг",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 3,
+          "file": "golubitskoe-estate-kaberne-sovinon-krasnoe-suhoe-137.webp",
+          "in_csv": true,
+          "slug": "golubitskoe-estate-kaberne-sovinon-krasnoe-suhoe-137",
+          "name": "Каберне Совиньон",
+          "winery": "Golubitskoe Estate",
+          "color": "Темно-рубиновый с гранатовым ободком",
+          "grape": "Каберне Совиньон",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 4,
+          "file": "golubitskoe-estate-sovinon-blan-beloe-suhoe-11.webp",
+          "in_csv": true,
+          "slug": "golubitskoe-estate-sovinon-blan-beloe-suhoe-11",
+          "name": "Совиньон Блан",
+          "winery": "Golubitskoe Estate",
+          "color": "Светло-соломенный",
+          "grape": "Совиньон Блан",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 5,
+          "file": "golubitskoe-estate-risling-beloe-suhoe-125.webp",
+          "in_csv": true,
+          "slug": "golubitskoe-estate-risling-beloe-suhoe-125",
+          "name": "Рислинг",
+          "winery": "Golubitskoe Estate",
+          "color": "Соломенный с переливающимися зеленоватыми искрами.",
+          "grape": "Рислинг",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        }
+      ],
+      "top_relations": {
+        "other": 5
+      },
+      "n_same_winery_in_top": 0,
+      "n_same_color_in_top": 0,
+      "n_same_category_in_top": 0
+    },
+    {
+      "query": "1978bd14.jpg",
+      "rank": 8,
+      "gap12": 0.03990045189857483,
+      "gt": {
+        "file": "zolotoe-pole-legend-of-crimea-cabernet-sauvignon-kaberne-sovinon-krasnoe-suhoe-125.webp",
+        "in_csv": true,
+        "slug": "zolotoe-pole-legend-of-crimea-cabernet-sauvignon-kaberne-sovinon-krasnoe-suhoe-125",
+        "name": "Legend of Crimea \"Cabernet Sauvignon\"",
+        "winery": "Золотое Поле",
+        "color": "Насыщенный рубиновый",
+        "grape": "Каберне Совиньон",
+        "category": "Красное",
+        "region": "Крым"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "perovskih_polusladkoe_krasnoe.webp",
+          "in_csv": true,
+          "slug": "perovskih_polusladkoe_krasnoe",
+          "name": "Полусладкое Красное",
+          "winery": "Усадьба Перовских",
+          "color": "Вино с глубоким гранатовым оттенком.",
+          "grape": "Каберне Совиньон, Мерло, Пино Нуар",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 2,
+          "file": "zolotoe-pole-legend-of-crimea-malbec-malbek-krasnoe-suhoe-125.webp",
+          "in_csv": true,
+          "slug": "zolotoe-pole-legend-of-crimea-malbec-malbek-krasnoe-suhoe-125",
+          "name": "Legend of Crimea \"Malbec\"",
+          "winery": "Золотое Поле",
+          "color": "Яркий рубиновый с пурпурным оттенком",
+          "grape": "Мальбек",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 3,
+          "file": "esse-kaberne-otbornoe-kaberne-sovinon-krasnoe-suhoe-12.webp",
+          "in_csv": true,
+          "slug": "esse-kaberne-otbornoe-kaberne-sovinon-krasnoe-suhoe-12",
+          "name": "Каберне Отборное",
+          "winery": "ESSE",
+          "color": "Насыщенный красный",
+          "grape": "Каберне Совиньон",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": true
+        },
+        {
+          "pos": 4,
+          "file": "vinodelnya-uzunov-roze-ekstra-bryut-kaberne-sovinon-rozovoe-127.webp",
+          "in_csv": true,
+          "slug": "vinodelnya-uzunov-roze-ekstra-bryut-kaberne-sovinon-rozovoe-127",
+          "name": "Розе экстра брют",
+          "winery": "Винодельня Узунов",
+          "color": "Бледно-розовый",
+          "grape": "Каберне Совиньон, Каберне Фран",
+          "category": "Розовое",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 5,
+          "file": "esse-merlo-otbornoe-krasnoe-suhoe-13.webp",
+          "in_csv": true,
+          "slug": "esse-merlo-otbornoe-krasnoe-suhoe-13",
+          "name": "Мерло Отборное",
+          "winery": "ESSE",
+          "color": "Ярко-рубиновый",
+          "grape": "Мерло",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        }
+      ],
+      "top_relations": {
+        "other": 4,
+        "same_winery": 1
+      },
+      "n_same_winery_in_top": 1,
+      "n_same_color_in_top": 0,
+      "n_same_category_in_top": 4
+    },
+    {
+      "query": "4ce9195c.jpg",
+      "rank": 10,
+      "gap12": 0.057787150144577026,
+      "gt": {
+        "file": "golubitskoe-estate-pino-nuar-rezerv-krasnoe-suhoe-132.webp",
+        "in_csv": true,
+        "slug": "golubitskoe-estate-pino-nuar-rezerv-krasnoe-suhoe-132",
+        "name": "Пино Нуар Резерв",
+        "winery": "Golubitskoe Estate",
+        "color": "Глубокий рубиново-красный",
+        "grape": "Пино Нуар",
+        "category": "Красное",
+        "region": "Кубань"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "pomeste-golubitskoe-kaberne-sovinon-rezerv-krasnoe-suhoe-143.webp",
+          "in_csv": true,
+          "slug": "pomeste-golubitskoe-kaberne-sovinon-rezerv-krasnoe-suhoe-143",
+          "name": "Каберне Совиньон Резерв",
+          "winery": "Golubitskoe Estate",
+          "color": "Глубокий рубиново-красный цвет с гранатовыми оттенками.",
+          "grape": "Каберне Совиньон",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 2,
+          "file": "pomeste-golubitskoe-shardone-rezerv-beloe-suhoe-132.webp",
+          "in_csv": true,
+          "slug": "pomeste-golubitskoe-shardone-rezerv-beloe-suhoe-132",
+          "name": "Шардоне Резерв",
+          "winery": "Golubitskoe Estate",
+          "color": "Вино бледно-лимонного цвета с зеленоватыми бликами.",
+          "grape": "Шардоне",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 3,
+          "file": "golubitskoe-estate-kaberne-sovinon-noble-selection-krasnoe-suhoe-133.webp",
+          "in_csv": true,
+          "slug": "golubitskoe-estate-kaberne-sovinon-noble-selection-krasnoe-suhoe-133",
+          "name": "Каберне Совиньон Noble Selection",
+          "winery": "Golubitskoe Estate",
+          "color": "Насыщенный рубиново-вишневый",
+          "grape": "Каберне Совиньон",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 4,
+          "file": "vinodelnya-batrak-perfekt-klassik-merlo-krasnoe-suhoe-135.webp",
+          "in_csv": true,
+          "slug": "vinodelnya-batrak-perfekt-klassik-merlo-krasnoe-suhoe-135",
+          "name": "Perfekt Klassik Мерло",
+          "winery": "Винодельня Батрак",
+          "color": "Пурпурный",
+          "grape": "Мерло",
+          "category": "Красное",
+          "region": "Ставрополье",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 5,
+          "file": "golubitskoe-estate-noble-selection-red-blend-kaberne-sovinon-krasnoe-suhoe-136.webp",
+          "in_csv": true,
+          "slug": "golubitskoe-estate-noble-selection-red-blend-kaberne-sovinon-krasnoe-suhoe-136",
+          "name": "Noble Selection Red Blend",
+          "winery": "Golubitskoe Estate",
+          "color": "Красивый гранатово-красный",
+          "grape": "Каберне Совиньон",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        }
+      ],
+      "top_relations": {
+        "same_winery": 4,
+        "other": 1
+      },
+      "n_same_winery_in_top": 4,
+      "n_same_color_in_top": 0,
+      "n_same_category_in_top": 4
+    },
+    {
+      "query": "1f973b82.jpg",
+      "rank": 44,
+      "gap12": 0.013064861297607422,
+      "gt": {
+        "file": "vino-suhoe-krasnoe-endemy-saperavi.webp",
+        "in_csv": true,
+        "slug": "vino-suhoe-krasnoe-endemy-saperavi",
+        "name": "Эндемы Саперави",
+        "winery": "Дербент Вино",
+        "color": "Ягодно-красный",
+        "grape": "Саперави",
+        "category": "Красное",
+        "region": "Дагестан"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "cock-test-belle-kyuve-2-blan-de-nuar-pino-mene-beloe-ekstra-bryut-12.webp",
+          "in_csv": true,
+          "slug": "cock-test-belle-kyuve-2-blan-de-nuar-pino-mene-beloe-ekstra-bryut-12",
+          "name": "Кюве №2 Блан Де Нуар",
+          "winery": "Cock t'est belle",
+          "color": "Бледно-соломенный",
+          "grape": "Пино Менье",
+          "category": "Белое",
+          "region": "Крым",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 2,
+          "file": "relikta-relikta-pervenets-muskat-pervenets-magaracha-beloe-polusladkoe-125.webp",
+          "in_csv": true,
+          "slug": "relikta-relikta-pervenets-muskat-pervenets-magaracha-beloe-polusladkoe-125",
+          "name": "Реликта Первенец Мускат",
+          "winery": "Реликта",
+          "color": "Светло-соломенный",
+          "grape": "Мускат Белый, Первенец Магарача",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 3,
+          "file": "usadba-mezyb-usadba-mezyb-merlo-krasnoe-suhoe-15.webp",
+          "in_csv": true,
+          "slug": "usadba-mezyb-usadba-mezyb-merlo-krasnoe-suhoe-15",
+          "name": "Усадьба Мезыбь. Мерло",
+          "winery": "Усадьба Мезыбь",
+          "color": "Тёмно-рубиновый",
+          "grape": "Мерло",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 4,
+          "file": "sober-bash-trezvaya-golova-tsimlyanskiygolubok-tsimlyanskiy-chernyy-krasnoe-suhoe-135.webp",
+          "in_csv": true,
+          "slug": "sober-bash-trezvaya-golova-tsimlyanskiygolubok-tsimlyanskiy-chernyy-krasnoe-suhoe-135",
+          "name": "Трезвая голова. Цимлянский+Голубок",
+          "winery": "Собер Баш",
+          "color": "Гранатовый",
+          "grape": "Голубок, Цимлянский черный",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 5,
+          "file": "sober-bash-trezvaya-golova-kaberne-fran-krasnostop-krasnoe-suhoe-13.webp",
+          "in_csv": true,
+          "slug": "sober-bash-trezvaya-golova-kaberne-fran-krasnostop-krasnoe-suhoe-13",
+          "name": "Трезвая голова. Каберне Фран + Красностоп",
+          "winery": "Собер Баш",
+          "color": "Тёмно-гранатовый",
+          "grape": "Каберне Фран, Красностоп Золотовский",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        }
+      ],
+      "top_relations": {
+        "other": 5
+      },
+      "n_same_winery_in_top": 0,
+      "n_same_color_in_top": 0,
+      "n_same_category_in_top": 3
+    },
+    {
+      "query": "54aa8496.jpg",
+      "rank": 58,
+      "gap12": 0.001735389232635498,
+      "gt": {
+        "file": "golubitskoe-estate-merlo-rezerv-krasnoe-suhoe-135.webp",
+        "in_csv": true,
+        "slug": "golubitskoe-estate-merlo-rezerv-krasnoe-suhoe-135",
+        "name": "Мерло Резерв",
+        "winery": "Golubitskoe Estate",
+        "color": "Глубокий вишнево-рубиновый",
+        "grape": "Мерло",
+        "category": "Красное",
+        "region": "Кубань"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "sober-bash-grani-plechistik-krasnoe-suhoe-12.webp",
+          "in_csv": true,
+          "slug": "sober-bash-grani-plechistik-krasnoe-suhoe-12",
+          "name": "Грани. Плечистик",
+          "winery": "Собер Баш",
+          "color": "Гранатовый",
+          "grape": "Плечистик",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 2,
+          "file": "pomeste-golubitskoe-kaberne-sovinon-rezerv-krasnoe-suhoe-143.webp",
+          "in_csv": true,
+          "slug": "pomeste-golubitskoe-kaberne-sovinon-rezerv-krasnoe-suhoe-143",
+          "name": "Каберне Совиньон Резерв",
+          "winery": "Golubitskoe Estate",
+          "color": "Глубокий рубиново-красный цвет с гранатовыми оттенками.",
+          "grape": "Каберне Совиньон",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 3,
+          "file": "pomeste-golubitskoe-shardone-rezerv-beloe-suhoe-132.webp",
+          "in_csv": true,
+          "slug": "pomeste-golubitskoe-shardone-rezerv-beloe-suhoe-132",
+          "name": "Шардоне Резерв",
+          "winery": "Golubitskoe Estate",
+          "color": "Вино бледно-лимонного цвета с зеленоватыми бликами.",
+          "grape": "Шардоне",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 4,
+          "file": "belbek-merlo-krasnoe-suhoe-13.webp",
+          "in_csv": true,
+          "slug": "belbek-merlo-krasnoe-suhoe-13",
+          "name": "Мерло",
+          "winery": "Бельбек",
+          "color": "Темно-рубиновый",
+          "grape": "Мерло",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": true
+        },
+        {
+          "pos": 5,
+          "file": "belbek-pino-mene-krasnoe-suhoe-128.webp",
+          "in_csv": true,
+          "slug": "belbek-pino-mene-krasnoe-suhoe-128",
+          "name": "Пино Менье",
+          "winery": "Бельбек",
+          "color": "Гранатово-красный",
+          "grape": "Пино Менье",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        }
+      ],
+      "top_relations": {
+        "other": 3,
+        "same_winery": 2
+      },
+      "n_same_winery_in_top": 2,
+      "n_same_color_in_top": 0,
+      "n_same_category_in_top": 4
+    },
+    {
+      "query": "750a209e.jpg",
+      "rank": 150,
+      "gap12": 0.0004469156265258789,
+      "gt": {
+        "file": "derbent-vino-endemy-kaberne-sovinon-krasnoe-suhoe-13.webp",
+        "in_csv": true,
+        "slug": "derbent-vino-endemy-kaberne-sovinon-krasnoe-suhoe-13",
+        "name": "Эндемы Каберне Совиньон",
+        "winery": "Дербент Вино",
+        "color": "Рубиновый с легким пурпурным оттенком",
+        "grape": "Каберне Совиньон",
+        "category": "Красное",
+        "region": "Дагестан"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "vino-suhoe-beloe-endemy-shardone.webp",
+          "in_csv": true,
+          "slug": "vino-suhoe-beloe-endemy-shardone",
+          "name": "Эндемы Шардоне",
+          "winery": "Дербент Вино",
+          "color": "Светло-соломенный",
+          "grape": "Шардоне",
+          "category": "Белое",
+          "region": "Дагестан",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 2,
+          "file": "derbent-vino-endemy-pino-nuar-rozovoe-bryut-105-125.webp",
+          "in_csv": true,
+          "slug": "derbent-vino-endemy-pino-nuar-rozovoe-bryut-105-125",
+          "name": "Эндемы Пино Нуар",
+          "winery": "Дербент Вино",
+          "color": "Нежно-розовый",
+          "grape": "Пино Нуар",
+          "category": "Розовое",
+          "region": "Дагестан",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 3,
+          "file": "derbent-vino-endemy-sovinon-beloe-bryut-105-125.webp",
+          "in_csv": true,
+          "slug": "derbent-vino-endemy-sovinon-beloe-bryut-105-125",
+          "name": "Эндемы Совиньон",
+          "winery": "Дербент Вино",
+          "color": "Светло-соломенный с зеленоватым оттенком",
+          "grape": "Совиньон",
+          "category": "Белое",
+          "region": "Дагестан",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 4,
+          "file": "derbent-vino-endemy-shardone-beloe-bryut-105-125.webp",
+          "in_csv": true,
+          "slug": "derbent-vino-endemy-shardone-beloe-bryut-105-125",
+          "name": "Эндемы Шардоне",
+          "winery": "Дербент Вино",
+          "color": "Соломенный",
+          "grape": "Шардоне",
+          "category": "Белое",
+          "region": "Дагестан",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 5,
+          "file": "vino-suhoe-beloe-endemy-sovinon.webp",
+          "in_csv": true,
+          "slug": "vino-suhoe-beloe-endemy-sovinon",
+          "name": "Эндемы Совиньон",
+          "winery": "Дербент Вино",
+          "color": "Светло-соломенный",
+          "grape": "Совиньон Блан",
+          "category": "Белое",
+          "region": "Дагестан",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        }
+      ],
+      "top_relations": {
+        "same_winery": 5
+      },
+      "n_same_winery_in_top": 5,
+      "n_same_color_in_top": 0,
+      "n_same_category_in_top": 0
+    }
+  ]
+}

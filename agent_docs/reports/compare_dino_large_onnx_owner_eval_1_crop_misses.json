@@ -1,0 +1,175 @@
+{
+  "tag": "dinov2_large_wine_phase1",
+  "topk": 5,
+  "n_scored": 27,
+  "n_miss": 1,
+  "n_hit": 26,
+  "R_at_k": 0.9629629629629629,
+  "gt_missing": [],
+  "slot_relations_on_miss": {
+    "same_winery": 5
+  },
+  "top_intruders": [
+    [
+      "b-yu-rne-krasnostop-suhoe-krasnoe-classic.webp",
+      1
+    ],
+    [
+      "b-yu-rne-malbek-krasnoe-suhoe.webp",
+      1
+    ],
+    [
+      "b-yu-rne-sira-krasnoe-suhoe-classic.webp",
+      1
+    ],
+    [
+      "vinodelnya-byurne-kaberne-sovinon-krasnoe-suhoe-135.webp",
+      1
+    ],
+    [
+      "b-yu-rne-pino-gri-pozdnij-sbor-sladkoe-beloe.webp",
+      1
+    ]
+  ],
+  "top_intruder_wineries": [
+    [
+      "Винодельня Бюрнье",
+      5
+    ]
+  ],
+  "color_confusion": [
+    [
+      "Интенсивный рубиновый → Насыщенный рубиновый",
+      2
+    ],
+    [
+      "Интенсивный рубиновый → Гиперинтенсивный пурпурный",
+      1
+    ],
+    [
+      "Интенсивный рубиновый → Глубокий темно-рубиновый",
+      1
+    ],
+    [
+      "Интенсивный рубиновый → Насыщенный золотистый",
+      1
+    ]
+  ],
+  "winery_confusion": [
+    [
+      "Винодельня Бюрнье → Винодельня Бюрнье",
+      5
+    ]
+  ],
+  "misses": [
+    {
+      "query": "e3f116c0.jpeg",
+      "rank": 8,
+      "gap12": 0.00861668586730957,
+      "gt": {
+        "file": "vinodelnya-byurne-merlo-krasnoe-suhoe-14.webp",
+        "in_csv": true,
+        "slug": "vinodelnya-byurne-merlo-krasnoe-suhoe-14",
+        "name": "БЮРНЬЕ.МЕРЛО сухое красное",
+        "winery": "Винодельня Бюрнье",
+        "color": "Интенсивный рубиновый",
+        "grape": "Мерло",
+        "category": "Красное",
+        "region": "Кубань"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "b-yu-rne-krasnostop-suhoe-krasnoe-classic.webp",
+          "in_csv": true,
+          "slug": "b-yu-rne-krasnostop-suhoe-krasnoe-classic",
+          "name": "БЮРНЬЕ.КРАСНОСТОП сухое красное Classic",
+          "winery": "Винодельня Бюрнье",
+          "color": "Насыщенный рубиновый",
+          "grape": "Красностоп",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 2,
+          "file": "b-yu-rne-malbek-krasnoe-suhoe.webp",
+          "in_csv": true,
+          "slug": "b-yu-rne-malbek-krasnoe-suhoe",
+          "name": "БЮРНЬЕ.МАЛЬБЕК красное сухое",
+          "winery": "Винодельня Бюрнье",
+          "color": "Гиперинтенсивный пурпурный",
+          "grape": "Мальбек",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 3,
+          "file": "b-yu-rne-sira-krasnoe-suhoe-classic.webp",
+          "in_csv": true,
+          "slug": "b-yu-rne-sira-krasnoe-suhoe-classic",
+          "name": "БЮРНЬЕ.СИРА красное сухое Classic",
+          "winery": "Винодельня Бюрнье",
+          "color": "Насыщенный рубиновый",
+          "grape": "Сира",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 4,
+          "file": "vinodelnya-byurne-kaberne-sovinon-krasnoe-suhoe-135.webp",
+          "in_csv": true,
+          "slug": "vinodelnya-byurne-kaberne-sovinon-krasnoe-suhoe-135",
+          "name": "БЮРНЬЕ.КАБЕРНЕ СОВИНЬОН сухое красное",
+          "winery": "Винодельня Бюрнье",
+          "color": "Глубокий темно-рубиновый",
+          "grape": "Каберне Совиньон",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 5,
+          "file": "b-yu-rne-pino-gri-pozdnij-sbor-sladkoe-beloe.webp",
+          "in_csv": true,
+          "slug": "b-yu-rne-pino-gri-pozdnij-sbor-sladkoe-beloe",
+          "name": "БЮРНЬЕ.ПИНО ГРИ Поздний сбор сладкое белое",
+          "winery": "Винодельня Бюрнье",
+          "color": "Насыщенный золотистый",
+          "grape": "Пино Гри",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        }
+      ],
+      "top_relations": {
+        "same_winery": 5
+      },
+      "n_same_winery_in_top": 5,
+      "n_same_color_in_top": 0,
+      "n_same_category_in_top": 4
+    }
+  ]
+}

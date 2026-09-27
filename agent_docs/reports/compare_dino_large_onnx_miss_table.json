@@ -1,0 +1,239 @@
+{
+  "slot_totals": {
+    "same_winery": 21,
+    "other": 39,
+    "n": 60,
+    "same_winery_pct": 35.0,
+    "other_pct": 65.0
+  },
+  "rows": [
+    {
+      "set": "set1",
+      "query": "ef930b69.jpg",
+      "rank": 7,
+      "gt_name": "Арена",
+      "gt_winery": "Криница",
+      "gt_slug": "vinodelnya-krinitsa-arena-sira-krasnoe-suhoe-13",
+      "n_same_winery": 0,
+      "n_other": 5,
+      "close_pct": 0.0,
+      "other_pct": 100.0,
+      "instead": [
+        "Лесная просека (Кубань-Вино)",
+        "Contadina (Винодельня Батрак)",
+        "Реликта Первенец Мускат (Реликта)",
+        "Кюве №2 Блан Де Нуар (Cock t'est belle)",
+        "Граф Воронцов. Брют белое (Дербент Вино)"
+      ]
+    },
+    {
+      "set": "set1",
+      "query": "8a8ad5d7.jpeg",
+      "rank": 8,
+      "gt_name": "БЮРНЬЕ.ЛЮБЛЮ сухое красное",
+      "gt_winery": "Винодельня Бюрнье",
+      "gt_slug": "vinodelnya-byurne-lyublyu-krasnoe-kaberne-fran-suhoe-135",
+      "n_same_winery": 0,
+      "n_other": 5,
+      "close_pct": 0.0,
+      "other_pct": 100.0,
+      "instead": [
+        "Пти Вердо (Villa di Alma)",
+        "Реликта Первенец Мускат (Реликта)",
+        "Кюве №2 Блан Де Нуар (Cock t'est belle)",
+        "Сибирьковый Оранж (Дача Сердюка)",
+        "Эндемы Совиньон (Дербент Вино)"
+      ]
+    },
+    {
+      "set": "set1",
+      "query": "3c11e5b0.jpeg",
+      "rank": 11,
+      "gt_name": "Мускатель розовый",
+      "gt_winery": "Массандра",
+      "gt_slug": "massandra-muskatel-rozovyy-belye-sorta-vinograda-rozovoe-sladkoe-16",
+      "n_same_winery": 5,
+      "n_other": 0,
+      "close_pct": 100.0,
+      "other_pct": 0.0,
+      "instead": [
+        "Мускатель черный (Массандра)",
+        "Мускат Белый Южнобережный (Массандра)",
+        "Кагор Гурзуф (Массандра)",
+        "Портвейн красный Ливадия (Массандра)",
+        "Бастардо (Массандра)"
+      ]
+    },
+    {
+      "set": "set1",
+      "query": "7bf0507b.jpg",
+      "rank": 19,
+      "gt_name": "Бельбек Мускат",
+      "gt_winery": "Бельбек",
+      "gt_slug": "belbek-belbek-muskat-beloe-suhoe-128",
+      "n_same_winery": 4,
+      "n_other": 1,
+      "close_pct": 80.0,
+      "other_pct": 20.0,
+      "instead": [
+        "Совиньон Блан (Бельбек)",
+        "Пино Нуар (Бельбек)",
+        "Пино Нуар Резерв (Бельбек)",
+        "Бельбек Пино Нуар (Бельбек)",
+        "AGORA Саперави (AGORA WINERY)"
+      ]
+    },
+    {
+      "set": "set1",
+      "query": "bd78e0f6.jpg",
+      "rank": 34,
+      "gt_name": "Гравити",
+      "gt_winery": "Alma Valley",
+      "gt_slug": "alma-valley-graviti-pino-blan-beloe-suhoe-135",
+      "n_same_winery": 0,
+      "n_other": 5,
+      "close_pct": 0.0,
+      "other_pct": 100.0,
+      "instead": [
+        "Riesling, 2024 (WINEMAFIA)",
+        "Orange, 2023 (WINEMAFIA)",
+        "Vermentino-Viognier 2022 (Vibes)",
+        "Appassimento (WINEMAFIA)",
+        "Ренессанс Блауфранкиш (Раевское)"
+      ]
+    },
+    {
+      "set": "set1",
+      "query": "2039dd8a.jpg",
+      "rank": 100,
+      "gt_name": "Альма Гравити. Пино Нуар - Мерло - Каберне Совиньон",
+      "gt_winery": "Alma Valley",
+      "gt_slug": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14",
+      "n_same_winery": 0,
+      "n_other": 5,
+      "close_pct": 0.0,
+      "other_pct": 100.0,
+      "instead": [
+        "Губернаторское. Рислинг (Ведерниковъ)",
+        "Primum Alveus. Blanc de Noirs. Meunier. Экстра брют 2019 (Фанагория)",
+        "Аристов Анима Пино Неро Санджовезе (Кубань-Вино)",
+        "Ди Каспико (Дербент Вино)",
+        "Primum Alveus Blanc de Blancs 2017 (Фанагория)"
+      ]
+    },
+    {
+      "set": "set2",
+      "query": "9b891f99.jpg",
+      "rank": 7,
+      "gt_name": "Golubitskoe Rose",
+      "gt_winery": "Поместье Голубицкое",
+      "gt_slug": "golubitskoe-rose",
+      "n_same_winery": 0,
+      "n_other": 5,
+      "close_pct": 0.0,
+      "other_pct": 100.0,
+      "instead": [
+        "Мерло (Golubitskoe Estate)",
+        "Golubitskoe Estate Рислинг (Golubitskoe Estate)",
+        "Каберне Совиньон (Golubitskoe Estate)",
+        "Совиньон Блан (Golubitskoe Estate)",
+        "Рислинг (Golubitskoe Estate)"
+      ]
+    },
+    {
+      "set": "set2",
+      "query": "1978bd14.jpg",
+      "rank": 8,
+      "gt_name": "Legend of Crimea \"Cabernet Sauvignon\"",
+      "gt_winery": "Золотое Поле",
+      "gt_slug": "zolotoe-pole-legend-of-crimea-cabernet-sauvignon-kaberne-sovinon-krasnoe-suhoe-125",
+      "n_same_winery": 1,
+      "n_other": 4,
+      "close_pct": 20.0,
+      "other_pct": 80.0,
+      "instead": [
+        "Полусладкое Красное (Усадьба Перовских)",
+        "Legend of Crimea \"Malbec\" (Золотое Поле)",
+        "Каберне Отборное (ESSE)",
+        "Розе экстра брют (Винодельня Узунов)",
+        "Мерло Отборное (ESSE)"
+      ]
+    },
+    {
+      "set": "set2",
+      "query": "4ce9195c.jpg",
+      "rank": 10,
+      "gt_name": "Пино Нуар Резерв",
+      "gt_winery": "Golubitskoe Estate",
+      "gt_slug": "golubitskoe-estate-pino-nuar-rezerv-krasnoe-suhoe-132",
+      "n_same_winery": 4,
+      "n_other": 1,
+      "close_pct": 80.0,
+      "other_pct": 20.0,
+      "instead": [
+        "Каберне Совиньон Резерв (Golubitskoe Estate)",
+        "Шардоне Резерв (Golubitskoe Estate)",
+        "Каберне Совиньон Noble Selection (Golubitskoe Estate)",
+        "Perfekt Klassik Мерло (Винодельня Батрак)",
+        "Noble Selection Red Blend (Golubitskoe Estate)"
+      ]
+    },
+    {
+      "set": "set2",
+      "query": "1f973b82.jpg",
+      "rank": 44,
+      "gt_name": "Эндемы Саперави",
+      "gt_winery": "Дербент Вино",
+      "gt_slug": "vino-suhoe-krasnoe-endemy-saperavi",
+      "n_same_winery": 0,
+      "n_other": 5,
+      "close_pct": 0.0,
+      "other_pct": 100.0,
+      "instead": [
+        "Кюве №2 Блан Де Нуар (Cock t'est belle)",
+        "Реликта Первенец Мускат (Реликта)",
+        "Усадьба Мезыбь. Мерло (Усадьба Мезыбь)",
+        "Трезвая голова. Цимлянский+Голубок (Собер Баш)",
+        "Трезвая голова. Каберне Фран + Красностоп (Собер Баш)"
+      ]
+    },
+    {
+      "set": "set2",
+      "query": "54aa8496.jpg",
+      "rank": 58,
+      "gt_name": "Мерло Резерв",
+      "gt_winery": "Golubitskoe Estate",
+      "gt_slug": "golubitskoe-estate-merlo-rezerv-krasnoe-suhoe-135",
+      "n_same_winery": 2,
+      "n_other": 3,
+      "close_pct": 40.0,
+      "other_pct": 60.0,
+      "instead": [
+        "Грани. Плечистик (Собер Баш)",
+        "Каберне Совиньон Резерв (Golubitskoe Estate)",
+        "Шардоне Резерв (Golubitskoe Estate)",
+        "Мерло (Бельбек)",
+        "Пино Менье (Бельбек)"
+      ]
+    },
+    {
+      "set": "set2",
+      "query": "750a209e.jpg",
+      "rank": 150,
+      "gt_name": "Эндемы Каберне Совиньон",
+      "gt_winery": "Дербент Вино",
+      "gt_slug": "derbent-vino-endemy-kaberne-sovinon-krasnoe-suhoe-13",
+      "n_same_winery": 5,
+      "n_other": 0,
+      "close_pct": 100.0,
+      "other_pct": 0.0,
+      "instead": [
+        "Эндемы Шардоне (Дербент Вино)",
+        "Эндемы Пино Нуар (Дербент Вино)",
+        "Эндемы Совиньон (Дербент Вино)",
+        "Эндемы Шардоне (Дербент Вино)",
+        "Эндемы Совиньон (Дербент Вино)"
+      ]
+    }
+  ]
+}

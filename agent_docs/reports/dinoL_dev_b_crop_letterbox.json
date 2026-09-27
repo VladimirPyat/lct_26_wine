@@ -1,0 +1,20 @@
+{
+  "summary": {
+    "dinov2_large_wine_phase1": {
+      "onnx": "bin/dinov2_large_wine_phase1.onnx",
+      "R@1": 0.6666666666666666,
+      "R@5": 0.9166666666666666,
+      "MRR": 0.7583333333333334,
+      "median_rank": 1.0,
+      "mean_gap12": 0.1132438766459624,
+      "n": 24,
+      "gt_missing": 0,
+      "crop_queries": false,
+      "crop_fallback": 0,
+      "false_far": {
+        "skipped": true
+      }
+    }
+  },
+  "flips": []
+}

@@ -1,0 +1,96 @@
+{
+  "summary": {
+    "dinov2_wine_phase1": {
+      "onnx": "bin/dinov2_wine_phase1.onnx",
+      "R@1": 0.5185185185185185,
+      "R@5": 0.8148148148148148,
+      "MRR": 0.6311689034616005,
+      "median_rank": 1.0,
+      "mean_gap12": 0.060077532573982524,
+      "n": 27,
+      "false_far": {
+        "skipped": true
+      }
+    },
+    "dinov2_wine_phase2": {
+      "onnx": "bin/dinov2_wine_phase2.onnx",
+      "R@1": 0.5185185185185185,
+      "R@5": 0.8148148148148148,
+      "MRR": 0.6245814428025136,
+      "median_rank": 1.0,
+      "mean_gap12": 0.061614565275333544,
+      "n": 27,
+      "false_far": {
+        "skipped": true
+      }
+    }
+  },
+  "flips": [
+    {
+      "query": "ef930b69.jpg",
+      "rank_dinov2_wine_phase1": 263,
+      "rank_dinov2_wine_phase2": 193,
+      "delta": -70
+    },
+    {
+      "query": "e3f116c0.jpeg",
+      "rank_dinov2_wine_phase1": 6,
+      "rank_dinov2_wine_phase2": 5,
+      "delta": -1
+    },
+    {
+      "query": "170d9123.jpeg",
+      "rank_dinov2_wine_phase1": 2,
+      "rank_dinov2_wine_phase2": 1,
+      "delta": -1
+    },
+    {
+      "query": "7bf0507b.jpg",
+      "rank_dinov2_wine_phase1": 21,
+      "rank_dinov2_wine_phase2": 20,
+      "delta": -1
+    },
+    {
+      "query": "9b04cb8d.jpeg",
+      "rank_dinov2_wine_phase1": 4,
+      "rank_dinov2_wine_phase2": 3,
+      "delta": -1
+    },
+    {
+      "query": "90020e08.jpeg",
+      "rank_dinov2_wine_phase1": 1,
+      "rank_dinov2_wine_phase2": 2,
+      "delta": 1
+    },
+    {
+      "query": "f212df5b.jpeg",
+      "rank_dinov2_wine_phase1": 3,
+      "rank_dinov2_wine_phase2": 4,
+      "delta": 1
+    },
+    {
+      "query": "bd78e0f6.jpg",
+      "rank_dinov2_wine_phase1": 2,
+      "rank_dinov2_wine_phase2": 3,
+      "delta": 1
+    },
+    {
+      "query": "ee3e3334.jpeg",
+      "rank_dinov2_wine_phase1": 5,
+      "rank_dinov2_wine_phase2": 6,
+      "delta": 1
+    },
+    {
+      "query": "6bb419b6.jpg",
+      "rank_dinov2_wine_phase1": 28,
+      "rank_dinov2_wine_phase2": 44,
+      "delta": 16
+    },
+    {
+      "query": "2039dd8a.jpg",
+      "rank_dinov2_wine_phase1": 226,
+      "rank_dinov2_wine_phase2": 407,
+      "delta": 181
+    }
+  ]
+}

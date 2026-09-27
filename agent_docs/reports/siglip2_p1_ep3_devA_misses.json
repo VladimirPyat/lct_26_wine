@@ -1,0 +1,964 @@
+{
+  "tag": "siglip2_p1_ep3_devA",
+  "topk": 1,
+  "n_scored": 27,
+  "n_miss": 6,
+  "n_hit": 21,
+  "R_at_k": 0.7777777777777778,
+  "gt_missing": [],
+  "slot_relations_on_miss": {
+    "other": 12,
+    "GT": 4,
+    "near": 7,
+    "same_winery": 7
+  },
+  "top_intruders": [
+    [
+      "vinodelnya-byurne-krasnostop-krasnoe-suhoe-145.webp",
+      2
+    ],
+    [
+      "alma-valley-shardone-beloe-suhoe-135.webp",
+      2
+    ],
+    [
+      "alma-valley-tempranilo-rezerv-krasnoe-suhoe-14.webp",
+      1
+    ],
+    [
+      "b-yu-rne-krasnostop-suhoe-krasnoe-classic.webp",
+      1
+    ],
+    [
+      "b-yu-rne-sira-krasnoe-suhoe-classic.webp",
+      1
+    ],
+    [
+      "b-yu-rne-malbek-krasnoe-suhoe.webp",
+      1
+    ],
+    [
+      "vinodelnya-byurne-byurne-pino-blan-beloe-suhoe-14.webp",
+      1
+    ],
+    [
+      "alma-valley-shardone-rezerv-beloe-suhoe-135.webp",
+      1
+    ],
+    [
+      "alma-valley-pino-nuar-krasnoe-suhoe-13.webp",
+      1
+    ],
+    [
+      "alma-valley-shiraz-sira-rezerv-krasnoe-suhoe-14.webp",
+      1
+    ],
+    [
+      "esse-saperavi-krasnoe-suhoe-13.webp",
+      1
+    ],
+    [
+      "esse-kaberne-sovinon-krasnoe-suhoe-14.webp",
+      1
+    ],
+    [
+      "esse-esse-sira-krasnoe-suhoe-12.webp",
+      1
+    ],
+    [
+      "esse-merlo-otbornoe-krasnoe-suhoe-13.webp",
+      1
+    ],
+    [
+      "oxana-istratova-wine-saperavi-2023-krasnoe-suhoe-13.webp",
+      1
+    ],
+    [
+      "vinodelnya-vedernikov-fantom-7030-krasnostop-zolotovskiy-krasnoe-suhoe-15.webp",
+      1
+    ],
+    [
+      "sober-bash-grani-plechistik-krasnoe-suhoe-12.webp",
+      1
+    ],
+    [
+      "vinodelnya-vedernikov-fantom-3070-krasnostop-zolotovskiy-krasnoe-suhoe-145.webp",
+      1
+    ],
+    [
+      "belbek-risling-risling-reynskiy-beloe-suhoe-12.webp",
+      1
+    ],
+    [
+      "chteau-le-grand-vostock-grand-karsov-shardone-beloe-suhoe-14.webp",
+      1
+    ],
+    [
+      "le-k2-vassal-risling-reynskiy-beloe-suhoe-14.webp",
+      1
+    ],
+    [
+      "leto-kaberne-fran-rezerv-2021-suhoe-krasnoe.webp",
+      1
+    ],
+    [
+      "usadba-mezyb-shishka-pino-nuar-rozovoe-suhoe-115.webp",
+      1
+    ],
+    [
+      "imenie-sikory-risling-pozdniy-sbor-beloe-sladkoe-13.webp",
+      1
+    ]
+  ],
+  "top_intruder_wineries": [
+    [
+      "Винодельня Бюрнье",
+      6
+    ],
+    [
+      "Alma Valley",
+      6
+    ],
+    [
+      "ESSE",
+      4
+    ],
+    [
+      "Ведерниковъ",
+      2
+    ],
+    [
+      "Oxana Istratova Wine",
+      1
+    ],
+    [
+      "Собер Баш",
+      1
+    ],
+    [
+      "Бельбек",
+      1
+    ],
+    [
+      "Château Le Grand Vostock",
+      1
+    ],
+    [
+      "Le K2",
+      1
+    ],
+    [
+      "LETO",
+      1
+    ],
+    [
+      "Усадьба Мезыбь",
+      1
+    ],
+    [
+      "Имение Сикоры",
+      1
+    ]
+  ],
+  "color_confusion": [
+    [
+      "Насыщенный рубиновый цвет → Насыщенный рубиновый",
+      2
+    ],
+    [
+      "Интенсивный рубиновый → Насыщенный рубиновый",
+      2
+    ],
+    [
+      "Золотистый → Рубиновый",
+      2
+    ],
+    [
+      "Интенсивный рубиново-красный с фиолетовым оттенком. → Золотистый",
+      2
+    ],
+    [
+      "Насыщенный рубиновый цвет → Рубиновый",
+      1
+    ],
+    [
+      "Насыщенный рубиновый цвет → Светло-золотистый",
+      1
+    ],
+    [
+      "Интенсивный рубиновый → Гиперинтенсивный пурпурный",
+      1
+    ],
+    [
+      "Интенсивный рубиновый → Светло-лимонный",
+      1
+    ],
+    [
+      "Золотистый → Золотистый, сияющий цвет с яркими золотыми бликами.",
+      1
+    ],
+    [
+      "Золотистый → Светло-золотистый",
+      1
+    ],
+    [
+      "Насыщенный красный → Рубиново-красный",
+      1
+    ],
+    [
+      "Насыщенный красный → Насыщенно-красный",
+      1
+    ],
+    [
+      "Насыщенный красный → Темно-вишневый",
+      1
+    ],
+    [
+      "Насыщенный красный → Ярко-рубиновый",
+      1
+    ],
+    [
+      "Малиново-фиолетовый → Малиновый с пурпурным оттенком",
+      1
+    ],
+    [
+      "Малиново-фиолетовый → Пурпурно-красный",
+      1
+    ],
+    [
+      "Малиново-фиолетовый → Гранатовый",
+      1
+    ],
+    [
+      "Малиново-фиолетовый → Красно-рубиновый",
+      1
+    ],
+    [
+      "Малиново-фиолетовый → Светло-лимонный",
+      1
+    ],
+    [
+      "Интенсивный рубиново-красный с фиолетовым оттенком. → Вино бледно-лимонного цвета.",
+      1
+    ]
+  ],
+  "winery_confusion": [
+    [
+      "Alma Valley → Alma Valley",
+      6
+    ],
+    [
+      "Винодельня Бюрнье → Винодельня Бюрнье",
+      4
+    ],
+    [
+      "ESSE → ESSE",
+      4
+    ],
+    [
+      "Alma Valley → Винодельня Бюрнье",
+      2
+    ],
+    [
+      "ESSE → Ведерниковъ",
+      2
+    ],
+    [
+      "ESSE → Oxana Istratova Wine",
+      1
+    ],
+    [
+      "ESSE → Собер Баш",
+      1
+    ],
+    [
+      "ESSE → Бельбек",
+      1
+    ],
+    [
+      "Криница → Château Le Grand Vostock",
+      1
+    ],
+    [
+      "Криница → Le K2",
+      1
+    ],
+    [
+      "Криница → LETO",
+      1
+    ],
+    [
+      "Криница → Усадьба Мезыбь",
+      1
+    ],
+    [
+      "Криница → Имение Сикоры",
+      1
+    ]
+  ],
+  "misses": [
+    {
+      "query": "e2591aad.jpg",
+      "rank": 2,
+      "gap12": -0.059,
+      "gt": {
+        "file": "alma-valley-tempranilo-krasnoe-suhoe-13.webp",
+        "in_csv": true,
+        "slug": "alma-valley-tempranilo-krasnoe-suhoe-13",
+        "name": "Темпранильо",
+        "winery": "Alma Valley",
+        "color": "Насыщенный рубиновый цвет",
+        "grape": "Темпранильо",
+        "category": "Красное",
+        "region": "Крым"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "vinodelnya-byurne-krasnostop-krasnoe-suhoe-145.webp",
+          "in_csv": true,
+          "slug": "vinodelnya-byurne-krasnostop-krasnoe-suhoe-145",
+          "name": "БЮРНЬЕ.КРАСНОСТОП сухое красное",
+          "winery": "Винодельня Бюрнье",
+          "color": "Насыщенный рубиновый",
+          "grape": "Красностоп",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 2,
+          "file": "alma-valley-tempranilo-krasnoe-suhoe-13.webp",
+          "in_csv": true,
+          "slug": "alma-valley-tempranilo-krasnoe-suhoe-13",
+          "name": "Темпранильо",
+          "winery": "Alma Valley",
+          "color": "Насыщенный рубиновый цвет",
+          "grape": "Темпранильо",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "GT",
+          "same_winery": true,
+          "same_color": true,
+          "same_category": true,
+          "same_grape": true
+        },
+        {
+          "pos": 3,
+          "file": "alma-valley-tempranilo-rezerv-krasnoe-suhoe-14.webp",
+          "in_csv": true,
+          "slug": "alma-valley-tempranilo-rezerv-krasnoe-suhoe-14",
+          "name": "Темпранильо Резерв",
+          "winery": "Alma Valley",
+          "color": "Рубиновый",
+          "grape": "Темпранильо",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "near",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": true
+        },
+        {
+          "pos": 4,
+          "file": "alma-valley-shardone-beloe-suhoe-135.webp",
+          "in_csv": true,
+          "slug": "alma-valley-shardone-beloe-suhoe-135",
+          "name": "Шардоне",
+          "winery": "Alma Valley",
+          "color": "Светло-золотистый",
+          "grape": "Шардоне",
+          "category": "Белое",
+          "region": "Крым",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 5,
+          "file": "b-yu-rne-krasnostop-suhoe-krasnoe-classic.webp",
+          "in_csv": true,
+          "slug": "b-yu-rne-krasnostop-suhoe-krasnoe-classic",
+          "name": "БЮРНЬЕ.КРАСНОСТОП сухое красное Classic",
+          "winery": "Винодельня Бюрнье",
+          "color": "Насыщенный рубиновый",
+          "grape": "Красностоп",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        }
+      ],
+      "top_relations": {
+        "other": 2,
+        "GT": 1,
+        "near": 1,
+        "same_winery": 1
+      },
+      "n_same_winery_in_top": 3,
+      "n_same_color_in_top": 1,
+      "n_same_category_in_top": 4
+    },
+    {
+      "query": "e3f116c0.jpeg",
+      "rank": 3,
+      "gap12": -0.0259,
+      "gt": {
+        "file": "vinodelnya-byurne-merlo-krasnoe-suhoe-14.webp",
+        "in_csv": true,
+        "slug": "vinodelnya-byurne-merlo-krasnoe-suhoe-14",
+        "name": "БЮРНЬЕ.МЕРЛО сухое красное",
+        "winery": "Винодельня Бюрнье",
+        "color": "Интенсивный рубиновый",
+        "grape": "Мерло",
+        "category": "Красное",
+        "region": "Кубань"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "b-yu-rne-sira-krasnoe-suhoe-classic.webp",
+          "in_csv": true,
+          "slug": "b-yu-rne-sira-krasnoe-suhoe-classic",
+          "name": "БЮРНЬЕ.СИРА красное сухое Classic",
+          "winery": "Винодельня Бюрнье",
+          "color": "Насыщенный рубиновый",
+          "grape": "Сира",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "near",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 2,
+          "file": "b-yu-rne-malbek-krasnoe-suhoe.webp",
+          "in_csv": true,
+          "slug": "b-yu-rne-malbek-krasnoe-suhoe",
+          "name": "БЮРНЬЕ.МАЛЬБЕК красное сухое",
+          "winery": "Винодельня Бюрнье",
+          "color": "Гиперинтенсивный пурпурный",
+          "grape": "Мальбек",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "near",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 3,
+          "file": "vinodelnya-byurne-merlo-krasnoe-suhoe-14.webp",
+          "in_csv": true,
+          "slug": "vinodelnya-byurne-merlo-krasnoe-suhoe-14",
+          "name": "БЮРНЬЕ.МЕРЛО сухое красное",
+          "winery": "Винодельня Бюрнье",
+          "color": "Интенсивный рубиновый",
+          "grape": "Мерло",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "GT",
+          "same_winery": true,
+          "same_color": true,
+          "same_category": true,
+          "same_grape": true
+        },
+        {
+          "pos": 4,
+          "file": "vinodelnya-byurne-krasnostop-krasnoe-suhoe-145.webp",
+          "in_csv": true,
+          "slug": "vinodelnya-byurne-krasnostop-krasnoe-suhoe-145",
+          "name": "БЮРНЬЕ.КРАСНОСТОП сухое красное",
+          "winery": "Винодельня Бюрнье",
+          "color": "Насыщенный рубиновый",
+          "grape": "Красностоп",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 5,
+          "file": "vinodelnya-byurne-byurne-pino-blan-beloe-suhoe-14.webp",
+          "in_csv": true,
+          "slug": "vinodelnya-byurne-byurne-pino-blan-beloe-suhoe-14",
+          "name": "БЮРНЬЕ.ПИНО БЛАН сухое белое",
+          "winery": "Винодельня Бюрнье",
+          "color": "Светло-лимонный",
+          "grape": "Пино Блан",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "near",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        }
+      ],
+      "top_relations": {
+        "near": 3,
+        "GT": 1,
+        "same_winery": 1
+      },
+      "n_same_winery_in_top": 5,
+      "n_same_color_in_top": 1,
+      "n_same_category_in_top": 4
+    },
+    {
+      "query": "35f764ae.jpg",
+      "rank": 3,
+      "gap12": -0.0956,
+      "gt": {
+        "file": "alma-valley-shardone-rezerv-beloe-suhoe-14.webp",
+        "in_csv": true,
+        "slug": "alma-valley-shardone-rezerv-beloe-suhoe-14",
+        "name": "Шардоне Резерв",
+        "winery": "Alma Valley",
+        "color": "Золотистый",
+        "grape": "Шардоне",
+        "category": "Белое",
+        "region": "Крым"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "alma-valley-shardone-rezerv-beloe-suhoe-135.webp",
+          "in_csv": true,
+          "slug": "alma-valley-shardone-rezerv-beloe-suhoe-135",
+          "name": "Шардоне Резерв",
+          "winery": "Alma Valley",
+          "color": "Золотистый, сияющий цвет с яркими золотыми бликами.",
+          "grape": "Шардоне",
+          "category": "Белое",
+          "region": "Крым",
+          "relation": "near",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": true
+        },
+        {
+          "pos": 2,
+          "file": "alma-valley-shardone-beloe-suhoe-135.webp",
+          "in_csv": true,
+          "slug": "alma-valley-shardone-beloe-suhoe-135",
+          "name": "Шардоне",
+          "winery": "Alma Valley",
+          "color": "Светло-золотистый",
+          "grape": "Шардоне",
+          "category": "Белое",
+          "region": "Крым",
+          "relation": "near",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": true
+        },
+        {
+          "pos": 3,
+          "file": "alma-valley-shardone-rezerv-beloe-suhoe-14.webp",
+          "in_csv": true,
+          "slug": "alma-valley-shardone-rezerv-beloe-suhoe-14",
+          "name": "Шардоне Резерв",
+          "winery": "Alma Valley",
+          "color": "Золотистый",
+          "grape": "Шардоне",
+          "category": "Белое",
+          "region": "Крым",
+          "relation": "GT",
+          "same_winery": true,
+          "same_color": true,
+          "same_category": true,
+          "same_grape": true
+        },
+        {
+          "pos": 4,
+          "file": "alma-valley-pino-nuar-krasnoe-suhoe-13.webp",
+          "in_csv": true,
+          "slug": "alma-valley-pino-nuar-krasnoe-suhoe-13",
+          "name": "Пино Нуар",
+          "winery": "Alma Valley",
+          "color": "Рубиновый",
+          "grape": "Пино Нуар",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 5,
+          "file": "alma-valley-shiraz-sira-rezerv-krasnoe-suhoe-14.webp",
+          "in_csv": true,
+          "slug": "alma-valley-shiraz-sira-rezerv-krasnoe-suhoe-14",
+          "name": "Шираз (Сира) Резерв",
+          "winery": "Alma Valley",
+          "color": "Рубиновый",
+          "grape": "Шираз",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        }
+      ],
+      "top_relations": {
+        "near": 2,
+        "GT": 1,
+        "same_winery": 2
+      },
+      "n_same_winery_in_top": 5,
+      "n_same_color_in_top": 1,
+      "n_same_category_in_top": 3
+    },
+    {
+      "query": "170d9123.jpeg",
+      "rank": 5,
+      "gap12": -0.0178,
+      "gt": {
+        "file": "esse-kaberne-otbornoe-kaberne-sovinon-krasnoe-suhoe-12.webp",
+        "in_csv": true,
+        "slug": "esse-kaberne-otbornoe-kaberne-sovinon-krasnoe-suhoe-12",
+        "name": "Каберне Отборное",
+        "winery": "ESSE",
+        "color": "Насыщенный красный",
+        "grape": "Каберне Совиньон",
+        "category": "Красное",
+        "region": "Крым"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "esse-saperavi-krasnoe-suhoe-13.webp",
+          "in_csv": true,
+          "slug": "esse-saperavi-krasnoe-suhoe-13",
+          "name": "Саперави",
+          "winery": "ESSE",
+          "color": "Рубиново-красный",
+          "grape": "Саперави",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 2,
+          "file": "esse-kaberne-sovinon-krasnoe-suhoe-14.webp",
+          "in_csv": true,
+          "slug": "esse-kaberne-sovinon-krasnoe-suhoe-14",
+          "name": "Каберне Совиньон",
+          "winery": "ESSE",
+          "color": "Насыщенно-красный",
+          "grape": "Каберне Совиньон",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": true
+        },
+        {
+          "pos": 3,
+          "file": "esse-esse-sira-krasnoe-suhoe-12.webp",
+          "in_csv": true,
+          "slug": "esse-esse-sira-krasnoe-suhoe-12",
+          "name": "Esse Сира",
+          "winery": "ESSE",
+          "color": "Темно-вишневый",
+          "grape": "Сира",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 4,
+          "file": "esse-merlo-otbornoe-krasnoe-suhoe-13.webp",
+          "in_csv": true,
+          "slug": "esse-merlo-otbornoe-krasnoe-suhoe-13",
+          "name": "Мерло Отборное",
+          "winery": "ESSE",
+          "color": "Ярко-рубиновый",
+          "grape": "Мерло",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "near",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 5,
+          "file": "esse-kaberne-otbornoe-kaberne-sovinon-krasnoe-suhoe-12.webp",
+          "in_csv": true,
+          "slug": "esse-kaberne-otbornoe-kaberne-sovinon-krasnoe-suhoe-12",
+          "name": "Каберне Отборное",
+          "winery": "ESSE",
+          "color": "Насыщенный красный",
+          "grape": "Каберне Совиньон",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "GT",
+          "same_winery": true,
+          "same_color": true,
+          "same_category": true,
+          "same_grape": true
+        }
+      ],
+      "top_relations": {
+        "same_winery": 3,
+        "near": 1,
+        "GT": 1
+      },
+      "n_same_winery_in_top": 5,
+      "n_same_color_in_top": 1,
+      "n_same_category_in_top": 5
+    },
+    {
+      "query": "4ea254fd.jpg",
+      "rank": 14,
+      "gap12": -0.0536,
+      "gt": {
+        "file": "esse-saperavi-heaven-krasnoe-suhoe-13.webp",
+        "in_csv": true,
+        "slug": "esse-saperavi-heaven-krasnoe-suhoe-13",
+        "name": "Саперави Heaven",
+        "winery": "ESSE",
+        "color": "Малиново-фиолетовый",
+        "grape": "Саперави",
+        "category": "Красное",
+        "region": "Крым"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "oxana-istratova-wine-saperavi-2023-krasnoe-suhoe-13.webp",
+          "in_csv": true,
+          "slug": "oxana-istratova-wine-saperavi-2023-krasnoe-suhoe-13",
+          "name": "Саперави 2023",
+          "winery": "Oxana Istratova Wine",
+          "color": "Малиновый с пурпурным оттенком",
+          "grape": "Саперави",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": true
+        },
+        {
+          "pos": 2,
+          "file": "vinodelnya-vedernikov-fantom-7030-krasnostop-zolotovskiy-krasnoe-suhoe-15.webp",
+          "in_csv": true,
+          "slug": "vinodelnya-vedernikov-fantom-7030-krasnostop-zolotovskiy-krasnoe-suhoe-15",
+          "name": "Фантом 70/30",
+          "winery": "Ведерниковъ",
+          "color": "Пурпурно-красный",
+          "grape": "Каберне Совиньон, Красностоп Золотовский",
+          "category": "Красное",
+          "region": "Долина Дона",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 3,
+          "file": "sober-bash-grani-plechistik-krasnoe-suhoe-12.webp",
+          "in_csv": true,
+          "slug": "sober-bash-grani-plechistik-krasnoe-suhoe-12",
+          "name": "Грани. Плечистик",
+          "winery": "Собер Баш",
+          "color": "Гранатовый",
+          "grape": "Плечистик",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 4,
+          "file": "vinodelnya-vedernikov-fantom-3070-krasnostop-zolotovskiy-krasnoe-suhoe-145.webp",
+          "in_csv": true,
+          "slug": "vinodelnya-vedernikov-fantom-3070-krasnostop-zolotovskiy-krasnoe-suhoe-145",
+          "name": "Фантом 30/70",
+          "winery": "Ведерниковъ",
+          "color": "Красно-рубиновый",
+          "grape": "Каберне Совиньон, Красностоп Золотовский",
+          "category": "Красное",
+          "region": "Долина Дона",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 5,
+          "file": "belbek-risling-risling-reynskiy-beloe-suhoe-12.webp",
+          "in_csv": true,
+          "slug": "belbek-risling-risling-reynskiy-beloe-suhoe-12",
+          "name": "Рислинг",
+          "winery": "Бельбек",
+          "color": "Светло-лимонный",
+          "grape": "Рислинг Рейнский",
+          "category": "Белое",
+          "region": "Крым",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        }
+      ],
+      "top_relations": {
+        "other": 5
+      },
+      "n_same_winery_in_top": 0,
+      "n_same_color_in_top": 0,
+      "n_same_category_in_top": 4
+    },
+    {
+      "query": "ef930b69.jpg",
+      "rank": 46,
+      "gap12": -0.1322,
+      "gt": {
+        "file": "vinodelnya-krinitsa-arena-sira-krasnoe-suhoe-13.webp",
+        "in_csv": true,
+        "slug": "vinodelnya-krinitsa-arena-sira-krasnoe-suhoe-13",
+        "name": "Арена",
+        "winery": "Криница",
+        "color": "Интенсивный рубиново-красный с фиолетовым оттенком.",
+        "grape": "Сира",
+        "category": "Красное",
+        "region": "Кубань"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "chteau-le-grand-vostock-grand-karsov-shardone-beloe-suhoe-14.webp",
+          "in_csv": true,
+          "slug": "chteau-le-grand-vostock-grand-karsov-shardone-beloe-suhoe-14",
+          "name": "Grand Karsov",
+          "winery": "Château Le Grand Vostock",
+          "color": "Золотистый",
+          "grape": "Шардоне",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 2,
+          "file": "le-k2-vassal-risling-reynskiy-beloe-suhoe-14.webp",
+          "in_csv": true,
+          "slug": "le-k2-vassal-risling-reynskiy-beloe-suhoe-14",
+          "name": "Вассал",
+          "winery": "Le K2",
+          "color": "Вино бледно-лимонного цвета.",
+          "grape": "Рислинг Рейнский",
+          "category": "Белое",
+          "region": "Крым",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 3,
+          "file": "leto-kaberne-fran-rezerv-2021-suhoe-krasnoe.webp",
+          "in_csv": true,
+          "slug": "leto-kaberne-fran-rezerv-2021-suhoe-krasnoe",
+          "name": "LETO Каберне Фран Резерв 2021 сухое красное",
+          "winery": "LETO",
+          "color": "Насыщенный рубиновый",
+          "grape": "Каберне Фран",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 4,
+          "file": "usadba-mezyb-shishka-pino-nuar-rozovoe-suhoe-115.webp",
+          "in_csv": true,
+          "slug": "usadba-mezyb-shishka-pino-nuar-rozovoe-suhoe-115",
+          "name": "Шишка. Пино Нуар",
+          "winery": "Усадьба Мезыбь",
+          "color": "Рубиновый",
+          "grape": "Пино Нуар",
+          "category": "Розовое",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 5,
+          "file": "imenie-sikory-risling-pozdniy-sbor-beloe-sladkoe-13.webp",
+          "in_csv": true,
+          "slug": "imenie-sikory-risling-pozdniy-sbor-beloe-sladkoe-13",
+          "name": "Рислинг. Поздний сбор",
+          "winery": "Имение Сикоры",
+          "color": "Золотистый",
+          "grape": "Рислинг",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        }
+      ],
+      "top_relations": {
+        "other": 5
+      },
+      "n_same_winery_in_top": 0,
+      "n_same_color_in_top": 0,
+      "n_same_category_in_top": 1
+    }
+  ]
+}

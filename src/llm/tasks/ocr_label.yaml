@@ -2,7 +2,7 @@
 name: ocr_label
 provider:
   name: qwen
-  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  base_url: https://dashscope-intl.aliyuncs.com/compatible-mode/v1
   api_key_env: QWEN_API_KEY
   model: qwen-vl-plus
 retries: 3

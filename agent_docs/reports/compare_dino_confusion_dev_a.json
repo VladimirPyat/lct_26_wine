@@ -1,0 +1,2102 @@
+{
+  "source": "Colab torch eval retrieval CSVs (Dev-A n=27)",
+  "note": "Not ONNX; ranks may differ from exported ONNX eval.",
+  "phase1": {
+    "tag": "colab_phase1_e8",
+    "n": 27,
+    "R@1": 0.48148148148148145,
+    "R@5": 0.8518518518518519,
+    "error_types_top1": {
+      "correct": 13,
+      "cross_winery": 6,
+      "near_same_group": 5,
+      "same_winery_diff_group": 3
+    },
+    "winery_offdiag_top1": [
+      {
+        "gt_winery": "052_ESSE",
+        "pred_winery": "031_WINEMAFIA",
+        "count": 1
+      },
+      {
+        "gt_winery": "039_Alma Valley",
+        "pred_winery": "027_AYA Organic Wine & Vineyards",
+        "count": 1
+      },
+      {
+        "gt_winery": "008_Цимлянские вина",
+        "pred_winery": "010_MILLSTREAM",
+        "count": 1
+      },
+      {
+        "gt_winery": "039_Бельбек",
+        "pred_winery": "031_AGORA WINERY",
+        "count": 1
+      },
+      {
+        "gt_winery": "059_Дербент Вино",
+        "pred_winery": "010_Bogovich Wine & Vineyard",
+        "count": 1
+      },
+      {
+        "gt_winery": "011_Криница",
+        "pred_winery": "039_Бельбек",
+        "count": 1
+      }
+    ],
+    "winery_matrix_active": {
+      "008_Цимлянские вина": {
+        "010_MILLSTREAM": 1
+      },
+      "010_Bogovich Wine & Vineyard": {},
+      "010_MILLSTREAM": {},
+      "011_Криница": {
+        "039_Бельбек": 1
+      },
+      "015_Инкерманский ЗМВ": {
+        "015_Инкерманский ЗМВ": 1
+      },
+      "019_Винодельня Бюрнье": {
+        "019_Винодельня Бюрнье": 2
+      },
+      "025_Château Le Grand Vostock": {
+        "025_Château Le Grand Vostock": 1
+      },
+      "026_Chateau de Talu": {
+        "026_Chateau de Talu": 2
+      },
+      "027_AYA Organic Wine & Vineyards": {
+        "027_AYA Organic Wine & Vineyards": 1
+      },
+      "031_AGORA WINERY": {
+        "031_AGORA WINERY": 1
+      },
+      "031_WINEMAFIA": {},
+      "033_Союз-Вино": {
+        "033_Союз-Вино": 1
+      },
+      "039_Alma Valley": {
+        "027_AYA Organic Wine & Vineyards": 1,
+        "039_Alma Valley": 4
+      },
+      "039_Бельбек": {
+        "031_AGORA WINERY": 1
+      },
+      "042_Массандра": {
+        "042_Массандра": 2
+      },
+      "050_Абрау-Дюрсо": {
+        "050_Абрау-Дюрсо": 1
+      },
+      "052_ESSE": {
+        "031_WINEMAFIA": 1,
+        "052_ESSE": 2
+      },
+      "059_Дербент Вино": {
+        "010_Bogovich Wine & Vineyard": 1
+      },
+      "096_Кубань-Вино": {
+        "096_Кубань-Вино": 3
+      }
+    },
+    "miss_at_1": [
+      {
+        "query": "170d9123.jpeg",
+        "gt": "esse-kaberne-otbornoe-kaberne-sovinon-krasnoe-suhoe-12.webp",
+        "rank": 6,
+        "top1": "glu-glu-mr-mouse-2022.webp",
+        "top5": [
+          "glu-glu-mr-mouse-2022.webp",
+          "aristov-anima-millesimato-beloe-bryut.webp",
+          "leto-muskat-oranzh-2024-suhoe-vino.webp",
+          "glu-glu-butch.webp",
+          "daniel-22.webp"
+        ],
+        "error_type": "cross_winery",
+        "gt_winery": "052_ESSE",
+        "pred_winery": "031_WINEMAFIA",
+        "gt_group": "052_ESSE::all__cluster_04_n5",
+        "pred_group": "031_WINEMAFIA::1",
+        "gap": -0.09007611870765686
+      },
+      {
+        "query": "2039dd8a.jpg",
+        "gt": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "rank": 345,
+        "top1": "marquetry-cabernet-franc.webp",
+        "top5": [
+          "marquetry-cabernet-franc.webp",
+          "esse-rose-sira-rozovoe-suhoe-12.webp",
+          "usadba-mezyb-shishka-merlo-vione-rozovoe-suhoe-125.webp",
+          "vaynkraft-kaberne-sovinon-krasnoe-suhoe-14.webp",
+          "belbek-belbek-kaberne-fran-krasnoe-suhoe-13.webp"
+        ],
+        "error_type": "cross_winery",
+        "gt_winery": "039_Alma Valley",
+        "pred_winery": "027_AYA Organic Wine & Vineyards",
+        "gt_group": "039_Alma Valley::all__cluster_05_n2",
+        "pred_group": "027_AYA Organic Wine & Vineyards::1",
+        "gap": -0.16707231104373932
+      },
+      {
+        "query": "2343a532.jpg",
+        "gt": "aristov-kyuve-aleksandr-blan-de-blan.webp",
+        "rank": 2,
+        "top1": "aristov-kyuve-aleksandr-blan-de-nuar.webp",
+        "top5": [
+          "aristov-kyuve-aleksandr-blan-de-nuar.webp",
+          "aristov-kyuve-aleksandr-blan-de-blan.webp",
+          "aristov-kyuve-aleksandr-roze-de-pino.webp",
+          "valeriy-zaharin-kokur-klassika-kokur-belyy-beloe-bryut-115.webp",
+          "riesling.webp"
+        ],
+        "error_type": "near_same_group",
+        "gt_winery": "096_Кубань-Вино",
+        "pred_winery": "096_Кубань-Вино",
+        "gt_group": "096_Кубань-Вино::aristov__cluster_02_n3",
+        "pred_group": "096_Кубань-Вино::aristov__cluster_02_n3",
+        "gap": -0.01927223801612854
+      },
+      {
+        "query": "35f764ae.jpg",
+        "gt": "alma-valley-shardone-rezerv-beloe-suhoe-14.webp",
+        "rank": 3,
+        "top1": "alma-valley-shardone-rezerv-beloe-suhoe-135.webp",
+        "top5": [
+          "alma-valley-shardone-rezerv-beloe-suhoe-135.webp",
+          "bogovich-wine-vineyard-kaberne-fran-krasnoe-suhoe-135.webp",
+          "alma-valley-shardone-rezerv-beloe-suhoe-14.webp",
+          "alma-valley-kaberne-fran-krasnoe-suhoe-145.webp",
+          "alma-valley-shiraz-krasnoe-suhoe-13.webp"
+        ],
+        "error_type": "near_same_group",
+        "gt_winery": "039_Alma Valley",
+        "pred_winery": "039_Alma Valley",
+        "gt_group": "039_Alma Valley::6",
+        "pred_group": "039_Alma Valley::6",
+        "gap": -0.04786181449890137
+      },
+      {
+        "query": "3c11e5b0.jpeg",
+        "gt": "massandra-muskatel-rozovyy-belye-sorta-vinograda-rozovoe-sladkoe-16.webp",
+        "rank": 5,
+        "top1": "massandra-kagor-gurzuf-saperavi-krasnoe-sladkoe-16.webp",
+        "top5": [
+          "massandra-kagor-gurzuf-saperavi-krasnoe-sladkoe-16.webp",
+          "massandra-portveyn-krasnyy-alushta-krasnye-sorta-vinograda-krasnoe-sladkoe-17.webp",
+          "massandra-rozovoe-suhoe.webp",
+          "massandra-bastardo-bastardo-magarachskiy-krasnoe-sladkoe-16.webp",
+          "massandra-muskatel-rozovyy-belye-sorta-vinograda-rozovoe-sladkoe-16.webp"
+        ],
+        "error_type": "same_winery_diff_group",
+        "gt_winery": "042_Массандра",
+        "pred_winery": "042_Массандра",
+        "gt_group": "042_Массандра::3",
+        "pred_group": "042_Массандра::4",
+        "gap": -0.05026489496231079
+      },
+      {
+        "query": "6bb419b6.jpg",
+        "gt": "tsimlyanskie-vina-krepost-sarkel-krasnostop-zolotovskiy-krasnoe-suhoe-145.webp",
+        "rank": 2,
+        "top1": "millstream-cellar-select-saperavi.webp",
+        "top5": [
+          "millstream-cellar-select-saperavi.webp",
+          "tsimlyanskie-vina-krepost-sarkel-krasnostop-zolotovskiy-krasnoe-suhoe-145.webp",
+          "millstream-cellar-select-blend-avtohtonov.webp",
+          "millstream-cellar-select-krasnostop-zolotovskij.webp",
+          "millstream-cellar-select-kaberne-sovinon.webp"
+        ],
+        "error_type": "cross_winery",
+        "gt_winery": "008_Цимлянские вина",
+        "pred_winery": "010_MILLSTREAM",
+        "gt_group": "singleton::tsimlyanskie-vina-krepost-sarkel-krasnostop-zolotovskiy-krasnoe-suhoe-145.webp",
+        "pred_group": "010_MILLSTREAM::1",
+        "gap": -0.0006912946701049805
+      },
+      {
+        "query": "7bf0507b.jpg",
+        "gt": "belbek-belbek-muskat-beloe-suhoe-128.webp",
+        "rank": 48,
+        "top1": "agora-saperavi.webp",
+        "top5": [
+          "agora-saperavi.webp",
+          "vibes-chardonnay-barrel-fermented-shardone-beloe-suhoe-125.webp",
+          "vibes-chardonnay-barrel-fermented-2021.webp",
+          "usadba-aleksandrovskaya-bubnovyy-valet-kaberne-sovinon-krasnoe-polusladkoe-13.webp",
+          "belbek-belbek-risling-rezerv-beloe-suhoe-13.webp"
+        ],
+        "error_type": "cross_winery",
+        "gt_winery": "039_Бельбек",
+        "pred_winery": "031_AGORA WINERY",
+        "gt_group": "039_Бельбек::3",
+        "pred_group": "031_AGORA WINERY::1",
+        "gap": -0.153607577085495
+      },
+      {
+        "query": "90020e08.jpeg",
+        "gt": "inkermanskiy-zmv-winemakers-selection-saperavi-krasnoe-polusladkoe-12.webp",
+        "rank": 3,
+        "top1": "winemaker-selection.webp",
+        "top5": [
+          "winemaker-selection.webp",
+          "fanagoriya-dekanter-kaberne-sovinon-2018-krasnoe-suhoe-14.webp",
+          "inkermanskiy-zmv-winemakers-selection-saperavi-krasnoe-polusladkoe-12.webp",
+          "fanagoriya-dekanter-pino-nuar-2020-krasnoe-suhoe-135.webp",
+          "fanagoriya-dekanter-riesling-2020-risling-reynskiy-beloe-suhoe-13.webp"
+        ],
+        "error_type": "same_winery_diff_group",
+        "gt_winery": "015_Инкерманский ЗМВ",
+        "pred_winery": "015_Инкерманский ЗМВ",
+        "gt_group": "015_Инкерманский ЗМВ::3",
+        "pred_group": "singleton::winemaker-selection.webp",
+        "gap": -0.13370758295059204
+      },
+      {
+        "query": "9b04cb8d.jpeg",
+        "gt": "chteau-le-grand-vostock-le-chene-royal-reserve-merlo-krasnoe-suhoe-145.webp",
+        "rank": 4,
+        "top1": "chteau-le-grand-vostock-cabernet-sauvignon-reserve-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "top5": [
+          "chteau-le-grand-vostock-cabernet-sauvignon-reserve-kaberne-sovinon-krasnoe-suhoe-14.webp",
+          "chteau-le-grand-vostock-cabernet-franc-reserve-kaberne-fran-krasnoe-suhoe-14.webp",
+          "chteau-le-grand-vostock-krasnostop-reserve-krasnostop-krasnoe-suhoe-14.webp",
+          "chteau-le-grand-vostock-le-chene-royal-reserve-merlo-krasnoe-suhoe-145.webp",
+          "chteau-le-grand-vostock-merlot-reserve-merlo-krasnoe-suhoe-145.webp"
+        ],
+        "error_type": "near_same_group",
+        "gt_winery": "025_Château Le Grand Vostock",
+        "pred_winery": "025_Château Le Grand Vostock",
+        "gt_group": "025_Château Le Grand Vostock::cluster_02_n6",
+        "pred_group": "025_Château Le Grand Vostock::cluster_02_n6",
+        "gap": -0.0650835633277893
+      },
+      {
+        "query": "e3f116c0.jpeg",
+        "gt": "vinodelnya-byurne-merlo-krasnoe-suhoe-14.webp",
+        "rank": 6,
+        "top1": "b-yu-rne-malbek-krasnoe-suhoe.webp",
+        "top5": [
+          "b-yu-rne-malbek-krasnoe-suhoe.webp",
+          "b-yu-rne-krasnostop-suhoe-krasnoe-classic.webp",
+          "b-yu-rne-sira-krasnoe-suhoe-classic.webp",
+          "vinodelnya-zhakov-rozeo-saperavi-rozovoe-suhoe-115.webp",
+          "vinodelnya-byurne-kaberne-fran-krasnoe-suhoe-135.webp"
+        ],
+        "error_type": "near_same_group",
+        "gt_winery": "019_Винодельня Бюрнье",
+        "pred_winery": "019_Винодельня Бюрнье",
+        "gt_group": "019_Винодельня Бюрнье::2",
+        "pred_group": "019_Винодельня Бюрнье::2",
+        "gap": -0.03126060962677002
+      },
+      {
+        "query": "ee3e3334.jpeg",
+        "gt": "derbent-vino-desono-kaberne-sovinon-krasnoe-suhoe-125.webp",
+        "rank": 2,
+        "top1": "bogovich-wine-vineyard-kaberne-fran-krasnoe-suhoe-135.webp",
+        "top5": [
+          "bogovich-wine-vineyard-kaberne-fran-krasnoe-suhoe-135.webp",
+          "derbent-vino-desono-kaberne-sovinon-krasnoe-suhoe-125.webp",
+          "millstream-cellar-select-blend-avtohtonov.webp",
+          "millstream-cellar-select-saperavi.webp",
+          "millstream-cellar-select-kaberne-sovinon.webp"
+        ],
+        "error_type": "cross_winery",
+        "gt_winery": "059_Дербент Вино",
+        "pred_winery": "010_Bogovich Wine & Vineyard",
+        "gt_group": "059_Дербент Вино::derbent_vino__cluster_00_n7",
+        "pred_group": "010_Bogovich Wine & Vineyard::2",
+        "gap": -0.01973903179168701
+      },
+      {
+        "query": "ef930b69.jpg",
+        "gt": "vinodelnya-krinitsa-arena-sira-krasnoe-suhoe-13.webp",
+        "rank": 3,
+        "top1": "belbek-merlo-krasnoe-suhoe-13.webp",
+        "top5": [
+          "belbek-merlo-krasnoe-suhoe-13.webp",
+          "belbek-belbek-roze-pino-nuar-rozovoe-suhoe-129.webp",
+          "vinodelnya-krinitsa-arena-sira-krasnoe-suhoe-13.webp",
+          "agora-saperavi.webp",
+          "agora-pino-nuar.webp"
+        ],
+        "error_type": "cross_winery",
+        "gt_winery": "011_Криница",
+        "pred_winery": "039_Бельбек",
+        "gt_group": "011_Криница::1",
+        "pred_group": "039_Бельбек::all__cluster_04_n4",
+        "gap": -0.04374825954437256
+      },
+      {
+        "query": "f212df5b.jpeg",
+        "gt": "massandra-portveyn-belyy-krymskiy-kokur-beloe-sladkoe-18.webp",
+        "rank": 2,
+        "top1": "massandra-portveyn-belyy-gurzuf-kokur-belyy-beloe-sladkoe-135.webp",
+        "top5": [
+          "massandra-portveyn-belyy-gurzuf-kokur-belyy-beloe-sladkoe-135.webp",
+          "massandra-portveyn-belyy-krymskiy-kokur-beloe-sladkoe-18.webp",
+          "massandra-massandra-heres-oreadna-aligote-beloe-suhoe-16.webp",
+          "massandra-muskat.webp",
+          "massandra-portveyn-belyy-alushta-belye-sorta-vinograda-beloe-sladkoe-17.webp"
+        ],
+        "error_type": "same_winery_diff_group",
+        "gt_winery": "042_Массандра",
+        "pred_winery": "042_Массандра",
+        "gt_group": "042_Массандра::massandra__cluster_00_n9",
+        "pred_group": "042_Массандра::4",
+        "gap": -0.09290492534637451
+      },
+      {
+        "query": "f780a956.jpg",
+        "gt": "esse-shardone-otbornoe-beloe-suhoe-12.webp",
+        "rank": 4,
+        "top1": "esse-sovinon-blan-beloe-suhoe-12.webp",
+        "top5": [
+          "esse-sovinon-blan-beloe-suhoe-12.webp",
+          "esse-rkatsiteli-beloe-suhoe-125.webp",
+          "esse-muskat-muskat-belyy-beloe-suhoe-115.webp",
+          "esse-shardone-otbornoe-beloe-suhoe-12.webp",
+          "vinodelnya-begildeeva-merlo-krasnoe-suhoe-14.webp"
+        ],
+        "error_type": "near_same_group",
+        "gt_winery": "052_ESSE",
+        "pred_winery": "052_ESSE",
+        "gt_group": "052_ESSE::all__cluster_04_n5",
+        "pred_group": "052_ESSE::all__cluster_04_n5",
+        "gap": -0.00673675537109375
+      }
+    ],
+    "miss_at_5": [
+      {
+        "query": "170d9123.jpeg",
+        "gt": "esse-kaberne-otbornoe-kaberne-sovinon-krasnoe-suhoe-12.webp",
+        "rank": 6,
+        "top5": [
+          "glu-glu-mr-mouse-2022.webp",
+          "aristov-anima-millesimato-beloe-bryut.webp",
+          "leto-muskat-oranzh-2024-suhoe-vino.webp",
+          "glu-glu-butch.webp",
+          "daniel-22.webp"
+        ],
+        "top1_error_type": "cross_winery"
+      },
+      {
+        "query": "2039dd8a.jpg",
+        "gt": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "rank": 345,
+        "top5": [
+          "marquetry-cabernet-franc.webp",
+          "esse-rose-sira-rozovoe-suhoe-12.webp",
+          "usadba-mezyb-shishka-merlo-vione-rozovoe-suhoe-125.webp",
+          "vaynkraft-kaberne-sovinon-krasnoe-suhoe-14.webp",
+          "belbek-belbek-kaberne-fran-krasnoe-suhoe-13.webp"
+        ],
+        "top1_error_type": "cross_winery"
+      },
+      {
+        "query": "7bf0507b.jpg",
+        "gt": "belbek-belbek-muskat-beloe-suhoe-128.webp",
+        "rank": 48,
+        "top5": [
+          "agora-saperavi.webp",
+          "vibes-chardonnay-barrel-fermented-shardone-beloe-suhoe-125.webp",
+          "vibes-chardonnay-barrel-fermented-2021.webp",
+          "usadba-aleksandrovskaya-bubnovyy-valet-kaberne-sovinon-krasnoe-polusladkoe-13.webp",
+          "belbek-belbek-risling-rezerv-beloe-suhoe-13.webp"
+        ],
+        "top1_error_type": "cross_winery"
+      },
+      {
+        "query": "e3f116c0.jpeg",
+        "gt": "vinodelnya-byurne-merlo-krasnoe-suhoe-14.webp",
+        "rank": 6,
+        "top5": [
+          "b-yu-rne-malbek-krasnoe-suhoe.webp",
+          "b-yu-rne-krasnostop-suhoe-krasnoe-classic.webp",
+          "b-yu-rne-sira-krasnoe-suhoe-classic.webp",
+          "vinodelnya-zhakov-rozeo-saperavi-rozovoe-suhoe-115.webp",
+          "vinodelnya-byurne-kaberne-fran-krasnoe-suhoe-135.webp"
+        ],
+        "top1_error_type": "near_same_group"
+      }
+    ]
+  },
+  "phase2_best": {
+    "tag": "colab_phase2_e1_best",
+    "n": 27,
+    "R@1": 0.5185185185185185,
+    "R@5": 0.7777777777777778,
+    "error_types_top1": {
+      "correct": 14,
+      "cross_winery": 5,
+      "near_same_group": 5,
+      "same_winery_diff_group": 3
+    },
+    "winery_offdiag_top1": [
+      {
+        "gt_winery": "052_ESSE",
+        "pred_winery": "031_WINEMAFIA",
+        "count": 1
+      },
+      {
+        "gt_winery": "039_Alma Valley",
+        "pred_winery": "039_Бельбек",
+        "count": 1
+      },
+      {
+        "gt_winery": "008_Цимлянские вина",
+        "pred_winery": "010_MILLSTREAM",
+        "count": 1
+      },
+      {
+        "gt_winery": "039_Бельбек",
+        "pred_winery": "014_Vibes",
+        "count": 1
+      },
+      {
+        "gt_winery": "011_Криница",
+        "pred_winery": "039_Бельбек",
+        "count": 1
+      }
+    ],
+    "winery_matrix_active": {
+      "008_Цимлянские вина": {
+        "010_MILLSTREAM": 1
+      },
+      "010_MILLSTREAM": {},
+      "011_Криница": {
+        "039_Бельбек": 1
+      },
+      "014_Vibes": {},
+      "015_Инкерманский ЗМВ": {
+        "015_Инкерманский ЗМВ": 1
+      },
+      "019_Винодельня Бюрнье": {
+        "019_Винодельня Бюрнье": 2
+      },
+      "025_Château Le Grand Vostock": {
+        "025_Château Le Grand Vostock": 1
+      },
+      "026_Chateau de Talu": {
+        "026_Chateau de Talu": 2
+      },
+      "027_AYA Organic Wine & Vineyards": {
+        "027_AYA Organic Wine & Vineyards": 1
+      },
+      "031_AGORA WINERY": {
+        "031_AGORA WINERY": 1
+      },
+      "031_WINEMAFIA": {},
+      "033_Союз-Вино": {
+        "033_Союз-Вино": 1
+      },
+      "039_Alma Valley": {
+        "039_Alma Valley": 4,
+        "039_Бельбек": 1
+      },
+      "039_Бельбек": {
+        "014_Vibes": 1
+      },
+      "042_Массандра": {
+        "042_Массандра": 2
+      },
+      "050_Абрау-Дюрсо": {
+        "050_Абрау-Дюрсо": 1
+      },
+      "052_ESSE": {
+        "031_WINEMAFIA": 1,
+        "052_ESSE": 2
+      },
+      "059_Дербент Вино": {
+        "059_Дербент Вино": 1
+      },
+      "096_Кубань-Вино": {
+        "096_Кубань-Вино": 3
+      }
+    },
+    "miss_at_1": [
+      {
+        "query": "170d9123.jpeg",
+        "gt": "esse-kaberne-otbornoe-kaberne-sovinon-krasnoe-suhoe-12.webp",
+        "rank": 6,
+        "top1": "glu-glu-mr-mouse-2022.webp",
+        "top5": [
+          "glu-glu-mr-mouse-2022.webp",
+          "aristov-anima-millesimato-beloe-bryut.webp",
+          "leto-muskat-oranzh-2024-suhoe-vino.webp",
+          "glu-glu-butch.webp",
+          "esse-merlo-otbornoe-krasnoe-suhoe-13.webp"
+        ],
+        "error_type": "cross_winery",
+        "gt_winery": "052_ESSE",
+        "pred_winery": "031_WINEMAFIA",
+        "gt_group": "052_ESSE::all__cluster_04_n5",
+        "pred_group": "031_WINEMAFIA::1",
+        "gap": -0.1114530861377716
+      },
+      {
+        "query": "2039dd8a.jpg",
+        "gt": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "rank": 676,
+        "top1": "belbek-belbek-kaberne-fran-krasnoe-suhoe-13.webp",
+        "top5": [
+          "belbek-belbek-kaberne-fran-krasnoe-suhoe-13.webp",
+          "belbek-kaberne-fran-krasnoe-suhoe-134.webp",
+          "vibes-vermentino-viognier-barrel-fermented-2022.webp",
+          "agora-pino-nuar.webp",
+          "stn-winery-syrah-sira-krasnoe-suhoe-13.webp"
+        ],
+        "error_type": "cross_winery",
+        "gt_winery": "039_Alma Valley",
+        "pred_winery": "039_Бельбек",
+        "gt_group": "039_Alma Valley::all__cluster_05_n2",
+        "pred_group": "039_Бельбек::all__cluster_05_n2",
+        "gap": -0.22337407246232033
+      },
+      {
+        "query": "35f764ae.jpg",
+        "gt": "alma-valley-shardone-rezerv-beloe-suhoe-14.webp",
+        "rank": 9,
+        "top1": "alma-valley-shardone-rezerv-beloe-suhoe-135.webp",
+        "top5": [
+          "alma-valley-shardone-rezerv-beloe-suhoe-135.webp",
+          "millstream-cellar-select-saperavi.webp",
+          "alma-valley-kaberne-fran-krasnoe-suhoe-145.webp",
+          "bogovich-wine-vineyard-kaberne-fran-krasnoe-suhoe-135.webp",
+          "vinodelnya-vedernikov-vedernikov-kaberne-sovinon-krasnoe-suhoe-145.webp"
+        ],
+        "error_type": "near_same_group",
+        "gt_winery": "039_Alma Valley",
+        "pred_winery": "039_Alma Valley",
+        "gt_group": "039_Alma Valley::6",
+        "pred_group": "039_Alma Valley::6",
+        "gap": -0.07029610872268677
+      },
+      {
+        "query": "3c11e5b0.jpeg",
+        "gt": "massandra-muskatel-rozovyy-belye-sorta-vinograda-rozovoe-sladkoe-16.webp",
+        "rank": 4,
+        "top1": "massandra-kagor-gurzuf-saperavi-krasnoe-sladkoe-16.webp",
+        "top5": [
+          "massandra-kagor-gurzuf-saperavi-krasnoe-sladkoe-16.webp",
+          "massandra-rozovoe-suhoe.webp",
+          "massandra-portveyn-krasnyy-alushta-krasnye-sorta-vinograda-krasnoe-sladkoe-17.webp",
+          "massandra-muskatel-rozovyy-belye-sorta-vinograda-rozovoe-sladkoe-16.webp",
+          "massandra-bastardo-bastardo-magarachskiy-krasnoe-sladkoe-16.webp"
+        ],
+        "error_type": "same_winery_diff_group",
+        "gt_winery": "042_Массандра",
+        "pred_winery": "042_Массандра",
+        "gt_group": "042_Массандра::3",
+        "pred_group": "042_Массандра::4",
+        "gap": -0.07422763109207153
+      },
+      {
+        "query": "6bb419b6.jpg",
+        "gt": "tsimlyanskie-vina-krepost-sarkel-krasnostop-zolotovskiy-krasnoe-suhoe-145.webp",
+        "rank": 2,
+        "top1": "millstream-cellar-select-saperavi.webp",
+        "top5": [
+          "millstream-cellar-select-saperavi.webp",
+          "tsimlyanskie-vina-krepost-sarkel-krasnostop-zolotovskiy-krasnoe-suhoe-145.webp",
+          "millstream-cellar-select-blend-avtohtonov.webp",
+          "bogovich-wine-vineyard-pino-nuar-krasnoe-suhoe-125.webp",
+          "millstream-cellar-select-krasnostop-zolotovskij.webp"
+        ],
+        "error_type": "cross_winery",
+        "gt_winery": "008_Цимлянские вина",
+        "pred_winery": "010_MILLSTREAM",
+        "gt_group": "singleton::tsimlyanskie-vina-krepost-sarkel-krasnostop-zolotovskiy-krasnoe-suhoe-145.webp",
+        "pred_group": "010_MILLSTREAM::1",
+        "gap": -0.0038461387157440186
+      },
+      {
+        "query": "72ce740a.jpg",
+        "gt": "shato-taman-kaberne-sovinon.webp",
+        "rank": 2,
+        "top1": "kuban-vino-shato-tamane-aligote-beloe-suhoe-13.webp",
+        "top5": [
+          "kuban-vino-shato-tamane-aligote-beloe-suhoe-13.webp",
+          "shato-taman-kaberne-sovinon.webp",
+          "kuban-vino-shato-tamane-shardone-beloe-suhoe-12.webp",
+          "kuban-vino-krasnostop-de-tamane-krasnostop-anapskiy-krasnoe-suhoe-13.webp",
+          "kuban-vino-kaberne-de-tamane-kaberne-sovinon-krasnoe-suhoe-125.webp"
+        ],
+        "error_type": "near_same_group",
+        "gt_winery": "096_Кубань-Вино",
+        "pred_winery": "096_Кубань-Вино",
+        "gt_group": "096_Кубань-Вино::chateau_tamagne__cluster_00_n10",
+        "pred_group": "096_Кубань-Вино::chateau_tamagne__cluster_00_n10",
+        "gap": -0.012601017951965332
+      },
+      {
+        "query": "7bf0507b.jpg",
+        "gt": "belbek-belbek-muskat-beloe-suhoe-128.webp",
+        "rank": 44,
+        "top1": "vibes-chardonnay-barrel-fermented-shardone-beloe-suhoe-125.webp",
+        "top5": [
+          "vibes-chardonnay-barrel-fermented-shardone-beloe-suhoe-125.webp",
+          "vibes-chardonnay-barrel-fermented-2021.webp",
+          "agora-saperavi.webp",
+          "belbek-sira-rezerv-krasnoe-suhoe-132.webp",
+          "belbek-belbek-sira-krasnoe-suhoe-132.webp"
+        ],
+        "error_type": "cross_winery",
+        "gt_winery": "039_Бельбек",
+        "pred_winery": "014_Vibes",
+        "gt_group": "039_Бельбек::3",
+        "pred_group": "014_Vibes::2",
+        "gap": -0.14307180047035217
+      },
+      {
+        "query": "90020e08.jpeg",
+        "gt": "inkermanskiy-zmv-winemakers-selection-saperavi-krasnoe-polusladkoe-12.webp",
+        "rank": 9,
+        "top1": "winemaker-selection.webp",
+        "top5": [
+          "winemaker-selection.webp",
+          "abrau-dyurso-imperial-brut-vintage-shardone-beloe-bryut-12.webp",
+          "abrau-dyurso-imperial-brut-rose-pino-nuar-rozovoe-bryut-12.webp",
+          "fanagoriya-dekanter-pino-nuar-2020-krasnoe-suhoe-135.webp",
+          "fanagoriya-dekanter-kaberne-sovinon-2018-krasnoe-suhoe-14.webp"
+        ],
+        "error_type": "same_winery_diff_group",
+        "gt_winery": "015_Инкерманский ЗМВ",
+        "pred_winery": "015_Инкерманский ЗМВ",
+        "gt_group": "015_Инкерманский ЗМВ::3",
+        "pred_group": "singleton::winemaker-selection.webp",
+        "gap": -0.16231751441955566
+      },
+      {
+        "query": "9b04cb8d.jpeg",
+        "gt": "chteau-le-grand-vostock-le-chene-royal-reserve-merlo-krasnoe-suhoe-145.webp",
+        "rank": 4,
+        "top1": "chteau-le-grand-vostock-cabernet-sauvignon-reserve-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "top5": [
+          "chteau-le-grand-vostock-cabernet-sauvignon-reserve-kaberne-sovinon-krasnoe-suhoe-14.webp",
+          "chteau-le-grand-vostock-merlot-reserve-merlo-krasnoe-suhoe-145.webp",
+          "chteau-le-grand-vostock-krasnostop-reserve-krasnostop-krasnoe-suhoe-14.webp",
+          "chteau-le-grand-vostock-le-chene-royal-reserve-merlo-krasnoe-suhoe-145.webp",
+          "chteau-le-grand-vostock-cabernet-franc-reserve-kaberne-fran-krasnoe-suhoe-14.webp"
+        ],
+        "error_type": "near_same_group",
+        "gt_winery": "025_Château Le Grand Vostock",
+        "pred_winery": "025_Château Le Grand Vostock",
+        "gt_group": "025_Château Le Grand Vostock::cluster_02_n6",
+        "pred_group": "025_Château Le Grand Vostock::cluster_02_n6",
+        "gap": -0.07010087370872498
+      },
+      {
+        "query": "e3f116c0.jpeg",
+        "gt": "vinodelnya-byurne-merlo-krasnoe-suhoe-14.webp",
+        "rank": 8,
+        "top1": "b-yu-rne-malbek-krasnoe-suhoe.webp",
+        "top5": [
+          "b-yu-rne-malbek-krasnoe-suhoe.webp",
+          "b-yu-rne-krasnostop-suhoe-krasnoe-classic.webp",
+          "b-yu-rne-sira-krasnoe-suhoe-classic.webp",
+          "vinogradniki-gay-kodzora-viognier-de-ga-kodzor-vione-beloe-suhoe-125.webp",
+          "vinodelnya-zhakov-rozeo-saperavi-rozovoe-suhoe-115.webp"
+        ],
+        "error_type": "near_same_group",
+        "gt_winery": "019_Винодельня Бюрнье",
+        "pred_winery": "019_Винодельня Бюрнье",
+        "gt_group": "019_Винодельня Бюрнье::2",
+        "pred_group": "019_Винодельня Бюрнье::2",
+        "gap": -0.0411737859249115
+      },
+      {
+        "query": "ef930b69.jpg",
+        "gt": "vinodelnya-krinitsa-arena-sira-krasnoe-suhoe-13.webp",
+        "rank": 2,
+        "top1": "belbek-merlo-krasnoe-suhoe-13.webp",
+        "top5": [
+          "belbek-merlo-krasnoe-suhoe-13.webp",
+          "vinodelnya-krinitsa-arena-sira-krasnoe-suhoe-13.webp",
+          "agora-pino-nuar.webp",
+          "belbek-belbek-roze-pino-nuar-rozovoe-suhoe-129.webp",
+          "shato-pino-exclusive-pino-nuar-merlo-krasnoe-suhoe-135.webp"
+        ],
+        "error_type": "cross_winery",
+        "gt_winery": "011_Криница",
+        "pred_winery": "039_Бельбек",
+        "gt_group": "011_Криница::1",
+        "pred_group": "039_Бельбек::all__cluster_04_n4",
+        "gap": -0.03690347075462341
+      },
+      {
+        "query": "f212df5b.jpeg",
+        "gt": "massandra-portveyn-belyy-krymskiy-kokur-beloe-sladkoe-18.webp",
+        "rank": 3,
+        "top1": "massandra-portveyn-belyy-gurzuf-kokur-belyy-beloe-sladkoe-135.webp",
+        "top5": [
+          "massandra-portveyn-belyy-gurzuf-kokur-belyy-beloe-sladkoe-135.webp",
+          "massandra-muskat.webp",
+          "massandra-portveyn-belyy-krymskiy-kokur-beloe-sladkoe-18.webp",
+          "kokur-suhoe.webp",
+          "massandra-massandra-heres-oreadna-aligote-beloe-suhoe-16.webp"
+        ],
+        "error_type": "same_winery_diff_group",
+        "gt_winery": "042_Массандра",
+        "pred_winery": "042_Массандра",
+        "gt_group": "042_Массандра::massandra__cluster_00_n9",
+        "pred_group": "042_Массандра::4",
+        "gap": -0.13096392154693604
+      },
+      {
+        "query": "f780a956.jpg",
+        "gt": "esse-shardone-otbornoe-beloe-suhoe-12.webp",
+        "rank": 3,
+        "top1": "esse-rkatsiteli-beloe-suhoe-125.webp",
+        "top5": [
+          "esse-rkatsiteli-beloe-suhoe-125.webp",
+          "esse-sovinon-blan-beloe-suhoe-12.webp",
+          "esse-shardone-otbornoe-beloe-suhoe-12.webp",
+          "esse-muskat-muskat-belyy-beloe-suhoe-115.webp",
+          "vibes-glera-col-fondo-2022.webp"
+        ],
+        "error_type": "near_same_group",
+        "gt_winery": "052_ESSE",
+        "pred_winery": "052_ESSE",
+        "gt_group": "052_ESSE::all__cluster_04_n5",
+        "pred_group": "052_ESSE::all__cluster_04_n5",
+        "gap": -0.007571548223495483
+      }
+    ],
+    "miss_at_5": [
+      {
+        "query": "170d9123.jpeg",
+        "gt": "esse-kaberne-otbornoe-kaberne-sovinon-krasnoe-suhoe-12.webp",
+        "rank": 6,
+        "top5": [
+          "glu-glu-mr-mouse-2022.webp",
+          "aristov-anima-millesimato-beloe-bryut.webp",
+          "leto-muskat-oranzh-2024-suhoe-vino.webp",
+          "glu-glu-butch.webp",
+          "esse-merlo-otbornoe-krasnoe-suhoe-13.webp"
+        ],
+        "top1_error_type": "cross_winery"
+      },
+      {
+        "query": "2039dd8a.jpg",
+        "gt": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "rank": 676,
+        "top5": [
+          "belbek-belbek-kaberne-fran-krasnoe-suhoe-13.webp",
+          "belbek-kaberne-fran-krasnoe-suhoe-134.webp",
+          "vibes-vermentino-viognier-barrel-fermented-2022.webp",
+          "agora-pino-nuar.webp",
+          "stn-winery-syrah-sira-krasnoe-suhoe-13.webp"
+        ],
+        "top1_error_type": "cross_winery"
+      },
+      {
+        "query": "35f764ae.jpg",
+        "gt": "alma-valley-shardone-rezerv-beloe-suhoe-14.webp",
+        "rank": 9,
+        "top5": [
+          "alma-valley-shardone-rezerv-beloe-suhoe-135.webp",
+          "millstream-cellar-select-saperavi.webp",
+          "alma-valley-kaberne-fran-krasnoe-suhoe-145.webp",
+          "bogovich-wine-vineyard-kaberne-fran-krasnoe-suhoe-135.webp",
+          "vinodelnya-vedernikov-vedernikov-kaberne-sovinon-krasnoe-suhoe-145.webp"
+        ],
+        "top1_error_type": "near_same_group"
+      },
+      {
+        "query": "7bf0507b.jpg",
+        "gt": "belbek-belbek-muskat-beloe-suhoe-128.webp",
+        "rank": 44,
+        "top5": [
+          "vibes-chardonnay-barrel-fermented-shardone-beloe-suhoe-125.webp",
+          "vibes-chardonnay-barrel-fermented-2021.webp",
+          "agora-saperavi.webp",
+          "belbek-sira-rezerv-krasnoe-suhoe-132.webp",
+          "belbek-belbek-sira-krasnoe-suhoe-132.webp"
+        ],
+        "top1_error_type": "cross_winery"
+      },
+      {
+        "query": "90020e08.jpeg",
+        "gt": "inkermanskiy-zmv-winemakers-selection-saperavi-krasnoe-polusladkoe-12.webp",
+        "rank": 9,
+        "top5": [
+          "winemaker-selection.webp",
+          "abrau-dyurso-imperial-brut-vintage-shardone-beloe-bryut-12.webp",
+          "abrau-dyurso-imperial-brut-rose-pino-nuar-rozovoe-bryut-12.webp",
+          "fanagoriya-dekanter-pino-nuar-2020-krasnoe-suhoe-135.webp",
+          "fanagoriya-dekanter-kaberne-sovinon-2018-krasnoe-suhoe-14.webp"
+        ],
+        "top1_error_type": "same_winery_diff_group"
+      },
+      {
+        "query": "e3f116c0.jpeg",
+        "gt": "vinodelnya-byurne-merlo-krasnoe-suhoe-14.webp",
+        "rank": 8,
+        "top5": [
+          "b-yu-rne-malbek-krasnoe-suhoe.webp",
+          "b-yu-rne-krasnostop-suhoe-krasnoe-classic.webp",
+          "b-yu-rne-sira-krasnoe-suhoe-classic.webp",
+          "vinogradniki-gay-kodzora-viognier-de-ga-kodzor-vione-beloe-suhoe-125.webp",
+          "vinodelnya-zhakov-rozeo-saperavi-rozovoe-suhoe-115.webp"
+        ],
+        "top1_error_type": "near_same_group"
+      }
+    ]
+  },
+  "phase2_last": {
+    "tag": "colab_phase2_e6_last",
+    "n": 27,
+    "R@1": 0.4444444444444444,
+    "R@5": 0.7037037037037037,
+    "error_types_top1": {
+      "correct": 12,
+      "cross_winery": 6,
+      "near_same_group": 5,
+      "same_winery_diff_group": 4
+    },
+    "winery_offdiag_top1": [
+      {
+        "gt_winery": "052_ESSE",
+        "pred_winery": "031_WINEMAFIA",
+        "count": 1
+      },
+      {
+        "gt_winery": "039_Alma Valley",
+        "pred_winery": "050_Абрау-Дюрсо",
+        "count": 1
+      },
+      {
+        "gt_winery": "039_Alma Valley",
+        "pred_winery": "010_Bogovich Wine & Vineyard",
+        "count": 1
+      },
+      {
+        "gt_winery": "008_Цимлянские вина",
+        "pred_winery": "010_MILLSTREAM",
+        "count": 1
+      },
+      {
+        "gt_winery": "039_Alma Valley",
+        "pred_winery": "031_WINEMAFIA",
+        "count": 1
+      },
+      {
+        "gt_winery": "059_Дербент Вино",
+        "pred_winery": "010_MILLSTREAM",
+        "count": 1
+      }
+    ],
+    "winery_matrix_active": {
+      "008_Цимлянские вина": {
+        "010_MILLSTREAM": 1
+      },
+      "010_Bogovich Wine & Vineyard": {},
+      "010_MILLSTREAM": {},
+      "011_Криница": {
+        "011_Криница": 1
+      },
+      "015_Инкерманский ЗМВ": {
+        "015_Инкерманский ЗМВ": 1
+      },
+      "019_Винодельня Бюрнье": {
+        "019_Винодельня Бюрнье": 2
+      },
+      "025_Château Le Grand Vostock": {
+        "025_Château Le Grand Vostock": 1
+      },
+      "026_Chateau de Talu": {
+        "026_Chateau de Talu": 2
+      },
+      "027_AYA Organic Wine & Vineyards": {
+        "027_AYA Organic Wine & Vineyards": 1
+      },
+      "031_AGORA WINERY": {
+        "031_AGORA WINERY": 1
+      },
+      "031_WINEMAFIA": {},
+      "033_Союз-Вино": {
+        "033_Союз-Вино": 1
+      },
+      "039_Alma Valley": {
+        "010_Bogovich Wine & Vineyard": 1,
+        "031_WINEMAFIA": 1,
+        "039_Alma Valley": 2,
+        "050_Абрау-Дюрсо": 1
+      },
+      "039_Бельбек": {
+        "039_Бельбек": 1
+      },
+      "042_Массандра": {
+        "042_Массандра": 2
+      },
+      "050_Абрау-Дюрсо": {
+        "050_Абрау-Дюрсо": 1
+      },
+      "052_ESSE": {
+        "031_WINEMAFIA": 1,
+        "052_ESSE": 2
+      },
+      "059_Дербент Вино": {
+        "010_MILLSTREAM": 1
+      },
+      "096_Кубань-Вино": {
+        "096_Кубань-Вино": 3
+      }
+    },
+    "miss_at_1": [
+      {
+        "query": "170d9123.jpeg",
+        "gt": "esse-kaberne-otbornoe-kaberne-sovinon-krasnoe-suhoe-12.webp",
+        "rank": 14,
+        "top1": "glu-glu-mr-mouse-2022.webp",
+        "top5": [
+          "glu-glu-mr-mouse-2022.webp",
+          "leto-vecrfn-2024-suhoe-vino.webp",
+          "aristov-anima-millesimato-beloe-bryut.webp",
+          "glu-glu-butch.webp",
+          "leto-muskat-oranzh-2024-suhoe-vino.webp"
+        ],
+        "error_type": "cross_winery",
+        "gt_winery": "052_ESSE",
+        "pred_winery": "031_WINEMAFIA",
+        "gt_group": "052_ESSE::all__cluster_04_n5",
+        "pred_group": "031_WINEMAFIA::1",
+        "gap": -0.1580829620361328
+      },
+      {
+        "query": "2039dd8a.jpg",
+        "gt": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "rank": 722,
+        "top1": "abrau-dyurso-fizz-beloe-bryut.webp",
+        "top5": [
+          "abrau-dyurso-fizz-beloe-bryut.webp",
+          "b-yu-rne-vinisa-zh-suhoe-rozovoe.webp",
+          "belbek-kaberne-fran-krasnoe-suhoe-134.webp",
+          "vibes-cabernet-franc-pinot-noir-pino-nuar-krasnoe-suhoe-125.webp",
+          "usadba-aleksandrovskaya-bubnovyy-valet-kaberne-sovinon-krasnoe-polusladkoe-13.webp"
+        ],
+        "error_type": "cross_winery",
+        "gt_winery": "039_Alma Valley",
+        "pred_winery": "050_Абрау-Дюрсо",
+        "gt_group": "039_Alma Valley::all__cluster_05_n2",
+        "pred_group": "050_Абрау-Дюрсо::other__cluster_04_n2",
+        "gap": -0.2298784889280796
+      },
+      {
+        "query": "2343a532.jpg",
+        "gt": "aristov-kyuve-aleksandr-blan-de-blan.webp",
+        "rank": 2,
+        "top1": "aristov-kyuve-aleksandr-blan-de-nuar.webp",
+        "top5": [
+          "aristov-kyuve-aleksandr-blan-de-nuar.webp",
+          "aristov-kyuve-aleksandr-blan-de-blan.webp",
+          "vinodelnya-batrak-perfekt-klassik-saperavi-krasnoe-suhoe-135.webp",
+          "vinodelnya-batrak-perfekt-klassik-merlo-krasnoe-suhoe-135.webp",
+          "agora-rosa-viva-cabernet-sauvignon-shiraz.webp"
+        ],
+        "error_type": "near_same_group",
+        "gt_winery": "096_Кубань-Вино",
+        "pred_winery": "096_Кубань-Вино",
+        "gt_group": "096_Кубань-Вино::aristov__cluster_02_n3",
+        "pred_group": "096_Кубань-Вино::aristov__cluster_02_n3",
+        "gap": -0.000261455774307251
+      },
+      {
+        "query": "35f764ae.jpg",
+        "gt": "alma-valley-shardone-rezerv-beloe-suhoe-14.webp",
+        "rank": 17,
+        "top1": "bogovich-wine-vineyard-pino-nuar-krasnoe-suhoe-125.webp",
+        "top5": [
+          "bogovich-wine-vineyard-pino-nuar-krasnoe-suhoe-125.webp",
+          "millstream-cellar-select-saperavi.webp",
+          "vinodelnya-vedernikov-vedernikov-kaberne-sovinon-krasnoe-suhoe-145.webp",
+          "alma-valley-shardone-rezerv-beloe-suhoe-135.webp",
+          "alma-valley-merlo-rezerv-krasnoe-suhoe-15.webp"
+        ],
+        "error_type": "cross_winery",
+        "gt_winery": "039_Alma Valley",
+        "pred_winery": "010_Bogovich Wine & Vineyard",
+        "gt_group": "039_Alma Valley::6",
+        "pred_group": "010_Bogovich Wine & Vineyard::2",
+        "gap": -0.05356323719024658
+      },
+      {
+        "query": "3c11e5b0.jpeg",
+        "gt": "massandra-muskatel-rozovyy-belye-sorta-vinograda-rozovoe-sladkoe-16.webp",
+        "rank": 4,
+        "top1": "massandra-portveyn-krasnyy-alushta-krasnye-sorta-vinograda-krasnoe-sladkoe-17.webp",
+        "top5": [
+          "massandra-portveyn-krasnyy-alushta-krasnye-sorta-vinograda-krasnoe-sladkoe-17.webp",
+          "massandra-kagor-gurzuf-saperavi-krasnoe-sladkoe-16.webp",
+          "massandra-muskatel-chernyy-krasnye-sorta-vinograda-krasnoe-sladkoe-16.webp",
+          "massandra-muskatel-rozovyy-belye-sorta-vinograda-rozovoe-sladkoe-16.webp",
+          "massandra-rozovoe-suhoe.webp"
+        ],
+        "error_type": "same_winery_diff_group",
+        "gt_winery": "042_Массандра",
+        "pred_winery": "042_Массандра",
+        "gt_group": "042_Массандра::3",
+        "pred_group": "042_Массандра::massandra__cluster_00_n9",
+        "gap": -0.07355713844299316
+      },
+      {
+        "query": "6bb419b6.jpg",
+        "gt": "tsimlyanskie-vina-krepost-sarkel-krasnostop-zolotovskiy-krasnoe-suhoe-145.webp",
+        "rank": 3,
+        "top1": "millstream-cellar-select-blend-avtohtonov.webp",
+        "top5": [
+          "millstream-cellar-select-blend-avtohtonov.webp",
+          "millstream-cellar-select-saperavi.webp",
+          "tsimlyanskie-vina-krepost-sarkel-krasnostop-zolotovskiy-krasnoe-suhoe-145.webp",
+          "millstream-cellar-select-kaberne-sovinon.webp",
+          "millstream-cellar-select-krasnostop-zolotovskij.webp"
+        ],
+        "error_type": "cross_winery",
+        "gt_winery": "008_Цимлянские вина",
+        "pred_winery": "010_MILLSTREAM",
+        "gt_group": "singleton::tsimlyanskie-vina-krepost-sarkel-krasnostop-zolotovskiy-krasnoe-suhoe-145.webp",
+        "pred_group": "010_MILLSTREAM::1",
+        "gap": -0.014573454856872559
+      },
+      {
+        "query": "72ce740a.jpg",
+        "gt": "shato-taman-kaberne-sovinon.webp",
+        "rank": 2,
+        "top1": "kuban-vino-shato-tamane-aligote-beloe-suhoe-13.webp",
+        "top5": [
+          "kuban-vino-shato-tamane-aligote-beloe-suhoe-13.webp",
+          "shato-taman-kaberne-sovinon.webp",
+          "kuban-vino-shato-tamane-shardone-beloe-suhoe-12.webp",
+          "kuban-vino-krasnostop-de-tamane-krasnostop-anapskiy-krasnoe-suhoe-13.webp",
+          "kuban-vino-kaberne-de-tamane-kaberne-sovinon-krasnoe-suhoe-125.webp"
+        ],
+        "error_type": "near_same_group",
+        "gt_winery": "096_Кубань-Вино",
+        "pred_winery": "096_Кубань-Вино",
+        "gt_group": "096_Кубань-Вино::chateau_tamagne__cluster_00_n10",
+        "pred_group": "096_Кубань-Вино::chateau_tamagne__cluster_00_n10",
+        "gap": -0.025314152240753174
+      },
+      {
+        "query": "7bf0507b.jpg",
+        "gt": "belbek-belbek-muskat-beloe-suhoe-128.webp",
+        "rank": 27,
+        "top1": "belbek-belbek-sira-krasnoe-suhoe-132.webp",
+        "top5": [
+          "belbek-belbek-sira-krasnoe-suhoe-132.webp",
+          "belbek-sira-rezerv-krasnoe-suhoe-132.webp",
+          "agora-saperavi.webp",
+          "belbek-sovinon-blan-beloe-suhoe-12.webp",
+          "kuban-vino-aristov-shardone-318-beloe-suhoe-115.webp"
+        ],
+        "error_type": "same_winery_diff_group",
+        "gt_winery": "039_Бельбек",
+        "pred_winery": "039_Бельбек",
+        "gt_group": "039_Бельбек::3",
+        "pred_group": "039_Бельбек::2",
+        "gap": -0.09101152420043945
+      },
+      {
+        "query": "90020e08.jpeg",
+        "gt": "inkermanskiy-zmv-winemakers-selection-saperavi-krasnoe-polusladkoe-12.webp",
+        "rank": 57,
+        "top1": "winemaker-selection.webp",
+        "top5": [
+          "winemaker-selection.webp",
+          "abrau-dyurso-imperial-brut-vintage-shardone-beloe-bryut-12.webp",
+          "novyy-svet-dom-shampanskih-vin-rossiyskoe-shampanskoe-kollektsionnoe-ekstra-bryut-beloe-novyy-svet-blan-de-nuar-pino-nuar-13.webp",
+          "valeriy-zaharin-paterum-bastardo-saperavi-kefesiya-bastardo-magarachskiy-krasnoe-suhoe-12.webp",
+          "perovskih_muskat.webp"
+        ],
+        "error_type": "same_winery_diff_group",
+        "gt_winery": "015_Инкерманский ЗМВ",
+        "pred_winery": "015_Инкерманский ЗМВ",
+        "gt_group": "015_Инкерманский ЗМВ::3",
+        "pred_group": "singleton::winemaker-selection.webp",
+        "gap": -0.2729299068450928
+      },
+      {
+        "query": "9b04cb8d.jpeg",
+        "gt": "chteau-le-grand-vostock-le-chene-royal-reserve-merlo-krasnoe-suhoe-145.webp",
+        "rank": 6,
+        "top1": "chteau-le-grand-vostock-cabernet-sauvignon-reserve-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "top5": [
+          "chteau-le-grand-vostock-cabernet-sauvignon-reserve-kaberne-sovinon-krasnoe-suhoe-14.webp",
+          "chteau-le-grand-vostock-merlot-reserve-merlo-krasnoe-suhoe-145.webp",
+          "chteau-le-grand-vostock-cuvee-karsov-reserve-shardone-beloe-suhoe-14.webp",
+          "chteau-le-grand-vostock-pinot-noir-reserve-pino-nuar-krasnoe-suhoe-135.webp",
+          "chteau-le-grand-vostock-sauvignon-blanc-reserve-sovinon-blan-beloe-suhoe-14.webp"
+        ],
+        "error_type": "near_same_group",
+        "gt_winery": "025_Château Le Grand Vostock",
+        "pred_winery": "025_Château Le Grand Vostock",
+        "gt_group": "025_Château Le Grand Vostock::cluster_02_n6",
+        "pred_group": "025_Château Le Grand Vostock::cluster_02_n6",
+        "gap": -0.07259762287139893
+      },
+      {
+        "query": "bd78e0f6.jpg",
+        "gt": "alma-valley-graviti-pino-blan-beloe-suhoe-135.webp",
+        "rank": 5,
+        "top1": "appassimento.webp",
+        "top5": [
+          "appassimento.webp",
+          "orange.webp",
+          "riesling.webp",
+          "oleg.webp",
+          "alma-valley-graviti-pino-blan-beloe-suhoe-135.webp"
+        ],
+        "error_type": "cross_winery",
+        "gt_winery": "039_Alma Valley",
+        "pred_winery": "031_WINEMAFIA",
+        "gt_group": "039_Alma Valley::all__cluster_05_n2",
+        "pred_group": "031_WINEMAFIA::2",
+        "gap": -0.07599331438541412
+      },
+      {
+        "query": "e3f116c0.jpeg",
+        "gt": "vinodelnya-byurne-merlo-krasnoe-suhoe-14.webp",
+        "rank": 2,
+        "top1": "vinodelnya-byurne-kaberne-fran-krasnoe-suhoe-135.webp",
+        "top5": [
+          "vinodelnya-byurne-kaberne-fran-krasnoe-suhoe-135.webp",
+          "vinodelnya-byurne-merlo-krasnoe-suhoe-14.webp",
+          "vinodelnya-byurne-kaberne-sovinon-krasnoe-suhoe-135.webp",
+          "vinodelnya-zhakov-rozeo-saperavi-rozovoe-suhoe-115.webp",
+          "shato-ay-danil-tokkata-saperavi-krasnoe-suhoe-14.webp"
+        ],
+        "error_type": "near_same_group",
+        "gt_winery": "019_Винодельня Бюрнье",
+        "pred_winery": "019_Винодельня Бюрнье",
+        "gt_group": "019_Винодельня Бюрнье::2",
+        "pred_group": "019_Винодельня Бюрнье::2",
+        "gap": -0.007473021745681763
+      },
+      {
+        "query": "ee3e3334.jpeg",
+        "gt": "derbent-vino-desono-kaberne-sovinon-krasnoe-suhoe-125.webp",
+        "rank": 6,
+        "top1": "millstream-cellar-select-blend-avtohtonov.webp",
+        "top5": [
+          "millstream-cellar-select-blend-avtohtonov.webp",
+          "millstream-cellar-select-kaberne-sovinon.webp",
+          "millstream-cellar-select-krasnostop-zolotovskij.webp",
+          "millstream-cellar-select-saperavi.webp",
+          "bogovich-wine-vineyard-kaberne-fran-krasnoe-suhoe-135.webp"
+        ],
+        "error_type": "cross_winery",
+        "gt_winery": "059_Дербент Вино",
+        "pred_winery": "010_MILLSTREAM",
+        "gt_group": "059_Дербент Вино::derbent_vino__cluster_00_n7",
+        "pred_group": "010_MILLSTREAM::1",
+        "gap": -0.06852889060974121
+      },
+      {
+        "query": "f212df5b.jpeg",
+        "gt": "massandra-portveyn-belyy-krymskiy-kokur-beloe-sladkoe-18.webp",
+        "rank": 8,
+        "top1": "massandra-portveyn-belyy-gurzuf-kokur-belyy-beloe-sladkoe-135.webp",
+        "top5": [
+          "massandra-portveyn-belyy-gurzuf-kokur-belyy-beloe-sladkoe-135.webp",
+          "massandra-muskat.webp",
+          "kokur-suhoe.webp",
+          "massandra-kokur.webp",
+          "massandra-kokur-desertnyy-surozh-beloe-sladkoe-16.webp"
+        ],
+        "error_type": "same_winery_diff_group",
+        "gt_winery": "042_Массандра",
+        "pred_winery": "042_Массандра",
+        "gt_group": "042_Массандра::massandra__cluster_00_n9",
+        "pred_group": "042_Массандра::4",
+        "gap": -0.14029374718666077
+      },
+      {
+        "query": "f780a956.jpg",
+        "gt": "esse-shardone-otbornoe-beloe-suhoe-12.webp",
+        "rank": 3,
+        "top1": "esse-rkatsiteli-beloe-suhoe-125.webp",
+        "top5": [
+          "esse-rkatsiteli-beloe-suhoe-125.webp",
+          "esse-sovinon-blan-beloe-suhoe-12.webp",
+          "esse-shardone-otbornoe-beloe-suhoe-12.webp",
+          "esse-muskat-muskat-belyy-beloe-suhoe-115.webp",
+          "vinodelnya-begildeeva-merlo-krasnoe-suhoe-14.webp"
+        ],
+        "error_type": "near_same_group",
+        "gt_winery": "052_ESSE",
+        "pred_winery": "052_ESSE",
+        "gt_group": "052_ESSE::all__cluster_04_n5",
+        "pred_group": "052_ESSE::all__cluster_04_n5",
+        "gap": -0.011293083429336548
+      }
+    ],
+    "miss_at_5": [
+      {
+        "query": "170d9123.jpeg",
+        "gt": "esse-kaberne-otbornoe-kaberne-sovinon-krasnoe-suhoe-12.webp",
+        "rank": 14,
+        "top5": [
+          "glu-glu-mr-mouse-2022.webp",
+          "leto-vecrfn-2024-suhoe-vino.webp",
+          "aristov-anima-millesimato-beloe-bryut.webp",
+          "glu-glu-butch.webp",
+          "leto-muskat-oranzh-2024-suhoe-vino.webp"
+        ],
+        "top1_error_type": "cross_winery"
+      },
+      {
+        "query": "2039dd8a.jpg",
+        "gt": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "rank": 722,
+        "top5": [
+          "abrau-dyurso-fizz-beloe-bryut.webp",
+          "b-yu-rne-vinisa-zh-suhoe-rozovoe.webp",
+          "belbek-kaberne-fran-krasnoe-suhoe-134.webp",
+          "vibes-cabernet-franc-pinot-noir-pino-nuar-krasnoe-suhoe-125.webp",
+          "usadba-aleksandrovskaya-bubnovyy-valet-kaberne-sovinon-krasnoe-polusladkoe-13.webp"
+        ],
+        "top1_error_type": "cross_winery"
+      },
+      {
+        "query": "35f764ae.jpg",
+        "gt": "alma-valley-shardone-rezerv-beloe-suhoe-14.webp",
+        "rank": 17,
+        "top5": [
+          "bogovich-wine-vineyard-pino-nuar-krasnoe-suhoe-125.webp",
+          "millstream-cellar-select-saperavi.webp",
+          "vinodelnya-vedernikov-vedernikov-kaberne-sovinon-krasnoe-suhoe-145.webp",
+          "alma-valley-shardone-rezerv-beloe-suhoe-135.webp",
+          "alma-valley-merlo-rezerv-krasnoe-suhoe-15.webp"
+        ],
+        "top1_error_type": "cross_winery"
+      },
+      {
+        "query": "7bf0507b.jpg",
+        "gt": "belbek-belbek-muskat-beloe-suhoe-128.webp",
+        "rank": 27,
+        "top5": [
+          "belbek-belbek-sira-krasnoe-suhoe-132.webp",
+          "belbek-sira-rezerv-krasnoe-suhoe-132.webp",
+          "agora-saperavi.webp",
+          "belbek-sovinon-blan-beloe-suhoe-12.webp",
+          "kuban-vino-aristov-shardone-318-beloe-suhoe-115.webp"
+        ],
+        "top1_error_type": "same_winery_diff_group"
+      },
+      {
+        "query": "90020e08.jpeg",
+        "gt": "inkermanskiy-zmv-winemakers-selection-saperavi-krasnoe-polusladkoe-12.webp",
+        "rank": 57,
+        "top5": [
+          "winemaker-selection.webp",
+          "abrau-dyurso-imperial-brut-vintage-shardone-beloe-bryut-12.webp",
+          "novyy-svet-dom-shampanskih-vin-rossiyskoe-shampanskoe-kollektsionnoe-ekstra-bryut-beloe-novyy-svet-blan-de-nuar-pino-nuar-13.webp",
+          "valeriy-zaharin-paterum-bastardo-saperavi-kefesiya-bastardo-magarachskiy-krasnoe-suhoe-12.webp",
+          "perovskih_muskat.webp"
+        ],
+        "top1_error_type": "same_winery_diff_group"
+      },
+      {
+        "query": "9b04cb8d.jpeg",
+        "gt": "chteau-le-grand-vostock-le-chene-royal-reserve-merlo-krasnoe-suhoe-145.webp",
+        "rank": 6,
+        "top5": [
+          "chteau-le-grand-vostock-cabernet-sauvignon-reserve-kaberne-sovinon-krasnoe-suhoe-14.webp",
+          "chteau-le-grand-vostock-merlot-reserve-merlo-krasnoe-suhoe-145.webp",
+          "chteau-le-grand-vostock-cuvee-karsov-reserve-shardone-beloe-suhoe-14.webp",
+          "chteau-le-grand-vostock-pinot-noir-reserve-pino-nuar-krasnoe-suhoe-135.webp",
+          "chteau-le-grand-vostock-sauvignon-blanc-reserve-sovinon-blan-beloe-suhoe-14.webp"
+        ],
+        "top1_error_type": "near_same_group"
+      },
+      {
+        "query": "ee3e3334.jpeg",
+        "gt": "derbent-vino-desono-kaberne-sovinon-krasnoe-suhoe-125.webp",
+        "rank": 6,
+        "top5": [
+          "millstream-cellar-select-blend-avtohtonov.webp",
+          "millstream-cellar-select-kaberne-sovinon.webp",
+          "millstream-cellar-select-krasnostop-zolotovskij.webp",
+          "millstream-cellar-select-saperavi.webp",
+          "bogovich-wine-vineyard-kaberne-fran-krasnoe-suhoe-135.webp"
+        ],
+        "top1_error_type": "cross_winery"
+      },
+      {
+        "query": "f212df5b.jpeg",
+        "gt": "massandra-portveyn-belyy-krymskiy-kokur-beloe-sladkoe-18.webp",
+        "rank": 8,
+        "top5": [
+          "massandra-portveyn-belyy-gurzuf-kokur-belyy-beloe-sladkoe-135.webp",
+          "massandra-muskat.webp",
+          "kokur-suhoe.webp",
+          "massandra-kokur.webp",
+          "massandra-kokur-desertnyy-surozh-beloe-sladkoe-16.webp"
+        ],
+        "top1_error_type": "same_winery_diff_group"
+      }
+    ]
+  },
+  "side_by_side": [
+    {
+      "query": "04f3ce15.jpg",
+      "gt": "chateau-de-talu-ruzh-kaberne-sovinon-krasnoe-suhoe-14.webp",
+      "gt_winery": "026_Chateau de Talu",
+      "p1_rank": 1,
+      "p2_rank": 1,
+      "p1_top1": "chateau-de-talu-ruzh-kaberne-sovinon-krasnoe-suhoe-14.webp",
+      "p2_top1": "chateau-de-talu-ruzh-kaberne-sovinon-krasnoe-suhoe-14.webp",
+      "p1_top5": [
+        "chateau-de-talu-ruzh-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "chateau-de-talu-roze-kaberne-sovinon-rozovoe-suhoe-14.webp",
+        "sober-bash-grani-plechistik-krasnoe-suhoe-12.webp",
+        "chateau-de-talu-blan-semilon-beloe-suhoe-127.webp",
+        "nebo-rossii-glera.webp"
+      ],
+      "p2_top5": [
+        "chateau-de-talu-ruzh-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "nebo-rossii-glera.webp",
+        "chateau-de-talu-blan-semilon-beloe-suhoe-127.webp",
+        "chateau-de-talu-klere-sira-rozovoe-suhoe-136.webp",
+        "chateau-de-talu-roze-kaberne-sovinon-rozovoe-suhoe-14.webp"
+      ],
+      "p1_err": "correct",
+      "p2_err": "correct",
+      "delta_rank": 0,
+      "p1_gap": 0.0,
+      "p2_gap": 0.0
+    },
+    {
+      "query": "10967716.jpg",
+      "gt": "aya-organic-wine-vineyards-purity-in-syrah-sira-rozovoe-suhoe-132.webp",
+      "gt_winery": "027_AYA Organic Wine & Vineyards",
+      "p1_rank": 1,
+      "p2_rank": 1,
+      "p1_top1": "aya-organic-wine-vineyards-purity-in-syrah-sira-rozovoe-suhoe-132.webp",
+      "p2_top1": "aya-organic-wine-vineyards-purity-in-syrah-sira-rozovoe-suhoe-132.webp",
+      "p1_top5": [
+        "aya-organic-wine-vineyards-purity-in-syrah-sira-rozovoe-suhoe-132.webp",
+        "aya-organic-wine-vineyards-purity-in-syrah-sira-krasnoe-suhoe-146.webp",
+        "vinodelnya-vedernikov-rkatsiteli-beloe-suhoe-13.webp",
+        "esse-mama-marselan-krasnoe-suhoe-135.webp",
+        "vinodelnya-uzunov-bunt-tsitronnyy-magaracha-beloe-suhoe-132.webp"
+      ],
+      "p2_top5": [
+        "aya-organic-wine-vineyards-purity-in-syrah-sira-rozovoe-suhoe-132.webp",
+        "esse-mama-marselan-krasnoe-suhoe-135.webp",
+        "aya-organic-wine-vineyards-purity-in-syrah-sira-krasnoe-suhoe-146.webp",
+        "vinodelnya-uzunov-bunt-tsitronnyy-magaracha-beloe-suhoe-132.webp",
+        "vinodelnya-vedernikov-rkatsiteli-beloe-suhoe-13.webp"
+      ],
+      "p1_err": "correct",
+      "p2_err": "correct",
+      "delta_rank": 0,
+      "p1_gap": 0.0,
+      "p2_gap": 0.0
+    },
+    {
+      "query": "170d9123.jpeg",
+      "gt": "esse-kaberne-otbornoe-kaberne-sovinon-krasnoe-suhoe-12.webp",
+      "gt_winery": "052_ESSE",
+      "p1_rank": 6,
+      "p2_rank": 6,
+      "p1_top1": "glu-glu-mr-mouse-2022.webp",
+      "p2_top1": "glu-glu-mr-mouse-2022.webp",
+      "p1_top5": [
+        "glu-glu-mr-mouse-2022.webp",
+        "aristov-anima-millesimato-beloe-bryut.webp",
+        "leto-muskat-oranzh-2024-suhoe-vino.webp",
+        "glu-glu-butch.webp",
+        "daniel-22.webp"
+      ],
+      "p2_top5": [
+        "glu-glu-mr-mouse-2022.webp",
+        "aristov-anima-millesimato-beloe-bryut.webp",
+        "leto-muskat-oranzh-2024-suhoe-vino.webp",
+        "glu-glu-butch.webp",
+        "esse-merlo-otbornoe-krasnoe-suhoe-13.webp"
+      ],
+      "p1_err": "cross_winery",
+      "p2_err": "cross_winery",
+      "delta_rank": 0,
+      "p1_gap": -0.09007611870765686,
+      "p2_gap": -0.1114530861377716
+    },
+    {
+      "query": "2039dd8a.jpg",
+      "gt": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14.webp",
+      "gt_winery": "039_Alma Valley",
+      "p1_rank": 345,
+      "p2_rank": 676,
+      "p1_top1": "marquetry-cabernet-franc.webp",
+      "p2_top1": "belbek-belbek-kaberne-fran-krasnoe-suhoe-13.webp",
+      "p1_top5": [
+        "marquetry-cabernet-franc.webp",
+        "esse-rose-sira-rozovoe-suhoe-12.webp",
+        "usadba-mezyb-shishka-merlo-vione-rozovoe-suhoe-125.webp",
+        "vaynkraft-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "belbek-belbek-kaberne-fran-krasnoe-suhoe-13.webp"
+      ],
+      "p2_top5": [
+        "belbek-belbek-kaberne-fran-krasnoe-suhoe-13.webp",
+        "belbek-kaberne-fran-krasnoe-suhoe-134.webp",
+        "vibes-vermentino-viognier-barrel-fermented-2022.webp",
+        "agora-pino-nuar.webp",
+        "stn-winery-syrah-sira-krasnoe-suhoe-13.webp"
+      ],
+      "p1_err": "cross_winery",
+      "p2_err": "cross_winery",
+      "delta_rank": 331,
+      "p1_gap": -0.16707231104373932,
+      "p2_gap": -0.22337407246232033
+    },
+    {
+      "query": "2343a532.jpg",
+      "gt": "aristov-kyuve-aleksandr-blan-de-blan.webp",
+      "gt_winery": "096_Кубань-Вино",
+      "p1_rank": 2,
+      "p2_rank": 1,
+      "p1_top1": "aristov-kyuve-aleksandr-blan-de-nuar.webp",
+      "p2_top1": "aristov-kyuve-aleksandr-blan-de-blan.webp",
+      "p1_top5": [
+        "aristov-kyuve-aleksandr-blan-de-nuar.webp",
+        "aristov-kyuve-aleksandr-blan-de-blan.webp",
+        "aristov-kyuve-aleksandr-roze-de-pino.webp",
+        "valeriy-zaharin-kokur-klassika-kokur-belyy-beloe-bryut-115.webp",
+        "riesling.webp"
+      ],
+      "p2_top5": [
+        "aristov-kyuve-aleksandr-blan-de-blan.webp",
+        "aristov-kyuve-aleksandr-blan-de-nuar.webp",
+        "oleg-repin-listva-syrah-sira-krasnoe-suhoe-14.webp",
+        "riesling.webp",
+        "valeriy-zaharin-kokur-klassika-kokur-belyy-beloe-bryut-115.webp"
+      ],
+      "p1_err": "near_same_group",
+      "p2_err": "correct",
+      "delta_rank": -1,
+      "p1_gap": -0.01927223801612854,
+      "p2_gap": 0.0
+    },
+    {
+      "query": "26ddb066.jpg",
+      "gt": "agora-muskat-chernyj.webp",
+      "gt_winery": "031_AGORA WINERY",
+      "p1_rank": 1,
+      "p2_rank": 1,
+      "p1_top1": "agora-muskat-chernyj.webp",
+      "p2_top1": "agora-muskat-chernyj.webp",
+      "p1_top5": [
+        "agora-muskat-chernyj.webp",
+        "agora-saperavi.webp",
+        "agora-pino-nuar.webp",
+        "agora-muskat.webp",
+        "belbek-belbek-roze-pino-nuar-rozovoe-suhoe-129.webp"
+      ],
+      "p2_top5": [
+        "agora-muskat-chernyj.webp",
+        "agora-saperavi.webp",
+        "agora-pino-nuar.webp",
+        "agora-muskat.webp",
+        "belbek-belbek-risling-rezerv-beloe-suhoe-13.webp"
+      ],
+      "p1_err": "correct",
+      "p2_err": "correct",
+      "delta_rank": 0,
+      "p1_gap": 0.0,
+      "p2_gap": 0.0
+    },
+    {
+      "query": "35f764ae.jpg",
+      "gt": "alma-valley-shardone-rezerv-beloe-suhoe-14.webp",
+      "gt_winery": "039_Alma Valley",
+      "p1_rank": 3,
+      "p2_rank": 9,
+      "p1_top1": "alma-valley-shardone-rezerv-beloe-suhoe-135.webp",
+      "p2_top1": "alma-valley-shardone-rezerv-beloe-suhoe-135.webp",
+      "p1_top5": [
+        "alma-valley-shardone-rezerv-beloe-suhoe-135.webp",
+        "bogovich-wine-vineyard-kaberne-fran-krasnoe-suhoe-135.webp",
+        "alma-valley-shardone-rezerv-beloe-suhoe-14.webp",
+        "alma-valley-kaberne-fran-krasnoe-suhoe-145.webp",
+        "alma-valley-shiraz-krasnoe-suhoe-13.webp"
+      ],
+      "p2_top5": [
+        "alma-valley-shardone-rezerv-beloe-suhoe-135.webp",
+        "millstream-cellar-select-saperavi.webp",
+        "alma-valley-kaberne-fran-krasnoe-suhoe-145.webp",
+        "bogovich-wine-vineyard-kaberne-fran-krasnoe-suhoe-135.webp",
+        "vinodelnya-vedernikov-vedernikov-kaberne-sovinon-krasnoe-suhoe-145.webp"
+      ],
+      "p1_err": "near_same_group",
+      "p2_err": "near_same_group",
+      "delta_rank": 6,
+      "p1_gap": -0.04786181449890137,
+      "p2_gap": -0.07029610872268677
+    },
+    {
+      "query": "3c11e5b0.jpeg",
+      "gt": "massandra-muskatel-rozovyy-belye-sorta-vinograda-rozovoe-sladkoe-16.webp",
+      "gt_winery": "042_Массандра",
+      "p1_rank": 5,
+      "p2_rank": 4,
+      "p1_top1": "massandra-kagor-gurzuf-saperavi-krasnoe-sladkoe-16.webp",
+      "p2_top1": "massandra-kagor-gurzuf-saperavi-krasnoe-sladkoe-16.webp",
+      "p1_top5": [
+        "massandra-kagor-gurzuf-saperavi-krasnoe-sladkoe-16.webp",
+        "massandra-portveyn-krasnyy-alushta-krasnye-sorta-vinograda-krasnoe-sladkoe-17.webp",
+        "massandra-rozovoe-suhoe.webp",
+        "massandra-bastardo-bastardo-magarachskiy-krasnoe-sladkoe-16.webp",
+        "massandra-muskatel-rozovyy-belye-sorta-vinograda-rozovoe-sladkoe-16.webp"
+      ],
+      "p2_top5": [
+        "massandra-kagor-gurzuf-saperavi-krasnoe-sladkoe-16.webp",
+        "massandra-rozovoe-suhoe.webp",
+        "massandra-portveyn-krasnyy-alushta-krasnye-sorta-vinograda-krasnoe-sladkoe-17.webp",
+        "massandra-muskatel-rozovyy-belye-sorta-vinograda-rozovoe-sladkoe-16.webp",
+        "massandra-bastardo-bastardo-magarachskiy-krasnoe-sladkoe-16.webp"
+      ],
+      "p1_err": "same_winery_diff_group",
+      "p2_err": "same_winery_diff_group",
+      "delta_rank": -1,
+      "p1_gap": -0.05026489496231079,
+      "p2_gap": -0.07422763109207153
+    },
+    {
+      "query": "4679856e.jpg",
+      "gt": "chateau-de-talu-klere-sira-rozovoe-suhoe-136.webp",
+      "gt_winery": "026_Chateau de Talu",
+      "p1_rank": 1,
+      "p2_rank": 1,
+      "p1_top1": "chateau-de-talu-klere-sira-rozovoe-suhoe-136.webp",
+      "p2_top1": "chateau-de-talu-klere-sira-rozovoe-suhoe-136.webp",
+      "p1_top5": [
+        "chateau-de-talu-klere-sira-rozovoe-suhoe-136.webp",
+        "chateau-de-talu-ruzh-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "chateau-de-talu-roze-kaberne-sovinon-rozovoe-suhoe-14.webp",
+        "chateau-de-talu-merlot.webp",
+        "esse-pino-gri-blush-rozovoe-suhoe-115.webp"
+      ],
+      "p2_top5": [
+        "chateau-de-talu-klere-sira-rozovoe-suhoe-136.webp",
+        "chateau-de-talu-ruzh-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "chateau-de-talu-roze-kaberne-sovinon-rozovoe-suhoe-14.webp",
+        "chateau-de-talu-blan-semilon-beloe-suhoe-127.webp",
+        "chateau-de-talu-merlot.webp"
+      ],
+      "p1_err": "correct",
+      "p2_err": "correct",
+      "delta_rank": 0,
+      "p1_gap": 0.0,
+      "p2_gap": 0.0
+    },
+    {
+      "query": "4ea254fd.jpg",
+      "gt": "esse-saperavi-heaven-krasnoe-suhoe-13.webp",
+      "gt_winery": "052_ESSE",
+      "p1_rank": 1,
+      "p2_rank": 1,
+      "p1_top1": "esse-saperavi-heaven-krasnoe-suhoe-13.webp",
+      "p2_top1": "esse-saperavi-heaven-krasnoe-suhoe-13.webp",
+      "p1_top5": [
+        "esse-saperavi-heaven-krasnoe-suhoe-13.webp",
+        "esse-pino-gri-beloe-suhoe-12.webp",
+        "chateau-de-talu-blan-semilon-beloe-suhoe-127.webp",
+        "chateau-de-talu-ruzh-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "sober-bash-grani-plechistik-krasnoe-suhoe-12.webp"
+      ],
+      "p2_top5": [
+        "esse-saperavi-heaven-krasnoe-suhoe-13.webp",
+        "esse-pino-gri-beloe-suhoe-12.webp",
+        "chateau-de-talu-blan-semilon-beloe-suhoe-127.webp",
+        "chateau-de-talu-ruzh-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "sober-bash-grani-plechistik-krasnoe-suhoe-12.webp"
+      ],
+      "p1_err": "correct",
+      "p2_err": "correct",
+      "delta_rank": 0,
+      "p1_gap": 0.0,
+      "p2_gap": 0.0
+    },
+    {
+      "query": "6bb419b6.jpg",
+      "gt": "tsimlyanskie-vina-krepost-sarkel-krasnostop-zolotovskiy-krasnoe-suhoe-145.webp",
+      "gt_winery": "008_Цимлянские вина",
+      "p1_rank": 2,
+      "p2_rank": 2,
+      "p1_top1": "millstream-cellar-select-saperavi.webp",
+      "p2_top1": "millstream-cellar-select-saperavi.webp",
+      "p1_top5": [
+        "millstream-cellar-select-saperavi.webp",
+        "tsimlyanskie-vina-krepost-sarkel-krasnostop-zolotovskiy-krasnoe-suhoe-145.webp",
+        "millstream-cellar-select-blend-avtohtonov.webp",
+        "millstream-cellar-select-krasnostop-zolotovskij.webp",
+        "millstream-cellar-select-kaberne-sovinon.webp"
+      ],
+      "p2_top5": [
+        "millstream-cellar-select-saperavi.webp",
+        "tsimlyanskie-vina-krepost-sarkel-krasnostop-zolotovskiy-krasnoe-suhoe-145.webp",
+        "millstream-cellar-select-blend-avtohtonov.webp",
+        "bogovich-wine-vineyard-pino-nuar-krasnoe-suhoe-125.webp",
+        "millstream-cellar-select-krasnostop-zolotovskij.webp"
+      ],
+      "p1_err": "cross_winery",
+      "p2_err": "cross_winery",
+      "delta_rank": 0,
+      "p1_gap": -0.0006912946701049805,
+      "p2_gap": -0.0038461387157440186
+    },
+    {
+      "query": "72ce740a.jpg",
+      "gt": "shato-taman-kaberne-sovinon.webp",
+      "gt_winery": "096_Кубань-Вино",
+      "p1_rank": 1,
+      "p2_rank": 2,
+      "p1_top1": "shato-taman-kaberne-sovinon.webp",
+      "p2_top1": "kuban-vino-shato-tamane-aligote-beloe-suhoe-13.webp",
+      "p1_top5": [
+        "shato-taman-kaberne-sovinon.webp",
+        "kuban-vino-shato-tamane-aligote-beloe-suhoe-13.webp",
+        "kuban-vino-shato-tamane-shardone-beloe-suhoe-12.webp",
+        "kuban-vino-krasnostop-de-tamane-krasnostop-anapskiy-krasnoe-suhoe-13.webp",
+        "shato-taman-krasnostop.webp"
+      ],
+      "p2_top5": [
+        "kuban-vino-shato-tamane-aligote-beloe-suhoe-13.webp",
+        "shato-taman-kaberne-sovinon.webp",
+        "kuban-vino-shato-tamane-shardone-beloe-suhoe-12.webp",
+        "kuban-vino-krasnostop-de-tamane-krasnostop-anapskiy-krasnoe-suhoe-13.webp",
+        "kuban-vino-kaberne-de-tamane-kaberne-sovinon-krasnoe-suhoe-125.webp"
+      ],
+      "p1_err": "correct",
+      "p2_err": "near_same_group",
+      "delta_rank": 1,
+      "p1_gap": 0.0,
+      "p2_gap": -0.012601017951965332
+    },
+    {
+      "query": "7bf0507b.jpg",
+      "gt": "belbek-belbek-muskat-beloe-suhoe-128.webp",
+      "gt_winery": "039_Бельбек",
+      "p1_rank": 48,
+      "p2_rank": 44,
+      "p1_top1": "agora-saperavi.webp",
+      "p2_top1": "vibes-chardonnay-barrel-fermented-shardone-beloe-suhoe-125.webp",
+      "p1_top5": [
+        "agora-saperavi.webp",
+        "vibes-chardonnay-barrel-fermented-shardone-beloe-suhoe-125.webp",
+        "vibes-chardonnay-barrel-fermented-2021.webp",
+        "usadba-aleksandrovskaya-bubnovyy-valet-kaberne-sovinon-krasnoe-polusladkoe-13.webp",
+        "belbek-belbek-risling-rezerv-beloe-suhoe-13.webp"
+      ],
+      "p2_top5": [
+        "vibes-chardonnay-barrel-fermented-shardone-beloe-suhoe-125.webp",
+        "vibes-chardonnay-barrel-fermented-2021.webp",
+        "agora-saperavi.webp",
+        "belbek-sira-rezerv-krasnoe-suhoe-132.webp",
+        "belbek-belbek-sira-krasnoe-suhoe-132.webp"
+      ],
+      "p1_err": "cross_winery",
+      "p2_err": "cross_winery",
+      "delta_rank": -4,
+      "p1_gap": -0.153607577085495,
+      "p2_gap": -0.14307180047035217
+    },
+    {
+      "query": "8a8ad5d7.jpeg",
+      "gt": "vinodelnya-byurne-lyublyu-krasnoe-kaberne-fran-suhoe-135.webp",
+      "gt_winery": "019_Винодельня Бюрнье",
+      "p1_rank": 1,
+      "p2_rank": 1,
+      "p1_top1": "vinodelnya-byurne-lyublyu-krasnoe-kaberne-fran-suhoe-135.webp",
+      "p2_top1": "vinodelnya-byurne-lyublyu-krasnoe-kaberne-fran-suhoe-135.webp",
+      "p1_top5": [
+        "vinodelnya-byurne-lyublyu-krasnoe-kaberne-fran-suhoe-135.webp",
+        "vinodelnya-byurne-lyublyu-beloe-shardone-suhoe-135.webp",
+        "b-yu-rne-l-yu-bl-yu-suhoe-rozovoe.webp",
+        "fanagoriya-sur-lie-clairet-saperavi-krasnoe-suhoe-13.webp",
+        "one-barrel-uan-barrel.webp"
+      ],
+      "p2_top5": [
+        "vinodelnya-byurne-lyublyu-krasnoe-kaberne-fran-suhoe-135.webp",
+        "b-yu-rne-l-yu-bl-yu-suhoe-rozovoe.webp",
+        "fanagoriya-sur-lie-clairet-saperavi-krasnoe-suhoe-13.webp",
+        "relikta-relikta-antey-magarachskiy-muskat-belyy-rozovoe-polusuhoe-11.webp",
+        "vinodelnya-byurne-lyublyu-beloe-shardone-suhoe-135.webp"
+      ],
+      "p1_err": "correct",
+      "p2_err": "correct",
+      "delta_rank": 0,
+      "p1_gap": 0.0,
+      "p2_gap": 0.0
+    },
+    {
+      "query": "90020e08.jpeg",
+      "gt": "inkermanskiy-zmv-winemakers-selection-saperavi-krasnoe-polusladkoe-12.webp",
+      "gt_winery": "015_Инкерманский ЗМВ",
+      "p1_rank": 3,
+      "p2_rank": 9,
+      "p1_top1": "winemaker-selection.webp",
+      "p2_top1": "winemaker-selection.webp",
+      "p1_top5": [
+        "winemaker-selection.webp",
+        "fanagoriya-dekanter-kaberne-sovinon-2018-krasnoe-suhoe-14.webp",
+        "inkermanskiy-zmv-winemakers-selection-saperavi-krasnoe-polusladkoe-12.webp",
+        "fanagoriya-dekanter-pino-nuar-2020-krasnoe-suhoe-135.webp",
+        "fanagoriya-dekanter-riesling-2020-risling-reynskiy-beloe-suhoe-13.webp"
+      ],
+      "p2_top5": [
+        "winemaker-selection.webp",
+        "abrau-dyurso-imperial-brut-vintage-shardone-beloe-bryut-12.webp",
+        "abrau-dyurso-imperial-brut-rose-pino-nuar-rozovoe-bryut-12.webp",
+        "fanagoriya-dekanter-pino-nuar-2020-krasnoe-suhoe-135.webp",
+        "fanagoriya-dekanter-kaberne-sovinon-2018-krasnoe-suhoe-14.webp"
+      ],
+      "p1_err": "same_winery_diff_group",
+      "p2_err": "same_winery_diff_group",
+      "delta_rank": 6,
+      "p1_gap": -0.13370758295059204,
+      "p2_gap": -0.16231751441955566
+    },
+    {
+      "query": "98ea37d3.jpg",
+      "gt": "alma-valley-kaberne-sovinon-rezerv-krasnoe-suhoe-15.webp",
+      "gt_winery": "039_Alma Valley",
+      "p1_rank": 1,
+      "p2_rank": 1,
+      "p1_top1": "alma-valley-kaberne-sovinon-rezerv-krasnoe-suhoe-15.webp",
+      "p2_top1": "alma-valley-kaberne-sovinon-rezerv-krasnoe-suhoe-15.webp",
+      "p1_top5": [
+        "alma-valley-kaberne-sovinon-rezerv-krasnoe-suhoe-15.webp",
+        "alma-valley-shardone-beloe-suhoe-135.webp",
+        "alma-valley-rislaner-beloe-polusladkoe-125.webp",
+        "alma-valley-sovinon-blan-beloe-suhoe-14.webp",
+        "alma-valley-shiraz-krasnoe-suhoe-13.webp"
+      ],
+      "p2_top5": [
+        "alma-valley-kaberne-sovinon-rezerv-krasnoe-suhoe-15.webp",
+        "alma-valley-rislaner-beloe-polusladkoe-125.webp",
+        "alma-valley-sovinon-blan-beloe-suhoe-14.webp",
+        "alma-valley-shiraz-krasnoe-suhoe-13.webp",
+        "alma-valley-shardone-beloe-suhoe-135.webp"
+      ],
+      "p1_err": "correct",
+      "p2_err": "correct",
+      "delta_rank": 0,
+      "p1_gap": 0.0,
+      "p2_gap": 0.0
+    },
+    {
+      "query": "9b04cb8d.jpeg",
+      "gt": "chteau-le-grand-vostock-le-chene-royal-reserve-merlo-krasnoe-suhoe-145.webp",
+      "gt_winery": "025_Château Le Grand Vostock",
+      "p1_rank": 4,
+      "p2_rank": 4,
+      "p1_top1": "chteau-le-grand-vostock-cabernet-sauvignon-reserve-kaberne-sovinon-krasnoe-suhoe-14.webp",
+      "p2_top1": "chteau-le-grand-vostock-cabernet-sauvignon-reserve-kaberne-sovinon-krasnoe-suhoe-14.webp",
+      "p1_top5": [
+        "chteau-le-grand-vostock-cabernet-sauvignon-reserve-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "chteau-le-grand-vostock-cabernet-franc-reserve-kaberne-fran-krasnoe-suhoe-14.webp",
+        "chteau-le-grand-vostock-krasnostop-reserve-krasnostop-krasnoe-suhoe-14.webp",
+        "chteau-le-grand-vostock-le-chene-royal-reserve-merlo-krasnoe-suhoe-145.webp",
+        "chteau-le-grand-vostock-merlot-reserve-merlo-krasnoe-suhoe-145.webp"
+      ],
+      "p2_top5": [
+        "chteau-le-grand-vostock-cabernet-sauvignon-reserve-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "chteau-le-grand-vostock-merlot-reserve-merlo-krasnoe-suhoe-145.webp",
+        "chteau-le-grand-vostock-krasnostop-reserve-krasnostop-krasnoe-suhoe-14.webp",
+        "chteau-le-grand-vostock-le-chene-royal-reserve-merlo-krasnoe-suhoe-145.webp",
+        "chteau-le-grand-vostock-cabernet-franc-reserve-kaberne-fran-krasnoe-suhoe-14.webp"
+      ],
+      "p1_err": "near_same_group",
+      "p2_err": "near_same_group",
+      "delta_rank": 0,
+      "p1_gap": -0.0650835633277893,
+      "p2_gap": -0.07010087370872498
+    },
+    {
+      "query": "a263fc7c.jpeg",
+      "gt": "abrau-dyurso-abrau-estates-krasnoe-kaberne-sovinon-suhoe-13.webp",
+      "gt_winery": "050_Абрау-Дюрсо",
+      "p1_rank": 1,
+      "p2_rank": 1,
+      "p1_top1": "abrau-dyurso-abrau-estates-krasnoe-kaberne-sovinon-suhoe-13.webp",
+      "p2_top1": "abrau-dyurso-abrau-estates-krasnoe-kaberne-sovinon-suhoe-13.webp",
+      "p1_top5": [
+        "abrau-dyurso-abrau-estates-krasnoe-kaberne-sovinon-suhoe-13.webp",
+        "abrau-dyurso-abrau-estates-oranzh-tsitronnyy-magaracha-oranzhevoe-suhoe-105.webp",
+        "abrau-dyurso-abrau-estates-dostoynyy-krasnoe-suhoe-135.webp",
+        "abrau-dyurso-abrau-estates-beloe-shardone-suhoe-12.webp",
+        "abrau-dyurso-abrau-estates-kaberne-po-belomu-kaberne-sovinon-beloe-suhoe-105.webp"
+      ],
+      "p2_top5": [
+        "abrau-dyurso-abrau-estates-krasnoe-kaberne-sovinon-suhoe-13.webp",
+        "abrau-dyurso-abrau-estates-oranzh-tsitronnyy-magaracha-oranzhevoe-suhoe-105.webp",
+        "abrau-dyurso-abrau-estates-dostoynyy-krasnoe-suhoe-135.webp",
+        "abrau-dyurso-abrau-estates-beloe-shardone-suhoe-12.webp",
+        "vinodelnya-uzunov-nrav-krasnostop-zolotovskiy-krasnoe-suhoe-132.webp"
+      ],
+      "p1_err": "correct",
+      "p2_err": "correct",
+      "delta_rank": 0,
+      "p1_gap": 0.0,
+      "p2_gap": 0.0
+    },
+    {
+      "query": "b50cf052.jpg",
+      "gt": "soyuz-vino-kanonicheskie-traditsii-krasnoe-sladkoe-kaberne-sovinon-115.webp",
+      "gt_winery": "033_Союз-Вино",
+      "p1_rank": 1,
+      "p2_rank": 1,
+      "p1_top1": "soyuz-vino-kanonicheskie-traditsii-krasnoe-sladkoe-kaberne-sovinon-115.webp",
+      "p2_top1": "soyuz-vino-kanonicheskie-traditsii-krasnoe-sladkoe-kaberne-sovinon-115.webp",
+      "p1_top5": [
+        "soyuz-vino-kanonicheskie-traditsii-krasnoe-sladkoe-kaberne-sovinon-115.webp",
+        "chateau-andre-pino-nuar-krasnoe-suhoe-14.webp",
+        "chateau-andre-kaberne-sovinon-krasnoe-suhoe-13.webp",
+        "chateau-andre-merlo-krasnoe-suhoe-14.webp",
+        "kaberne-sovinon.webp"
+      ],
+      "p2_top5": [
+        "soyuz-vino-kanonicheskie-traditsii-krasnoe-sladkoe-kaberne-sovinon-115.webp",
+        "soyuz-vino-mosavali-saperavi-suhoe-krasnoe-11.webp",
+        "imenie-sikory-krasnostop-zolotovskiy-na-terrasah-rozovoe-suhoe-13.webp",
+        "kaberne-sovinon.webp",
+        "portvejn-surozh.webp"
+      ],
+      "p1_err": "correct",
+      "p2_err": "correct",
+      "delta_rank": 0,
+      "p1_gap": 0.0,
+      "p2_gap": 0.0
+    },
+    {
+      "query": "bd78e0f6.jpg",
+      "gt": "alma-valley-graviti-pino-blan-beloe-suhoe-135.webp",
+      "gt_winery": "039_Alma Valley",
+      "p1_rank": 1,
+      "p2_rank": 1,
+      "p1_top1": "alma-valley-graviti-pino-blan-beloe-suhoe-135.webp",
+      "p2_top1": "alma-valley-graviti-pino-blan-beloe-suhoe-135.webp",
+      "p1_top5": [
+        "alma-valley-graviti-pino-blan-beloe-suhoe-135.webp",
+        "orange.webp",
+        "appassimento.webp",
+        "chateau-de-talu-krasnostop-rezerv-krasnostop-anapskiy-krasnoe-suhoe-137.webp",
+        "riesling.webp"
+      ],
+      "p2_top5": [
+        "alma-valley-graviti-pino-blan-beloe-suhoe-135.webp",
+        "orange.webp",
+        "riesling.webp",
+        "appassimento.webp",
+        "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14.webp"
+      ],
+      "p1_err": "correct",
+      "p2_err": "correct",
+      "delta_rank": 0,
+      "p1_gap": 0.0,
+      "p2_gap": 0.0
+    },
+    {
+      "query": "db42a74e.jpeg",
+      "gt": "kuban-vino-vysokiy-bereg-merlo-krasnoe-suhoe-135.webp",
+      "gt_winery": "096_Кубань-Вино",
+      "p1_rank": 1,
+      "p2_rank": 1,
+      "p1_top1": "kuban-vino-vysokiy-bereg-merlo-krasnoe-suhoe-135.webp",
+      "p2_top1": "kuban-vino-vysokiy-bereg-merlo-krasnoe-suhoe-135.webp",
+      "p1_top5": [
+        "kuban-vino-vysokiy-bereg-merlo-krasnoe-suhoe-135.webp",
+        "usadba-mezyb-mezyb-kaberne-sovinon-kaberne-fran-vione-rozovoe-suhoe-133.webp",
+        "artvin-kaberne-sovinon-grand-rezerv-krasnoe-suhoe-13.webp",
+        "chateau-de-talu-merlo-rezerv-krasnoe-suhoe-14.webp",
+        "kuban-vino-vysokiy-bereg-myuller-turgau-beloe-suhoe-13.webp"
+      ],
+      "p2_top5": [
+        "kuban-vino-vysokiy-bereg-merlo-krasnoe-suhoe-135.webp",
+        "usadba-mezyb-mezyb-kaberne-sovinon-kaberne-fran-vione-rozovoe-suhoe-133.webp",
+        "artvin-kaberne-sovinon-grand-rezerv-krasnoe-suhoe-13.webp",
+        "kuban-vino-shato-tamane-rkatsiteli-myuller-turgau-shardone-2025-beloe-suhoe-12.webp",
+        "kuban-vino-vysokiy-bereg-myuller-turgau-beloe-suhoe-13.webp"
+      ],
+      "p1_err": "correct",
+      "p2_err": "correct",
+      "delta_rank": 0,
+      "p1_gap": 0.0,
+      "p2_gap": 0.0
+    },
+    {
+      "query": "e2591aad.jpg",
+      "gt": "alma-valley-tempranilo-krasnoe-suhoe-13.webp",
+      "gt_winery": "039_Alma Valley",
+      "p1_rank": 1,
+      "p2_rank": 1,
+      "p1_top1": "alma-valley-tempranilo-krasnoe-suhoe-13.webp",
+      "p2_top1": "alma-valley-tempranilo-krasnoe-suhoe-13.webp",
+      "p1_top5": [
+        "alma-valley-tempranilo-krasnoe-suhoe-13.webp",
+        "alma-valley-shiraz-krasnoe-suhoe-13.webp",
+        "vinodelnya-byurne-krasnostop-krasnoe-suhoe-145.webp",
+        "alma-valley-shardone-beloe-suhoe-135.webp",
+        "alma-valley-merlo-krasnoe-suhoe-13.webp"
+      ],
+      "p2_top5": [
+        "alma-valley-tempranilo-krasnoe-suhoe-13.webp",
+        "alma-valley-shiraz-krasnoe-suhoe-13.webp",
+        "alma-valley-merlo-krasnoe-suhoe-13.webp",
+        "vinodelnya-byurne-krasnostop-krasnoe-suhoe-145.webp",
+        "alma-valley-traminer-beloe-suhoe-125.webp"
+      ],
+      "p1_err": "correct",
+      "p2_err": "correct",
+      "delta_rank": 0,
+      "p1_gap": 0.0,
+      "p2_gap": 0.0
+    },
+    {
+      "query": "e3f116c0.jpeg",
+      "gt": "vinodelnya-byurne-merlo-krasnoe-suhoe-14.webp",
+      "gt_winery": "019_Винодельня Бюрнье",
+      "p1_rank": 6,
+      "p2_rank": 8,
+      "p1_top1": "b-yu-rne-malbek-krasnoe-suhoe.webp",
+      "p2_top1": "b-yu-rne-malbek-krasnoe-suhoe.webp",
+      "p1_top5": [
+        "b-yu-rne-malbek-krasnoe-suhoe.webp",
+        "b-yu-rne-krasnostop-suhoe-krasnoe-classic.webp",
+        "b-yu-rne-sira-krasnoe-suhoe-classic.webp",
+        "vinodelnya-zhakov-rozeo-saperavi-rozovoe-suhoe-115.webp",
+        "vinodelnya-byurne-kaberne-fran-krasnoe-suhoe-135.webp"
+      ],
+      "p2_top5": [
+        "b-yu-rne-malbek-krasnoe-suhoe.webp",
+        "b-yu-rne-krasnostop-suhoe-krasnoe-classic.webp",
+        "b-yu-rne-sira-krasnoe-suhoe-classic.webp",
+        "vinogradniki-gay-kodzora-viognier-de-ga-kodzor-vione-beloe-suhoe-125.webp",
+        "vinodelnya-zhakov-rozeo-saperavi-rozovoe-suhoe-115.webp"
+      ],
+      "p1_err": "near_same_group",
+      "p2_err": "near_same_group",
+      "delta_rank": 2,
+      "p1_gap": -0.03126060962677002,
+      "p2_gap": -0.0411737859249115
+    },
+    {
+      "query": "ee3e3334.jpeg",
+      "gt": "derbent-vino-desono-kaberne-sovinon-krasnoe-suhoe-125.webp",
+      "gt_winery": "059_Дербент Вино",
+      "p1_rank": 2,
+      "p2_rank": 1,
+      "p1_top1": "bogovich-wine-vineyard-kaberne-fran-krasnoe-suhoe-135.webp",
+      "p2_top1": "derbent-vino-desono-kaberne-sovinon-krasnoe-suhoe-125.webp",
+      "p1_top5": [
+        "bogovich-wine-vineyard-kaberne-fran-krasnoe-suhoe-135.webp",
+        "derbent-vino-desono-kaberne-sovinon-krasnoe-suhoe-125.webp",
+        "millstream-cellar-select-blend-avtohtonov.webp",
+        "millstream-cellar-select-saperavi.webp",
+        "millstream-cellar-select-kaberne-sovinon.webp"
+      ],
+      "p2_top5": [
+        "derbent-vino-desono-kaberne-sovinon-krasnoe-suhoe-125.webp",
+        "millstream-cellar-select-blend-avtohtonov.webp",
+        "millstream-cellar-select-kaberne-sovinon.webp",
+        "bogovich-wine-vineyard-kaberne-fran-krasnoe-suhoe-135.webp",
+        "millstream-cellar-select-saperavi.webp"
+      ],
+      "p1_err": "cross_winery",
+      "p2_err": "correct",
+      "delta_rank": -1,
+      "p1_gap": -0.01973903179168701,
+      "p2_gap": 0.0
+    },
+    {
+      "query": "ef930b69.jpg",
+      "gt": "vinodelnya-krinitsa-arena-sira-krasnoe-suhoe-13.webp",
+      "gt_winery": "011_Криница",
+      "p1_rank": 3,
+      "p2_rank": 2,
+      "p1_top1": "belbek-merlo-krasnoe-suhoe-13.webp",
+      "p2_top1": "belbek-merlo-krasnoe-suhoe-13.webp",
+      "p1_top5": [
+        "belbek-merlo-krasnoe-suhoe-13.webp",
+        "belbek-belbek-roze-pino-nuar-rozovoe-suhoe-129.webp",
+        "vinodelnya-krinitsa-arena-sira-krasnoe-suhoe-13.webp",
+        "agora-saperavi.webp",
+        "agora-pino-nuar.webp"
+      ],
+      "p2_top5": [
+        "belbek-merlo-krasnoe-suhoe-13.webp",
+        "vinodelnya-krinitsa-arena-sira-krasnoe-suhoe-13.webp",
+        "agora-pino-nuar.webp",
+        "belbek-belbek-roze-pino-nuar-rozovoe-suhoe-129.webp",
+        "shato-pino-exclusive-pino-nuar-merlo-krasnoe-suhoe-135.webp"
+      ],
+      "p1_err": "cross_winery",
+      "p2_err": "cross_winery",
+      "delta_rank": -1,
+      "p1_gap": -0.04374825954437256,
+      "p2_gap": -0.03690347075462341
+    },
+    {
+      "query": "f212df5b.jpeg",
+      "gt": "massandra-portveyn-belyy-krymskiy-kokur-beloe-sladkoe-18.webp",
+      "gt_winery": "042_Массандра",
+      "p1_rank": 2,
+      "p2_rank": 3,
+      "p1_top1": "massandra-portveyn-belyy-gurzuf-kokur-belyy-beloe-sladkoe-135.webp",
+      "p2_top1": "massandra-portveyn-belyy-gurzuf-kokur-belyy-beloe-sladkoe-135.webp",
+      "p1_top5": [
+        "massandra-portveyn-belyy-gurzuf-kokur-belyy-beloe-sladkoe-135.webp",
+        "massandra-portveyn-belyy-krymskiy-kokur-beloe-sladkoe-18.webp",
+        "massandra-massandra-heres-oreadna-aligote-beloe-suhoe-16.webp",
+        "massandra-muskat.webp",
+        "massandra-portveyn-belyy-alushta-belye-sorta-vinograda-beloe-sladkoe-17.webp"
+      ],
+      "p2_top5": [
+        "massandra-portveyn-belyy-gurzuf-kokur-belyy-beloe-sladkoe-135.webp",
+        "massandra-muskat.webp",
+        "massandra-portveyn-belyy-krymskiy-kokur-beloe-sladkoe-18.webp",
+        "kokur-suhoe.webp",
+        "massandra-massandra-heres-oreadna-aligote-beloe-suhoe-16.webp"
+      ],
+      "p1_err": "same_winery_diff_group",
+      "p2_err": "same_winery_diff_group",
+      "delta_rank": 1,
+      "p1_gap": -0.09290492534637451,
+      "p2_gap": -0.13096392154693604
+    },
+    {
+      "query": "f780a956.jpg",
+      "gt": "esse-shardone-otbornoe-beloe-suhoe-12.webp",
+      "gt_winery": "052_ESSE",
+      "p1_rank": 4,
+      "p2_rank": 3,
+      "p1_top1": "esse-sovinon-blan-beloe-suhoe-12.webp",
+      "p2_top1": "esse-rkatsiteli-beloe-suhoe-125.webp",
+      "p1_top5": [
+        "esse-sovinon-blan-beloe-suhoe-12.webp",
+        "esse-rkatsiteli-beloe-suhoe-125.webp",
+        "esse-muskat-muskat-belyy-beloe-suhoe-115.webp",
+        "esse-shardone-otbornoe-beloe-suhoe-12.webp",
+        "vinodelnya-begildeeva-merlo-krasnoe-suhoe-14.webp"
+      ],
+      "p2_top5": [
+        "esse-rkatsiteli-beloe-suhoe-125.webp",
+        "esse-sovinon-blan-beloe-suhoe-12.webp",
+        "esse-shardone-otbornoe-beloe-suhoe-12.webp",
+        "esse-muskat-muskat-belyy-beloe-suhoe-115.webp",
+        "vibes-glera-col-fondo-2022.webp"
+      ],
+      "p1_err": "near_same_group",
+      "p2_err": "near_same_group",
+      "delta_rank": -1,
+      "p1_gap": -0.00673675537109375,
+      "p2_gap": -0.007571548223495483
+    }
+  ],
+  "shared_wrong_top1_both_miss@1": 9,
+  "different_wrong_top1_both_miss@1": 3
+}

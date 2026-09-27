@@ -1,0 +1,998 @@
+{
+  "tag": "dinov2_large_wine_phase1",
+  "topk": 5,
+  "n_scored": 27,
+  "n_miss": 6,
+  "n_hit": 21,
+  "R_at_k": 0.7777777777777778,
+  "gt_missing": [],
+  "slot_relations_on_miss": {
+    "other": 21,
+    "same_winery": 9
+  },
+  "top_intruders": [
+    [
+      "relikta-relikta-pervenets-muskat-pervenets-magaracha-beloe-polusladkoe-125.webp",
+      2
+    ],
+    [
+      "cock-test-belle-kyuve-2-blan-de-nuar-pino-mene-beloe-ekstra-bryut-12.webp",
+      2
+    ],
+    [
+      "lesnaya-proseka.webp",
+      1
+    ],
+    [
+      "vinodelnya-batrak-contadina-merlo-krasnoe-suhoe-14.webp",
+      1
+    ],
+    [
+      "derbent-vino-graf-vorontsov-bryut-beloe-sovinon-blan-105-125.webp",
+      1
+    ],
+    [
+      "villa-di-alma-pti-verdo-krasnoe-suhoe-125.webp",
+      1
+    ],
+    [
+      "dacha-serdyuka-sibirkovyy-oranzh-beloe-suhoe-135.webp",
+      1
+    ],
+    [
+      "derbent-vino-endemy-sovinon-beloe-bryut-105-125.webp",
+      1
+    ],
+    [
+      "massandra-muskatel-chernyy-krasnye-sorta-vinograda-krasnoe-sladkoe-16.webp",
+      1
+    ],
+    [
+      "massandra-muskat-belyy-yuzhnoberezhnyy-beloe-sladkoe-16.webp",
+      1
+    ],
+    [
+      "massandra-kagor-gurzuf-saperavi-krasnoe-sladkoe-16.webp",
+      1
+    ],
+    [
+      "massandra-portveyn-krasnyy-livadiya-kaberne-sovinon-krasnoe-sladkoe-185.webp",
+      1
+    ],
+    [
+      "massandra-bastardo-bastardo-magarachskiy-krasnoe-sladkoe-16.webp",
+      1
+    ],
+    [
+      "belbek-sovinon-blan-beloe-suhoe-12.webp",
+      1
+    ],
+    [
+      "belbek-pino-nuar-krasnoe-suhoe-133.webp",
+      1
+    ],
+    [
+      "belbek-pino-nuar-rezerv-krasnoe-suhoe-135.webp",
+      1
+    ],
+    [
+      "belbek-belbek-pino-nuar-krasnoe-suhoe-13.webp",
+      1
+    ],
+    [
+      "agora-saperavi.webp",
+      1
+    ],
+    [
+      "riesling.webp",
+      1
+    ],
+    [
+      "orange.webp",
+      1
+    ],
+    [
+      "vermentino-viognier-2022.webp",
+      1
+    ],
+    [
+      "appassimento.webp",
+      1
+    ],
+    [
+      "vinodelnya-raevskoe-renessans-blaufrankish-krasnoe-suhoe-128.webp",
+      1
+    ],
+    [
+      "vinodelnya-vedernikov-gubernatorskoe-risling-beloe-suhoe-12.webp",
+      1
+    ],
+    [
+      "fanagoriya-primum-alveus-blanc-de-noirs-meunier-ekstra-bryut-2019-mene-beloe-11-13.webp",
+      1
+    ]
+  ],
+  "top_intruder_wineries": [
+    [
+      "Массандра",
+      5
+    ],
+    [
+      "Бельбек",
+      4
+    ],
+    [
+      "Дербент Вино",
+      3
+    ],
+    [
+      "WINEMAFIA",
+      3
+    ],
+    [
+      "Кубань-Вино",
+      2
+    ],
+    [
+      "Реликта",
+      2
+    ],
+    [
+      "Cock t'est belle",
+      2
+    ],
+    [
+      "Фанагория",
+      2
+    ],
+    [
+      "Винодельня Батрак",
+      1
+    ],
+    [
+      "Villa di Alma",
+      1
+    ],
+    [
+      "Дача Сердюка",
+      1
+    ],
+    [
+      "AGORA WINERY",
+      1
+    ],
+    [
+      "Vibes",
+      1
+    ],
+    [
+      "Раевское",
+      1
+    ],
+    [
+      "Ведерниковъ",
+      1
+    ]
+  ],
+  "color_confusion": [
+    [
+      "Розовый, насыщенный → Тёмно-рубиновый",
+      2
+    ],
+    [
+      "Интенсивный рубиново-красный с фиолетовым оттенком. → Светло-золотистый",
+      1
+    ],
+    [
+      "Интенсивный рубиново-красный с фиолетовым оттенком. → Красновато-багряный",
+      1
+    ],
+    [
+      "Интенсивный рубиново-красный с фиолетовым оттенком. → Светло-соломенный",
+      1
+    ],
+    [
+      "Интенсивный рубиново-красный с фиолетовым оттенком. → Бледно-соломенный",
+      1
+    ],
+    [
+      "Интенсивный рубиново-красный с фиолетовым оттенком. → Серебристо-белый, практически прозрачный",
+      1
+    ],
+    [
+      "рубиновый средней интенсивности → Глубокий рубиновый цвет с чернильным оттенком.",
+      1
+    ],
+    [
+      "рубиновый средней интенсивности → Светло-соломенный",
+      1
+    ],
+    [
+      "рубиновый средней интенсивности → Бледно-соломенный",
+      1
+    ],
+    [
+      "рубиновый средней интенсивности → Янтарно-золотой",
+      1
+    ],
+    [
+      "рубиновый средней интенсивности → Светло-соломенный с зеленоватым оттенком",
+      1
+    ],
+    [
+      "Розовый, насыщенный → Насыщенный золотистый цвет с красивыми бликами тёмного янтаря.",
+      1
+    ],
+    [
+      "Розовый, насыщенный → Тёмно-рубиновый с коричневатым оттенком",
+      1
+    ],
+    [
+      "Розовый, насыщенный → Тёмно-рубиновый с фиолетовым оттенком",
+      1
+    ],
+    [
+      "Светло-соломенный с зеленоватым оттенком → Зеленовато-соломенный",
+      1
+    ],
+    [
+      "Светло-соломенный с зеленоватым оттенком → Сдержанный рубиновый",
+      1
+    ],
+    [
+      "Светло-соломенный с зеленоватым оттенком → Красивый темно-рубиновый",
+      1
+    ],
+    [
+      "Светло-соломенный с зеленоватым оттенком → Светло-рубиновый, прозрачный",
+      1
+    ],
+    [
+      "Светло-соломенный с зеленоватым оттенком → Темно-рубиновый",
+      1
+    ],
+    [
+      "Светло-золотистый → Соломенный, с зеленоватым оттенком",
+      1
+    ]
+  ],
+  "winery_confusion": [
+    [
+      "Массандра → Массандра",
+      5
+    ],
+    [
+      "Бельбек → Бельбек",
+      4
+    ],
+    [
+      "Alma Valley → WINEMAFIA",
+      3
+    ],
+    [
+      "Alma Valley → Фанагория",
+      2
+    ],
+    [
+      "Криница → Кубань-Вино",
+      1
+    ],
+    [
+      "Криница → Винодельня Батрак",
+      1
+    ],
+    [
+      "Криница → Реликта",
+      1
+    ],
+    [
+      "Криница → Cock t'est belle",
+      1
+    ],
+    [
+      "Криница → Дербент Вино",
+      1
+    ],
+    [
+      "Винодельня Бюрнье → Villa di Alma",
+      1
+    ],
+    [
+      "Винодельня Бюрнье → Реликта",
+      1
+    ],
+    [
+      "Винодельня Бюрнье → Cock t'est belle",
+      1
+    ],
+    [
+      "Винодельня Бюрнье → Дача Сердюка",
+      1
+    ],
+    [
+      "Винодельня Бюрнье → Дербент Вино",
+      1
+    ],
+    [
+      "Бельбек → AGORA WINERY",
+      1
+    ],
+    [
+      "Alma Valley → Vibes",
+      1
+    ],
+    [
+      "Alma Valley → Раевское",
+      1
+    ],
+    [
+      "Alma Valley → Ведерниковъ",
+      1
+    ],
+    [
+      "Alma Valley → Кубань-Вино",
+      1
+    ],
+    [
+      "Alma Valley → Дербент Вино",
+      1
+    ]
+  ],
+  "misses": [
+    {
+      "query": "ef930b69.jpg",
+      "rank": 7,
+      "gap12": 0.028681933879852295,
+      "gt": {
+        "file": "vinodelnya-krinitsa-arena-sira-krasnoe-suhoe-13.webp",
+        "in_csv": true,
+        "slug": "vinodelnya-krinitsa-arena-sira-krasnoe-suhoe-13",
+        "name": "Арена",
+        "winery": "Криница",
+        "color": "Интенсивный рубиново-красный с фиолетовым оттенком.",
+        "grape": "Сира",
+        "category": "Красное",
+        "region": "Кубань"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "lesnaya-proseka.webp",
+          "in_csv": true,
+          "slug": "lesnaya-proseka",
+          "name": "Лесная просека",
+          "winery": "Кубань-Вино",
+          "color": "Светло-золотистый",
+          "grape": "Алиготе, Пино Блан, Шардоне",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 2,
+          "file": "vinodelnya-batrak-contadina-merlo-krasnoe-suhoe-14.webp",
+          "in_csv": true,
+          "slug": "vinodelnya-batrak-contadina-merlo-krasnoe-suhoe-14",
+          "name": "Contadina",
+          "winery": "Винодельня Батрак",
+          "color": "Красновато-багряный",
+          "grape": "Мерло",
+          "category": "Красное",
+          "region": "Ставрополье",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 3,
+          "file": "relikta-relikta-pervenets-muskat-pervenets-magaracha-beloe-polusladkoe-125.webp",
+          "in_csv": true,
+          "slug": "relikta-relikta-pervenets-muskat-pervenets-magaracha-beloe-polusladkoe-125",
+          "name": "Реликта Первенец Мускат",
+          "winery": "Реликта",
+          "color": "Светло-соломенный",
+          "grape": "Мускат Белый, Первенец Магарача",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 4,
+          "file": "cock-test-belle-kyuve-2-blan-de-nuar-pino-mene-beloe-ekstra-bryut-12.webp",
+          "in_csv": true,
+          "slug": "cock-test-belle-kyuve-2-blan-de-nuar-pino-mene-beloe-ekstra-bryut-12",
+          "name": "Кюве №2 Блан Де Нуар",
+          "winery": "Cock t'est belle",
+          "color": "Бледно-соломенный",
+          "grape": "Пино Менье",
+          "category": "Белое",
+          "region": "Крым",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 5,
+          "file": "derbent-vino-graf-vorontsov-bryut-beloe-sovinon-blan-105-125.webp",
+          "in_csv": true,
+          "slug": "derbent-vino-graf-vorontsov-bryut-beloe-sovinon-blan-105-125",
+          "name": "Граф Воронцов. Брют белое",
+          "winery": "Дербент Вино",
+          "color": "Серебристо-белый, практически прозрачный",
+          "grape": "Первенец Магарача, Ркацители, Совиньон Блан, Шардоне",
+          "category": "Белое",
+          "region": "Дагестан",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        }
+      ],
+      "top_relations": {
+        "other": 5
+      },
+      "n_same_winery_in_top": 0,
+      "n_same_color_in_top": 0,
+      "n_same_category_in_top": 1
+    },
+    {
+      "query": "8a8ad5d7.jpeg",
+      "rank": 8,
+      "gap12": 0.10234665870666504,
+      "gt": {
+        "file": "vinodelnya-byurne-lyublyu-krasnoe-kaberne-fran-suhoe-135.webp",
+        "in_csv": true,
+        "slug": "vinodelnya-byurne-lyublyu-krasnoe-kaberne-fran-suhoe-135",
+        "name": "БЮРНЬЕ.ЛЮБЛЮ сухое красное",
+        "winery": "Винодельня Бюрнье",
+        "color": "рубиновый средней интенсивности",
+        "grape": "Каберне Фран, Мерло, Сира",
+        "category": "Красное",
+        "region": "Кубань"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "villa-di-alma-pti-verdo-krasnoe-suhoe-125.webp",
+          "in_csv": true,
+          "slug": "villa-di-alma-pti-verdo-krasnoe-suhoe-125",
+          "name": "Пти Вердо",
+          "winery": "Villa di Alma",
+          "color": "Глубокий рубиновый цвет с чернильным оттенком.",
+          "grape": "Пти Вердо",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 2,
+          "file": "relikta-relikta-pervenets-muskat-pervenets-magaracha-beloe-polusladkoe-125.webp",
+          "in_csv": true,
+          "slug": "relikta-relikta-pervenets-muskat-pervenets-magaracha-beloe-polusladkoe-125",
+          "name": "Реликта Первенец Мускат",
+          "winery": "Реликта",
+          "color": "Светло-соломенный",
+          "grape": "Мускат Белый, Первенец Магарача",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 3,
+          "file": "cock-test-belle-kyuve-2-blan-de-nuar-pino-mene-beloe-ekstra-bryut-12.webp",
+          "in_csv": true,
+          "slug": "cock-test-belle-kyuve-2-blan-de-nuar-pino-mene-beloe-ekstra-bryut-12",
+          "name": "Кюве №2 Блан Де Нуар",
+          "winery": "Cock t'est belle",
+          "color": "Бледно-соломенный",
+          "grape": "Пино Менье",
+          "category": "Белое",
+          "region": "Крым",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 4,
+          "file": "dacha-serdyuka-sibirkovyy-oranzh-beloe-suhoe-135.webp",
+          "in_csv": true,
+          "slug": "dacha-serdyuka-sibirkovyy-oranzh-beloe-suhoe-135",
+          "name": "Сибирьковый Оранж",
+          "winery": "Дача Сердюка",
+          "color": "Янтарно-золотой",
+          "grape": "Сибирьковый",
+          "category": "Белое",
+          "region": "Долина Дона",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 5,
+          "file": "derbent-vino-endemy-sovinon-beloe-bryut-105-125.webp",
+          "in_csv": true,
+          "slug": "derbent-vino-endemy-sovinon-beloe-bryut-105-125",
+          "name": "Эндемы Совиньон",
+          "winery": "Дербент Вино",
+          "color": "Светло-соломенный с зеленоватым оттенком",
+          "grape": "Совиньон",
+          "category": "Белое",
+          "region": "Дагестан",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        }
+      ],
+      "top_relations": {
+        "other": 5
+      },
+      "n_same_winery_in_top": 0,
+      "n_same_color_in_top": 0,
+      "n_same_category_in_top": 1
+    },
+    {
+      "query": "3c11e5b0.jpeg",
+      "rank": 11,
+      "gap12": 0.0038732290267944336,
+      "gt": {
+        "file": "massandra-muskatel-rozovyy-belye-sorta-vinograda-rozovoe-sladkoe-16.webp",
+        "in_csv": true,
+        "slug": "massandra-muskatel-rozovyy-belye-sorta-vinograda-rozovoe-sladkoe-16",
+        "name": "Мускатель розовый",
+        "winery": "Массандра",
+        "color": "Розовый, насыщенный",
+        "grape": "Белые сорта винограда, Красные сорта винограда",
+        "category": "Розовое",
+        "region": "Крым"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "massandra-muskatel-chernyy-krasnye-sorta-vinograda-krasnoe-sladkoe-16.webp",
+          "in_csv": true,
+          "slug": "massandra-muskatel-chernyy-krasnye-sorta-vinograda-krasnoe-sladkoe-16",
+          "name": "Мускатель черный",
+          "winery": "Массандра",
+          "color": "Тёмно-рубиновый",
+          "grape": "Красные сорта винограда",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 2,
+          "file": "massandra-muskat-belyy-yuzhnoberezhnyy-beloe-sladkoe-16.webp",
+          "in_csv": true,
+          "slug": "massandra-muskat-belyy-yuzhnoberezhnyy-beloe-sladkoe-16",
+          "name": "Мускат Белый Южнобережный",
+          "winery": "Массандра",
+          "color": "Насыщенный золотистый цвет с красивыми бликами тёмного янтаря.",
+          "grape": "Мускат Белый",
+          "category": "Белое",
+          "region": "Крым",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 3,
+          "file": "massandra-kagor-gurzuf-saperavi-krasnoe-sladkoe-16.webp",
+          "in_csv": true,
+          "slug": "massandra-kagor-gurzuf-saperavi-krasnoe-sladkoe-16",
+          "name": "Кагор Гурзуф",
+          "winery": "Массандра",
+          "color": "Тёмно-рубиновый",
+          "grape": "Бастардо Магарачский, Каберне Совиньон, Саперави",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 4,
+          "file": "massandra-portveyn-krasnyy-livadiya-kaberne-sovinon-krasnoe-sladkoe-185.webp",
+          "in_csv": true,
+          "slug": "massandra-portveyn-krasnyy-livadiya-kaberne-sovinon-krasnoe-sladkoe-185",
+          "name": "Портвейн красный Ливадия",
+          "winery": "Массандра",
+          "color": "Тёмно-рубиновый с коричневатым оттенком",
+          "grape": "Каберне Совиньон",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 5,
+          "file": "massandra-bastardo-bastardo-magarachskiy-krasnoe-sladkoe-16.webp",
+          "in_csv": true,
+          "slug": "massandra-bastardo-bastardo-magarachskiy-krasnoe-sladkoe-16",
+          "name": "Бастардо",
+          "winery": "Массандра",
+          "color": "Тёмно-рубиновый с фиолетовым оттенком",
+          "grape": "Бастардо Магарачский",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        }
+      ],
+      "top_relations": {
+        "same_winery": 5
+      },
+      "n_same_winery_in_top": 5,
+      "n_same_color_in_top": 0,
+      "n_same_category_in_top": 0
+    },
+    {
+      "query": "7bf0507b.jpg",
+      "rank": 19,
+      "gap12": 0.016860365867614746,
+      "gt": {
+        "file": "belbek-belbek-muskat-beloe-suhoe-128.webp",
+        "in_csv": true,
+        "slug": "belbek-belbek-muskat-beloe-suhoe-128",
+        "name": "Бельбек Мускат",
+        "winery": "Бельбек",
+        "color": "Светло-соломенный с зеленоватым оттенком",
+        "grape": "Мускат",
+        "category": "Белое",
+        "region": "Крым"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "belbek-sovinon-blan-beloe-suhoe-12.webp",
+          "in_csv": true,
+          "slug": "belbek-sovinon-blan-beloe-suhoe-12",
+          "name": "Совиньон Блан",
+          "winery": "Бельбек",
+          "color": "Зеленовато-соломенный",
+          "grape": "Совиньон Блан",
+          "category": "Белое",
+          "region": "Крым",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 2,
+          "file": "belbek-pino-nuar-krasnoe-suhoe-133.webp",
+          "in_csv": true,
+          "slug": "belbek-pino-nuar-krasnoe-suhoe-133",
+          "name": "Пино Нуар",
+          "winery": "Бельбек",
+          "color": "Сдержанный рубиновый",
+          "grape": "Пино Нуар",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 3,
+          "file": "belbek-pino-nuar-rezerv-krasnoe-suhoe-135.webp",
+          "in_csv": true,
+          "slug": "belbek-pino-nuar-rezerv-krasnoe-suhoe-135",
+          "name": "Пино Нуар Резерв",
+          "winery": "Бельбек",
+          "color": "Красивый темно-рубиновый",
+          "grape": "Пино Нуар",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 4,
+          "file": "belbek-belbek-pino-nuar-krasnoe-suhoe-13.webp",
+          "in_csv": true,
+          "slug": "belbek-belbek-pino-nuar-krasnoe-suhoe-13",
+          "name": "Бельбек Пино Нуар",
+          "winery": "Бельбек",
+          "color": "Светло-рубиновый, прозрачный",
+          "grape": "Пино Нуар",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "same_winery",
+          "same_winery": true,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 5,
+          "file": "agora-saperavi.webp",
+          "in_csv": true,
+          "slug": "agora-saperavi",
+          "name": "AGORA Саперави",
+          "winery": "AGORA WINERY",
+          "color": "Темно-рубиновый",
+          "grape": "Саперави",
+          "category": "Красное",
+          "region": "Крым",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        }
+      ],
+      "top_relations": {
+        "same_winery": 4,
+        "other": 1
+      },
+      "n_same_winery_in_top": 4,
+      "n_same_color_in_top": 0,
+      "n_same_category_in_top": 1
+    },
+    {
+      "query": "bd78e0f6.jpg",
+      "rank": 34,
+      "gap12": 0.12044847011566162,
+      "gt": {
+        "file": "alma-valley-graviti-pino-blan-beloe-suhoe-135.webp",
+        "in_csv": true,
+        "slug": "alma-valley-graviti-pino-blan-beloe-suhoe-135",
+        "name": "Гравити",
+        "winery": "Alma Valley",
+        "color": "Светло-золотистый",
+        "grape": "Пино Блан, Пино Гри, Рислинг",
+        "category": "Белое",
+        "region": "Крым"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "riesling.webp",
+          "in_csv": true,
+          "slug": "riesling",
+          "name": "Riesling, 2024",
+          "winery": "WINEMAFIA",
+          "color": "Соломенный, с зеленоватым оттенком",
+          "grape": "Рислинг",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 2,
+          "file": "orange.webp",
+          "in_csv": true,
+          "slug": "orange",
+          "name": "Orange, 2023",
+          "winery": "WINEMAFIA",
+          "color": "Сухой насыщенной соломы",
+          "grape": "Рислинг",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 3,
+          "file": "vermentino-viognier-2022.webp",
+          "in_csv": true,
+          "slug": "vermentino-viognier-2022",
+          "name": "Vermentino-Viognier 2022",
+          "winery": "Vibes",
+          "color": "Светло-соломенный",
+          "grape": "Верментино",
+          "category": "Белое",
+          "region": "Крым",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 4,
+          "file": "appassimento.webp",
+          "in_csv": true,
+          "slug": "appassimento",
+          "name": "Appassimento",
+          "winery": "WINEMAFIA",
+          "color": "Плотный рубиново-красный с фиолетовыми отблесками",
+          "grape": "Каберне Совиньон",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 5,
+          "file": "vinodelnya-raevskoe-renessans-blaufrankish-krasnoe-suhoe-128.webp",
+          "in_csv": true,
+          "slug": "vinodelnya-raevskoe-renessans-blaufrankish-krasnoe-suhoe-128",
+          "name": "Ренессанс Блауфранкиш",
+          "winery": "Раевское",
+          "color": "Чистый прозрачный рубиновый цвет с вишнево-пурпурными оттенками.",
+          "grape": "Блауфранкиш",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        }
+      ],
+      "top_relations": {
+        "other": 5
+      },
+      "n_same_winery_in_top": 0,
+      "n_same_color_in_top": 0,
+      "n_same_category_in_top": 3
+    },
+    {
+      "query": "2039dd8a.jpg",
+      "rank": 100,
+      "gap12": 0.007922887802124023,
+      "gt": {
+        "file": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14.webp",
+        "in_csv": true,
+        "slug": "alma-valley-alma-graviti-pino-nuar-merlo-kaberne-sovinon-krasnoe-suhoe-14",
+        "name": "Альма Гравити. Пино Нуар - Мерло - Каберне Совиньон",
+        "winery": "Alma Valley",
+        "color": "Рубиновый цвет с пурпурно-малиновыми оттенками и ровным блеском.",
+        "grape": "Пино Нуар",
+        "category": "Красное",
+        "region": "Крым"
+      },
+      "top": [
+        {
+          "pos": 1,
+          "file": "vinodelnya-vedernikov-gubernatorskoe-risling-beloe-suhoe-12.webp",
+          "in_csv": true,
+          "slug": "vinodelnya-vedernikov-gubernatorskoe-risling-beloe-suhoe-12",
+          "name": "Губернаторское. Рислинг",
+          "winery": "Ведерниковъ",
+          "color": "Соломенно-золотистый",
+          "grape": "Рислинг",
+          "category": "Белое",
+          "region": "Долина Дона",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 2,
+          "file": "fanagoriya-primum-alveus-blanc-de-noirs-meunier-ekstra-bryut-2019-mene-beloe-11-13.webp",
+          "in_csv": true,
+          "slug": "fanagoriya-primum-alveus-blanc-de-noirs-meunier-ekstra-bryut-2019-mene-beloe-11-13",
+          "name": "Primum Alveus. Blanc de Noirs. Meunier. Экстра брют 2019",
+          "winery": "Фанагория",
+          "color": "Соломенный",
+          "grape": "Менье",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        },
+        {
+          "pos": 3,
+          "file": "kuban-vino-aristov-anima-pino-nero-sandzhoveze-pino-nuar-krasnoe-suhoe-125.webp",
+          "in_csv": true,
+          "slug": "kuban-vino-aristov-anima-pino-nero-sandzhoveze-pino-nuar-krasnoe-suhoe-125",
+          "name": "Аристов Анима Пино Неро Санджовезе",
+          "winery": "Кубань-Вино",
+          "color": "Цвет вина варьируется от насыщенного до темного рубинового.",
+          "grape": "Пино Нуар, Санджовезе",
+          "category": "Красное",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 4,
+          "file": "derbent-vino-di-kaspiko-merlo-krasnoe-polusladkoe-11.webp",
+          "in_csv": true,
+          "slug": "derbent-vino-di-kaspiko-merlo-krasnoe-polusladkoe-11",
+          "name": "Ди Каспико",
+          "winery": "Дербент Вино",
+          "color": "Глубокий алый",
+          "grape": "Мерло",
+          "category": "Красное",
+          "region": "Дагестан",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": true,
+          "same_grape": false
+        },
+        {
+          "pos": 5,
+          "file": "fanagoriya-primum-alveus-blanc-de-blancs-2017-shardone-igristoe-bryut-beloe-12.webp",
+          "in_csv": true,
+          "slug": "fanagoriya-primum-alveus-blanc-de-blancs-2017-shardone-igristoe-bryut-beloe-12",
+          "name": "Primum Alveus Blanc de Blancs 2017",
+          "winery": "Фанагория",
+          "color": "Светло-золотистый",
+          "grape": "Шардоне",
+          "category": "Белое",
+          "region": "Кубань",
+          "relation": "other",
+          "same_winery": false,
+          "same_color": false,
+          "same_category": false,
+          "same_grape": false
+        }
+      ],
+      "top_relations": {
+        "other": 5
+      },
+      "n_same_winery_in_top": 0,
+      "n_same_color_in_top": 0,
+      "n_same_category_in_top": 2
+    }
+  ]
+}
