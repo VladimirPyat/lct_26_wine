@@ -29,11 +29,14 @@ node_modules/
 __pycache__
 *.pyc
 .pytest_cache
+.mypy_cache
+.pytest_cache
 
 #cursor
 .cursor/
 manifest.md
 _migration/
+.worktrees
 
 .trash/
 
@@ -50,8 +53,13 @@ service-account*.json
 .ssh/id_*
 
 
-# big data
-data/
+# big data (catalog source CSVs are tracked; images / eval / tmp are not)
+/data/*
+!/data/wines_integrated_updated.csv
+!/data/wines_problem_images.csv
+!/data/site_database/
+/data/site_database/*
+!/data/site_database/wines_database_enriched.json
 bin/
 # Top-level FAISS/vector dump dir (not src/db package)
 /db/

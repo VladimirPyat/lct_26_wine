@@ -16,8 +16,11 @@
 #   scripts/rebuild_catalog_db.sh --prepare-only            # steps 1-2, DB untouched
 #   scripts/rebuild_catalog_db.sh --yes --reuse-assets      # step 3 on prepared assets
 #   scripts/rebuild_catalog_db.sh --yes                     # 1-3
-#   scripts/rebuild_catalog_db.sh --yes --input data/owner_database/wines_integrated_updated.csv \
+#   scripts/rebuild_catalog_db.sh --yes --input data/wines_integrated_updated.csv \
 #       --images-dir data/owner_database/images -- --encode-batch-size 8
+#
+# Inputs: data/wines_integrated_updated.csv (tracked), data/site_database/wines_database_enriched.json
+# (tracked; rating / dishes / product_url), images {slug}.webp in data/owner_database/images (cloud).
 #
 # Args after `--` are passed to scripts/catalog_import.py (both import calls).
 set -euo pipefail
@@ -25,7 +28,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
-INPUT="data/owner_database/wines_integrated_updated.csv"
+INPUT="data/wines_integrated_updated.csv"
 IMAGES_DIR="data/owner_database/images"
 READY_CSV="scripts/catalog_prepare/wines_clean_ready.csv"
 REJECTED_CSV="scripts/catalog_prepare/wines_clean_rejected.csv"
@@ -48,7 +51,7 @@ while [[ $# -gt 0 ]]; do
     --ready-csv) READY_CSV="$2"; shift 2 ;;
     --cropper-device) CROPPER_DEVICE="$2"; shift 2 ;;
     --) shift; IMPORT_ARGS=("$@"); break ;;
-    -h|--help) sed -n '2,21p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,24p' "$0"; exit 0 ;;
     *) echo "unknown arg: $1" >&2; exit 2 ;;
   esac
 done

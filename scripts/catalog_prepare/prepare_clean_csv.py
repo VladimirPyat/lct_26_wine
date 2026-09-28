@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert a cleaned owner-format catalog CSV into the import CSV schema.
 
-Input: ``data/owner_database/wines_integrated_updated.csv`` (Russian owner
+Input: ``data/wines_integrated_updated.csv`` (Russian owner
 headers) with images under ``data/owner_database/images/``; an empty image
 column falls back to ``{slug}.webp``. Output (import schema,
 ``image_source=clean`` → resolved against ``--clean-images`` on import):
@@ -45,7 +45,7 @@ from prepare_ready_csv import (  # noqa: E402
 
 IMAGE_SOURCE_CLEAN = "clean"
 
-DEFAULT_INPUT = _REPO_ROOT / "data" / "owner_database" / "wines_integrated_updated.csv"
+DEFAULT_INPUT = _REPO_ROOT / "data" / "wines_integrated_updated.csv"
 DEFAULT_IMAGES = _REPO_ROOT / "data" / "owner_database" / "images"
 DEFAULT_OUT_READY = _SCRIPT_DIR / "wines_clean_ready.csv"
 DEFAULT_OUT_REJECTED = _SCRIPT_DIR / "wines_clean_rejected.csv"

@@ -234,3 +234,11 @@ TEST_PASS (WEB-UI A–D)
 - Commands: `ruff check src/ tests/` exit 0; `pytest tests/ -q` exit 0 — 404 passed, 2 skipped (live e2e), 1 xfailed.
 - Smoke on :8080 (GPU): `/health`, `/`, `/catalog`, `/me`, `/docs`, `/api/v1/dictionaries`, `/api/v1/wines` 200; `/v1/eval/predict` returns slug; `/api/v1/search` found/high; UI form `POST /search` → 303 → result (found) → `?analogs=1` (298 matches, sommelier hint) → photo 200 → wine page 200; noise image → low + «Аналог подобрать не удалось».
 - Eval runs — owner. Open: app logging config (OCR engine line invisible under plain uvicorn), `not_found_min` calibration on real out-of-catalog photos.
+
+## 2026-09-28 — Logging, fp16 encoder, full quickstart (master)
+
+- App logging: `src/api/main.py` configures root logger (stderr, `VINE_LOG_LEVEL`, default INFO) unless handlers exist → startup lines (encoder, `OCR engine: …`, dictionaries) visible under plain uvicorn.
+- Encoder config → `bin/siglip2_wine_p1_epoch_3_fp16.onnx` (owner links); DB index built with fp32 kept (same space). owner_eval via :8080 with fp16: set1 27/27, set2 25/25 identical to master baseline.
+- Catalog inputs tracked in git: `data/wines_integrated_updated.csv` (2103 wines), `data/wines_problem_images.csv` (100), `data/site_database/wines_database_enriched.json` (rating/dishes/url); defaults of `rebuild_catalog_db.sh` / `prepare_clean_csv.py` → `data/wines_integrated_updated.csv`. Dry-run prepare: ready=2091, rejected=12.
+- Docs: `manuals/quickstart.md` rewritten (Docker, NVIDIA driver, uv, models + links, DB, indexing, run/open UI, API, eval, troubleshooting); new `manuals/user_interface.md`; README (docs, UI + API endpoints, layout), `manuals/index.md`, `configuration_guide.md`, `ARCHITECTURE.md`, `manual_testing.md` synced.
+- Commands: `ruff check src/ tests/` exit 0; `pytest tests/ -q` exit 0 — 404 passed, 2 skipped, 1 xfailed.

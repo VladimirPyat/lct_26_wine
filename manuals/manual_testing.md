@@ -108,7 +108,7 @@ uv run pytest tests/test_owner_eval_scoring.py::test_owner_eval_canary_swapped_g
 
 ## Веб-интерфейс (Stage 4) — чеклист-заготовка
 
-Заготовка для @Tester (дополняется в `tester_web_ui.md`). Сервис — `StubProductService`: статус задаётся именем файла (`*_low.jpg`, `*_notfound.jpg`, иначе «найдено»).
+Заготовка для @Tester (дополняется в `tester_web_ui.md`). Сервис — реальный `CatalogProductService` (как `/api/v1`); экраны и состояния — [user_interface.md](user_interface.md). `StubProductService` (статус по имени файла) — только в автотестах `tests/web/`.
 
 ### Предусловия
 

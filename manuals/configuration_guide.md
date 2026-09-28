@@ -16,13 +16,18 @@
 | `src/llm/tasks/*.yaml` | base_url / model / `api_key_env` / retries для LLM-задач |
 | `src/llm/prompts/` | тексты промптов (путь в task YAML) |
 | `docker-compose.yml` | сервис `db`, порт `5432` |
+| Переменные окружения | `VINE_LOG_LEVEL` (уровень логов приложения: `DEBUG` / `INFO` / `WARNING`, по умолчанию `INFO`); `LD_LIBRARY_PATH` (GPU: библиотеки CUDA из venv, см. quickstart); `VINE_RESET_EMBEDDINGS=1` (только для смены размерности эмбеддинга) |
+
+## Логи приложения
+
+Uvicorn настраивает только свои логгеры (`uvicorn.*`), поэтому приложение при старте само выводит свои логи (`api.*`, `core.*`, `db.*`, `llm.*`) в stderr в формате `время уровень логгер: сообщение`. Уровень — `VINE_LOG_LEVEL` (по умолчанию `INFO`). Если логирование уже настроено хостом (pytest, внешний запускатель), приложение его не трогает. Полезные строки старта: модель и провайдеры энкодера, `OCR engine: configured=… effective=… reason=…`, `product dictionaries: …`. Решения по каждому запросу — отдельный JSONL (`decision_log`, см. ниже).
 
 ## Энкодер изображений (`config/database.yaml`)
 
-Прод-энкодер — SigLIP2 so400m (`bin/siglip2_wine_p1_epoch_3.onnx`, выход `pooler_output [B, 1152]`). Имена ключей (`dino_model_path`, блок `dino:`) и класс `DinoOnnxEncoder` исторические — переименование вне скоупа.
+Прод-энкодер — SigLIP2 so400m, экспорт **fp16** (`bin/siglip2_wine_p1_epoch_3_fp16.onnx`, ~817 МБ, выход `pooler_output [B, 1152]`; ссылки на скачивание — [quickstart.md](quickstart.md#5-модели--bin)). fp32-версия (`bin/siglip2_wine_p1_epoch_3.onnx`) даёт то же пространство эмбеддингов (косинус с fp16 ≥ 0.9995, ответы owner_eval совпадают 52/52) — можно подставить без переиндексации. Имена ключей (`dino_model_path`, блок `dino:`) и класс `DinoOnnxEncoder` исторические — переименование вне скоупа.
 
 ```yaml
-dino_model_path: bin/siglip2_wine_p1_epoch_3.onnx
+dino_model_path: bin/siglip2_wine_p1_epoch_3_fp16.onnx
 embedding_dim: 1152
 dino:
   input_size: 256
@@ -34,7 +39,7 @@ dino:
   encode_batch_size: 16
 ```
 
-- Препроцесс **обязан** совпадать с обучением: значения берутся из `bin/siglip2_wine_p1_epoch_3_preprocess.json`. Letterbox — одна реализация (`core/retrieve/preprocess.py`), её же использует `scripts/compare_dino_onnx.py`.
+- Препроцесс **обязан** совпадать с обучением: значения в `dino:` сверены с `siglip2_wine_p1_epoch_3_preprocess.json` (справочный файл обучения; приложение его не читает). Letterbox — одна реализация (`core/retrieve/preprocess.py`), её же использует `scripts/compare_dino_onnx.py`.
 - **Fail-fast по размерности:** если статическая размерность выхода ONNX ≠ `embedding_dim`, энкодер не стартует (`RuntimeError` с путём модели и обеими размерностями). Символьные размерности не проверяются.
 - **Откат на DINO:** в `database.yaml` закомментирован блок DINOv2 (768, 224, ImageNet mean/std, `resize_mode: stretch`). Раскомментировать его вместо SigLIP-блока → процедура «Смена размерности эмбеддинга» ниже.
 - В decision log каждой записи пишутся `encoder_model` (имя ONNX-файла) и `embedding_dim`.
@@ -236,7 +241,7 @@ uv run python scripts/catalog_import.py --crop-first --cropper-device cuda \
 uv run python scripts/catalog_import.py --crops-dir data/tmp/catalog_crops --recreate-wines
 ```
 
-Источник каталога — CSV владельца (`data/owner_database/wines_integrated_updated.csv` + `data/owner_database/images/`; пустая колонка «Файл в wines_images» → `{slug}.webp`): сначала `scripts/catalog_prepare/prepare_clean_csv.py` конвертирует его в схему импорта (`wines_clean_ready.csv`, строки без фото → `wines_clean_rejected.csv` с `reason`), затем импорт с `--csv scripts/catalog_prepare/wines_clean_ready.csv`. `--csv` можно повторять; он заменяет `--ready`/`--additional`. Строки с `image_source=clean` ищут фото в `--clean-images` (по умолчанию `data/clean/images`; `rebuild_catalog_db.sh` передаёт `data/owner_database/images`).
+Источник каталога — CSV владельца (`data/wines_integrated_updated.csv` в git + фото `data/owner_database/images/` из облака + обогащение `data/site_database/wines_database_enriched.json` в git: рейтинг, блюда, ссылки; пустая колонка «Файл в wines_images» → `{slug}.webp`): сначала `scripts/catalog_prepare/prepare_clean_csv.py` конвертирует его в схему импорта (`wines_clean_ready.csv`, строки без фото → `wines_clean_rejected.csv` с `reason`), затем импорт с `--csv scripts/catalog_prepare/wines_clean_ready.csv`. `--csv` можно повторять; он заменяет `--ready`/`--additional`. Строки с `image_source=clean` ищут фото в `--clean-images` (по умолчанию `data/clean/images`; `rebuild_catalog_db.sh` передаёт `data/owner_database/images`).
 
 ### Смена размерности эмбеддинга
 

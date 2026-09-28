@@ -2,7 +2,7 @@
 
 Фото этикетки → одна карточка вина из каталога «Своё Вино». Документ описывает пайплайн и границы слоёв. Детали модулей, логов и режимов policy — в [manuals/architecture.md](manuals/architecture.md), настройки — в [manuals/configuration_guide.md](manuals/configuration_guide.md).
 
-**Статус (2026-09-28):** готовы каталог, поиск, eval-эндпоинт организатора и продуктовый API `/api/v1/*` (карточка + уверенность, аналоги, фильтры каталога, справочники, отзывы). Фронтенд — в работе (см. [тикет TZ-GAP-001](agent_docs/reports/ticket_tz_gap_001_remaining_scope.md)).
+**Статус (2026-09-28):** готовы каталог, поиск, eval-эндпоинт организатора и продуктовый API `/api/v1/*` (карточка + уверенность, аналоги, фильтры каталога, справочники, отзывы), веб-интерфейс на Jinja2 в том же процессе ([manuals/user_interface.md](manuals/user_interface.md)). Запуск с нуля — [manuals/quickstart.md](manuals/quickstart.md).
 
 ## Пайплайн
 
@@ -36,7 +36,7 @@
 
 ### 2. Извлечение признаков
 
-- **Энкодер:** SigLIP2 so400m, дообученный на фото вин, экспорт в ONNX (`bin/siglip2_wine_p1_epoch_3.onnx`). Выход `pooler_output`, 1152, L2-нормировка.
+- **Энкодер:** SigLIP2 so400m, дообученный на фото вин, экспорт в ONNX fp16 (`bin/siglip2_wine_p1_epoch_3_fp16.onnx`). Выход `pooler_output`, 1152, L2-нормировка.
 - ONNX Runtime: CUDA при наличии GPU, иначе CPU (`compute.device`).
 - Класс называется `DinoOnnxEncoder` по историческим причинам (до SigLIP2 был DINOv2); DINOv2-конфиг сохранён для отката.
 - Код: `src/core/retrieve/dino_encoder.py`.
@@ -57,7 +57,7 @@
 
 ### 5. Функции после поиска (готово)
 
-- **Аналоги:** для `low` / `not_found` — по OCR-подсказкам этикетки (цвет, сорт); для найденного вина — тот же цвет и сорт из других виноделен; иначе — следующие кандидаты векторного поиска. До 5 вин по рейтингу + общее число.
+- **Аналоги:** для найденного вина (по кнопке) — из базы, без OCR: тот же сорт винограда, другие винодельни; для `low` / `not_found` — только по сорту, прочитанному OCR с этикетки (включая латиницу импортных вин). До 5 вин по рейтингу + общее число; сорт не определён или ничего не нашлось — «аналог подобрать не удалось».
 - **Фильтры каталога** (`GET /api/v1/wines`: цвет, сорт, регион, сладость, блюдо) и справочники для них — основа сценария «крымское к шашлыку»; разбор свободного текста запроса в этот этап не входит.
 - **Отзывы** «то / не то вино» → JSONL для калибровки порогов.
 - LLM-слой: `src/llm/` (OpenAI-совместимый клиент, задачи в YAML).
@@ -72,8 +72,9 @@
 ## Каталог (офлайн)
 
 ```
-data/owner_database/wines_integrated_updated.csv + images/{slug}.webp
-  → prepare_clean_csv.py          CSV в схему импорта (строки без фото → rejected)
+data/wines_integrated_updated.csv + data/site_database/wines_database_enriched.json
+  + data/owner_database/images/{slug}.webp
+  → prepare_clean_csv.py          CSV в схему импорта + рейтинг/блюда/ссылки с сайта (строки без фото → rejected)
   → YOLO-кроп                     data/tmp/catalog_crops/ (+ review без кропа)
   → verify_catalog_assets.py      кроп и статика — одно и то же фото
   → catalog_import                SigLIP2 → pgvector; полная бутылка → static/wines/
@@ -99,6 +100,7 @@ data/owner_database/wines_integrated_updated.csv + images/{slug}.webp
 | `src/core/` | кроп, энкодер, policy, OCR, fuzzy |
 | `src/db/` | модели, репозиторий, импорт каталога |
 | `src/llm/` | LLM-клиент и задачи |
+| `src/web/` | веб-интерфейс (Jinja2, статика) |
 | `config/` | YAML-настройки |
 | `alembic/` | миграции БД |
 | `bin/` | ONNX-веса |
