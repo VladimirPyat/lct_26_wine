@@ -60,3 +60,16 @@ Append-only. Plan: `agent_docs/plans/web_product.md`.
   exception handler — main.py scope restricted)
 
 READY_FOR_TEST (WEB-UI)
+
+## WEB-UI — @Tester (A–D, 2026-09-28)
+
+- Branch `feat/web-ui`; tests `tests/web/{conftest,web_helpers,test_pages,test_search_flow,test_catalog_analogs,test_security}.py`
+  (TestClient on web_router + /ui-static + StubProductService / local fakes, `VINE_WEB_STRICT=1`, no lifespan/DB)
+- A 14 passed · B 32 passed · C 16 passed + 1 xfailed · D 64 passed
+- `uv run ruff check src/web/ tests/web/` exit 0; `uv run pytest tests/web/ -v` 126 passed, 1 xfailed;
+  `uv run pytest tests/ -v -k "not owner_eval"` 208 passed, 4 deselected, 1 xfailed
+- BUG-WEB-01 (minor): analogs block not capped at 5 cards when service returns more (`views.build_analogs_view`);
+  strict xfail `test_c2_ui_caps_cards_even_if_service_returns_more`. Note N-1: `image_url` unchecked in lightbox href
+- Report: `agent_docs/reports/test_web_ui.md`; §E pending on master
+
+TEST_PASS (WEB-UI A–D)
