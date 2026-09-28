@@ -18,8 +18,19 @@ Thumbs.db
 
 # Logs and databases
 *.log
+nohup.out
+*.pid
 *.sql
 *.sqlite
+
+# Temp / editor / stray files
+*.tmp
+*.bak
+*.swp
+*~
+*.ps
+/csv
+.ipynb_checkpoints/
 
 # Node.js
 node_modules/
@@ -30,7 +41,7 @@ __pycache__
 *.pyc
 .pytest_cache
 .mypy_cache
-.pytest_cache
+.ruff_cache
 
 #cursor
 .cursor/
