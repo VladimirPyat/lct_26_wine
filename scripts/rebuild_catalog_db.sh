@@ -7,7 +7,8 @@
 #                (crops = DB embeddings) + full bottles → static/wines (UI);
 #                verify both are the same image set (verify_catalog_assets.py)
 #   3. DB      — alembic upgrade head with VINE_RESET_EMBEDDINGS=1, then encode
-#                prepared crops + import with --recreate-wines
+#                prepared crops + import with --recreate-wines; rows YOLO could
+#                not crop (review) are then imported with the full bottle embedded
 #
 # Step 3 deletes all rows in `wines`: requires --yes.
 #
@@ -122,6 +123,31 @@ uv run python scripts/catalog_import.py \
   --crops-dir "$CROPS_DIR" \
   --skip-crop-pass \
   --recreate-wines \
+  "${IMPORT_ARGS[@]}"
+
+echo "== review rows (no YOLO crop) → embed the full bottle instead"
+FALLBACK_CSV="data/tmp/catalog_full_image_fallback.csv"
+uv run python - "$READY_CSV" "$REVIEW_DIR/reasons.csv" "$FALLBACK_CSV" <<'EOF'
+import csv
+import sys
+
+ready_csv, reasons_csv, out_csv = sys.argv[1:4]
+with open(reasons_csv, encoding="utf-8", newline="") as handle:
+    review = {row["slug"] for row in csv.DictReader(handle)}
+with open(ready_csv, encoding="utf-8", newline="") as handle:
+    reader = csv.DictReader(handle)
+    fields = reader.fieldnames or []
+    rows = [row for row in reader if row["slug"] in review]
+with open(out_csv, "w", encoding="utf-8", newline="") as handle:
+    writer = csv.DictWriter(handle, fieldnames=fields)
+    writer.writeheader()
+    writer.writerows(rows)
+print(f"full-image fallback rows={len(rows)} → {out_csv}")
+EOF
+uv run python scripts/catalog_import.py \
+  --csv "$FALLBACK_CSV" \
+  --clean-images "$IMAGES_DIR" \
+  --static-dir "$STATIC_DIR" \
   "${IMPORT_ARGS[@]}"
 
 echo "done. Check: SELECT count(*), count(embedding) FROM wines;  (≈ ok rows in verify)"

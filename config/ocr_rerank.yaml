@@ -53,7 +53,7 @@ confidence:
 # enable_not_found_gate is Stage 3 product only — must not null eval slug.
 policy:
   top_k: 5
-  margin_min: 0.06       # OCR only when s1 - s2 < this (was 0.08)
+  margin_min: 0.01       # OCR only on near-ties (catalog has identical images); was 0.08
   abs_min: 0.2
   enable_rerank: true
   enable_not_found_gate: false

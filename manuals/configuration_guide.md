@@ -43,7 +43,7 @@ dino:
 ```yaml
 policy:
   top_k: 5
-  margin_min: 0.08
+  margin_min: 0.01
   abs_min: 0.2
   enable_rerank: true
   enable_not_found_gate: false   # Stage 3; на eval slug не влияет
