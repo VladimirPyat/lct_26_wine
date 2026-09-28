@@ -20,6 +20,7 @@ from api.eval_pipeline import SearchRun, recognize_crop, run_search
 from api.runtime import EvalRuntime
 from core.config import ConfidenceSettings, ProductSettings
 from core.contracts import RankedHit
+from core.ocr.base import OCRUnavailableError
 from core.policy.decision import PolicyDecision
 from core.product.hints import extract_hints
 from core.product.schemas import (
@@ -50,6 +51,8 @@ logger = logging.getLogger(__name__)
 
 _EXT_BY_FORMAT = {"JPEG": ".jpg", "PNG": ".png", "WEBP": ".webp"}
 _ENDPOINT = "product"
+# Policy skipped rerank because OCR is off / failed: do not call OCR again.
+_OCR_SKIPPED = frozenset({"ocr_unavailable", "ocr_failed"})
 
 
 class _FilterKwargs(TypedDict):
@@ -204,7 +207,6 @@ class CatalogProductService:
                     repo,
                     hints,
                     winner_slug=winner.slug if winner is not None else None,
-                    candidates=candidates,
                     limit=self._settings.analogs.limit,
                 )
             )
@@ -237,7 +239,11 @@ class CatalogProductService:
         return photo_path(self._queries_dir, search_id)
 
     def analogs_for(self, search_id: str, *, limit: int = 5) -> AnalogsResult:
-        """Аналоги: для found — фильтры победителя, иначе — OCR-подсказки поиска."""
+        """Аналоги (контракт §4.2): один фильтр — один сорт, без OCR-вызова.
+
+        found — сорт победителя из БД, исключая его производителя; иначе —
+        сорт из сохранённых OCR-подсказок поиска.
+        """
         result = self.get_search(search_id)
         if result is None:
             msg = f"unknown search_id: {search_id!r}"
@@ -245,15 +251,12 @@ class CatalogProductService:
         with session_scope(self._runtime.session_factory) as session:
             repo = WineRepository(session)
             if result.status == "found" and result.winner is not None:
-                return self._winner_analogs(
-                    repo, result.winner, result.candidates, limit=limit
-                )
+                return self._winner_analogs(repo, result.winner, limit=limit)
             hints = result.analogs.hints if result.analogs is not None else OcrHints()
             return self._hint_analogs(
                 repo,
                 hints,
                 winner_slug=result.winner.slug if result.winner is not None else None,
-                candidates=result.candidates,
                 limit=limit,
             )
 
@@ -324,6 +327,13 @@ class CatalogProductService:
         self._manufacturers = sorted(
             {m for m in session.scalars(select(Wine.manufacturer).distinct()) if m}
         )
+        self._grape_aliases: dict[str, list[str]] = {}
+        for key, aliases in self._settings.analogs.grape_aliases.items():
+            grape = self._grapes.canonical(key)
+            if grape is None:
+                logger.warning("analogs.grape_aliases: unknown grape %r ignored", key)
+                continue
+            self._grape_aliases.setdefault(grape, []).extend(aliases)
         self._dictionaries = Dictionaries(
             colors=list(self._colors.values),
             grapes=list(self._grapes.values),
@@ -343,15 +353,24 @@ class CatalogProductService:
         )
 
     def _hints(self, run: SearchRun) -> OcrHints:
+        """OCR-подсказки неизвестного вина; нет OCR / сбой → ``ocr_ran=False``."""
         decision = run.decision
-        if decision.rerank_triggered:
-            lines = list(decision.ocr_lines)
-        else:
+        if decision.rerank_reason in _OCR_SKIPPED:
+            logger.warning("analogs OCR skipped: %s", decision.rerank_reason)
+            return OcrHints(ocr_ran=False)
+        lines: list[str] | None = list(decision.ocr_lines)
+        if not decision.rerank_triggered:
             try:
                 lines = recognize_crop(self._runtime, run.bundle.crop_path)
+            except OCRUnavailableError as err:
+                logger.warning("analogs OCR failed: %s", err)
+                return OcrHints(ocr_ran=False)
             except Exception:
-                logger.exception("analogs OCR failed; falling back to vector analogs")
-                return OcrHints()
+                logger.exception("analogs OCR failed")
+                return OcrHints(ocr_ran=False)
+        if lines is None:
+            logger.warning("analogs OCR skipped: no OCR engine")
+            return OcrHints(ocr_ran=False)
         return extract_hints(
             lines,
             reranker=self._runtime.reranker,
@@ -359,6 +378,7 @@ class CatalogProductService:
             grapes=self._grapes.values,
             manufacturers=self._manufacturers,
             ocr_ran=True,
+            grape_aliases=self._grape_aliases,
         )
 
     def _hint_analogs(
@@ -367,85 +387,46 @@ class CatalogProductService:
         hints: OcrHints,
         *,
         winner_slug: str | None,
-        candidates: Sequence[Candidate],
         limit: int,
     ) -> AnalogsResult:
-        if hints.color is not None or hints.grapes:
-            filters = CatalogFilters(
-                color=hints.color,
-                grape=hints.grapes[0] if hints.grapes else None,
-                exclude_slugs=[winner_slug] if winner_slug is not None else [],
-            )
-            found = self._filtered_analogs(repo, "ocr_filters", filters, hints, limit)
-            if found is not None:
-                return found
-        return self._vector_analogs(repo, candidates, hints, limit)
+        """Неизвестное вино: фильтр — только первый OCR-сорт (без цвета)."""
+        filters = CatalogFilters(
+            grape=hints.grapes[0] if hints.grapes else None,
+            exclude_slugs=[winner_slug] if winner_slug is not None else [],
+        )
+        return self._grape_analogs(repo, "ocr_filters", filters, hints, limit)
 
     def _winner_analogs(
-        self,
-        repo: WineRepository,
-        winner: WineCard,
-        candidates: Sequence[Candidate],
-        *,
-        limit: int,
+        self, repo: WineRepository, winner: WineCard, *, limit: int
     ) -> AnalogsResult:
+        """Известное вино: первый сорт победителя, другие производители (без цвета)."""
         grapes = split_grapes(winner.grape_variety)
         grape = self._grapes.canonical(grapes[0]) if grapes else None
         filters = CatalogFilters(
-            color=winner.color,
             grape=grape,
             exclude_manufacturer=winner.manufacturer,
             exclude_slugs=[winner.slug],
         )
-        hints = OcrHints()
-        found = self._filtered_analogs(repo, "winner_filters", filters, hints, limit)
-        if found is not None:
-            return found
-        return self._vector_analogs(repo, candidates, hints, limit)
+        hints = OcrHints(
+            color=winner.color, grapes=[grape] if grape else [], ocr_ran=False
+        )
+        return self._grape_analogs(repo, "winner_filters", filters, hints, limit)
 
-    def _filtered_analogs(
+    def _grape_analogs(
         self,
         repo: WineRepository,
         source: AnalogSource,
         filters: CatalogFilters,
         hints: OcrHints,
         limit: int,
-    ) -> AnalogsResult | None:
-        """Фильтры → при 0 без сорта (только цвет) → ``None`` (дальше vector)."""
-        attempts = [filters]
-        if filters.grape is not None and filters.color is not None:
-            attempts.append(filters.model_copy(update={"grape": None}))
-        for attempt in attempts:
-            wines, total = self._find(repo, attempt, limit, 0)
-            if total > 0:
-                return AnalogsResult(
-                    source=source,
-                    filters=attempt,
-                    hints=hints,
-                    wines=wines,
-                    total=total,
-                )
-        return None
-
-    def _vector_analogs(
-        self,
-        repo: WineRepository,
-        candidates: Sequence[Candidate],
-        hints: OcrHints,
-        limit: int,
     ) -> AnalogsResult:
-        rest = [c for c in candidates if c.rank > 1]
+        """Один запрос по сорту; нет сорта → пусто без запроса в БД; без повторов."""
         wines: list[WineCard] = []
-        for candidate in rest[:limit]:
-            wine = repo.get_by_slug(candidate.slug)
-            if wine is not None:
-                wines.append(wine_card(wine))
+        total = 0
+        if filters.grape is not None:
+            wines, total = self._find(repo, filters, limit, 0)
         return AnalogsResult(
-            source="vector",
-            filters=CatalogFilters(),
-            hints=hints,
-            wines=wines,
-            total=len(rest),
+            source=source, filters=filters, hints=hints, wines=wines, total=total
         )
 
     def _find(

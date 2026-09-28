@@ -10,7 +10,8 @@ image top-1) для попаданий / промахов top-1 и предла�
         --endpoint http://127.0.0.1:8080/api/v1/search --sets 1 2 \
         --report agent_docs/reports/confidence_calibration.md
 
-    # без сервера; OCR на CPU (GPU занят другим процессом):
+    # без сервера и без GPU (GPU занят другим процессом): цепочка выбора
+    # OCR при старте даёт LLM (есть ключ) или «без OCR» (rerank пропускается):
     CUDA_VISIBLE_DEVICES= uv run python scripts/calibrate_confidence.py \
         --in-process --ocr-device cpu --report ...
 """
@@ -324,7 +325,11 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         "--ocr-device",
         choices=["cpu", "cuda"],
         default=None,
-        help="in-process only: override compute.device for OCR (YAML untouched)",
+        help=(
+            "in-process only: override compute.device for a lazily built PHOCR "
+            "(YAML untouched); the OCR engine itself is chosen at startup by the "
+            "fallback chain (no CUDA -> LLM, no LLM key -> OCR off)"
+        ),
     )
     parser.add_argument(
         "--report", type=Path, default=None, help="write markdown report"

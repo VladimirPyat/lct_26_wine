@@ -107,7 +107,7 @@ curl -s -F "image=@./data/owner_eval/1/queries/04f3ce15.jpg" \
 |---|---|
 | `POST /api/v1/search` (multipart **`image`**) | `SearchResult`: `search_id`, `status` (`found` / `low` / `not_found`), `confidence_level`, `winner`, `candidates` (top-5), `analogs` |
 | `GET /api/v1/search/{search_id}` | сохранённый `SearchResult` |
-| `GET /api/v1/search/{search_id}/analogs?limit=5` | `AnalogsResult` (`winner_filters` / `ocr_filters` / `vector`) |
+| `GET /api/v1/search/{search_id}/analogs?limit=5` | `AnalogsResult`: `winner_filters` (найденное вино — тот же сорт, другие производители) / `ocr_filters` (неизвестное вино — сорт с этикетки); пустой `wines` = «аналог подобрать не удалось» |
 | `GET /api/v1/wines/{slug}` | `WineCard` |
 | `GET /api/v1/wines?color=&grape=&region=&sweetness=&dish=&exclude_manufacturer=&limit=5&offset=0` | `{"items": [...], "total": N}` |
 | `GET /api/v1/dictionaries` | цвета, сорта, регионы, сладость, блюда |
@@ -164,7 +164,7 @@ uv sync --extra ml --extra db --extra dev   # колесо onnxruntime (CPU)
 # config/compute_cropper.yaml → compute.device: cpu, cropper.device: cpu
 ```
 
-Так и задумано для сервера заказчика: без GPU-пакетов всё должно подниматься. Если локально GPU «сломался» (нет драйвера / библиотек) — верните `compute.device: cpu` (и при необходимости `cropper.device: cpu`) и снова `uv sync` (CPU-колесо).
+Так и задумано для сервера заказчика: без GPU-пакетов всё должно подниматься. Без CUDA OCR выбирается цепочкой: LLM (`ocr.llm_task`, нужен ключ `QWEN_API_KEY` в окружении), а без ключа OCR отключается — rerank пропускается, eval всё равно отдаёт slug, аналоги неизвестного вина пустые. Итог выбора — строка `OCR engine: configured=… effective=… reason=…` в логе старта. Если локально GPU «сломался» (нет драйвера / библиотек) — верните `compute.device: cpu` (и при необходимости `cropper.device: cpu`) и снова `uv sync` (CPU-колесо).
 
 ### Опционально — локальный GPU (быстрее OCR / SigLIP2)
 

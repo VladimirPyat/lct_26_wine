@@ -80,6 +80,10 @@ analogs:
   color_synonyms:      # слово OCR → categories.name
     Красное: [красное, красн, red, rosso, tinto, rouge]
     ...
+  grape_aliases:       # сорт справочника → латинские написания (фраза целиком)
+    Санджовезе: [sangiovese]
+    Пино Нуар: [pinot noir, pinot nero]
+    ...
 storage:
   queries_dir: data/tmp/search_queries
   retention_days: 10
@@ -94,7 +98,8 @@ upload:
 | `confidence.high_min` / `medium_min` | Граница `found/high` → `found/medium` → `low`. Меньше — чаще «уверенный» ответ, больше ошибок среди них |
 | `confidence.not_found_min` | Ниже порога — `not_found` (без победителя, только аналоги). Нужны фото вне каталога для честной калибровки |
 | `analogs.limit` | Сколько аналогов в ответе поиска (у `GET /analogs` — параметр `limit`, 1..50) |
-| `analogs.color_synonyms` | Ключ — точное `categories.name`; значения — слова этикетки (регистр и диакритика не важны; русские слова совпадают и с окончаниями: «красного»). Цвет без ключа просто не даёт подсказки |
+| `analogs.color_synonyms` | Ключ — точное `categories.name`; значения — слова этикетки (регистр и диакритика не важны; русские слова совпадают и с окончаниями: «красного»). Цвет без ключа просто не даёт подсказки (цвет только в `hints`, фильтром аналогов не служит) |
+| `analogs.grape_aliases` | Необязательно (по умолчанию `{}`). Ключ — сорт из справочника (`GET /api/v1/dictionaries` → `grapes`); значения — латинские / OCR-написания. Совпадение — все слова фразы есть на этикетке (порядок, регистр, диакритика не важны): `SANGIOVESE` → «Санджовезе». Алиас ведёт только на свой ключ, поэтому «PINOT» отдельно не даёт «Пино Нуар». Ключ, которого нет в справочнике, игнорируется с WARNING в логе старта. Используется только продуктом (подбор аналогов неизвестного вина), на eval не влияет |
 | `storage.queries_dir` | Куда сохранять фото запросов и JSON результатов (относительно корня репо) |
 | `storage.retention_days` | Срок хранения; чистка при старте и `scripts/cleanup_search_queries.py` |
 | `feedback_log` | JSONL отзывов «то / не то вино» |
@@ -106,7 +111,7 @@ upload:
 # через работающий API
 uv run python scripts/calibrate_confidence.py --endpoint http://127.0.0.1:8080/api/v1/search \
   --report agent_docs/reports/confidence_calibration.md
-# без сервера (GPU занят → энкодер и OCR на CPU, YAML не трогаем)
+# без сервера (GPU занят → энкодер на CPU; OCR по цепочке: LLM при наличии ключа, иначе без OCR)
 CUDA_VISIBLE_DEVICES= uv run python scripts/calibrate_confidence.py --in-process --ocr-device cpu
 ```
 
@@ -127,7 +132,25 @@ ocr:
   limit_side_len: 1150
 ```
 
-OCR поднимается **лениво** при первом rerank. При `enable_rerank: false` движок не грузится.
+**Цепочка выбора движка** (один раз при старте, дефолты `ocr.engine: phocr` и `compute.device` не менялись; значения `auto` нет):
+
+| `ocr.engine` | Условие | Эффективный движок |
+|---|---|---|
+| `phocr` | CUDA доступна (`compute.device: cuda` и сессия энкодера реально на `CUDAExecutionProvider`) | `phocr` — как раньше |
+| `phocr` | CUDA нет (`compute.device: cpu`, `CUDA_VISIBLE_DEVICES=""`, CUDA EP не загрузился) | `llm` (задача `ocr.llm_task`) |
+| `phocr` / `llm` | LLM недоступен (нет / пустой ключ из task YAML, ошибка YAML / клиента) | `none` — OCR выключен, rerank пропускается, slug всё равно возвращается |
+| `llm` | ключ есть | `llm` (CUDA не проверяется) |
+| `mock` | — | `mock` (тесты) |
+
+В логе старта одна строка, по ней видно итог выбора:
+
+```
+OCR engine: configured=phocr effective=phocr reason=cuda_available
+OCR engine: configured=phocr effective=llm reason=no_cuda
+OCR engine: configured=phocr effective=none reason=llm_unavailable: ValueError: Environment variable 'QWEN_API_KEY' is missing or empty (…)
+```
+
+Сбой LLM-OCR на конкретном запросе (исчерпаны ретраи, пустой ответ) → rerank этого запроса пропускается (`rerank_reason: ocr_failed` в decision log), аналоги неизвестного вина пустые; при `none` — `rerank_reason: ocr_unavailable`. Переключения на лету нет — повторный выбор только при рестарте. PHOCR строится **лениво** при первом rerank; при `enable_rerank: false` движок не грузится. Полноценные профили GPU / CPU — бэклог `CFG-DEVICE-001`.
 
 ## LLM tasks (Stage 2A)
 

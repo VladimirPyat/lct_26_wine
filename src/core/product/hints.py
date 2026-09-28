@@ -60,11 +60,38 @@ def extract_color(
     return best
 
 
+def _alias_matches(
+    lines: Sequence[str],
+    grapes: Sequence[str],
+    grape_aliases: Mapping[str, Sequence[str]],
+) -> list[str]:
+    """Сорта справочника, чей латинский алиас целиком (все слова) есть в OCR.
+
+    Алиас указывает только на свой ключ; порядок слов не важен.
+    """
+    words = set(_ocr_words(lines))
+    in_dictionary = set(grapes)
+    matched: list[str] = []
+    for grape, aliases in grape_aliases.items():
+        if grape not in in_dictionary:
+            continue
+        for alias in aliases:
+            tokens = [t for t in _WORD_SPLIT.split(_fold(alias)) if t]
+            if tokens and all(token in words for token in tokens):
+                matched.append(grape)
+                break
+    return matched
+
+
 def extract_grapes(
-    lines: Sequence[str], grapes: Sequence[str], reranker: FuzzyReranker
+    lines: Sequence[str],
+    grapes: Sequence[str],
+    reranker: FuzzyReranker,
+    grape_aliases: Mapping[str, Sequence[str]] | None = None,
 ) -> list[str]:
     """Сорта справочника, все токены которых есть в OCR (как ``label_evidence``).
 
+    Дополнительно — латинские алиасы ``analogs.grape_aliases`` (фраза целиком).
     Более конкретные названия (больше токенов) идут первыми: «Мускат Белый»
     раньше «Мускат». Внутри одинаковой длины — порядок справочника.
     """
@@ -75,6 +102,8 @@ def extract_grapes(
         lines, title="", manufacturer="", grape_variety=", ".join(by_norm.values())
     )
     matched = [by_norm[name] for name in evidence.grapes if name in by_norm]
+    if grape_aliases:
+        matched.extend(_alias_matches(lines, grapes, grape_aliases))
     order = {grape: index for index, grape in enumerate(grapes)}
     return sorted(
         dict.fromkeys(matched),
@@ -125,11 +154,12 @@ def extract_hints(
     grapes: Sequence[str],
     manufacturers: Sequence[str],
     ocr_ran: bool,
+    grape_aliases: Mapping[str, Sequence[str]] | None = None,
 ) -> OcrHints:
     """Собрать ``OcrHints`` из строк OCR."""
     return OcrHints(
         color=extract_color(lines, color_synonyms),
-        grapes=extract_grapes(lines, grapes, reranker),
+        grapes=extract_grapes(lines, grapes, reranker, grape_aliases),
         manufacturer=extract_manufacturer(lines, manufacturers, reranker),
         ocr_ran=ocr_ran,
     )

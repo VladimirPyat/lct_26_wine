@@ -114,6 +114,11 @@ class DinoOnnxEncoder:
     def encode_batch_size(self) -> int:
         return self._encode_batch_size
 
+    @property
+    def active_providers(self) -> list[str]:
+        """Активные ORT-провайдеры уже созданной сессии (без новых сессий)."""
+        return list(self._session.get_providers())
+
     def encode_image(self, path: str) -> list[float]:
         """Return L2-normalized (if configured) pooler vector of ``embedding_dim``.
 

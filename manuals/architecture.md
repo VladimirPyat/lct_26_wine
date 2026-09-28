@@ -9,12 +9,12 @@
 | Компонент | Назначение |
 |-----------|------------|
 | `api` (FastAPI) | HTTP: `/health`, `/static/wines`, `POST /v1/eval/predict`, `/api/v1/*` (продукт) |
-| `api.runtime` | Старт: YOLO + энкодер SigLIP2 + DB; OCR лениво при первом rerank |
+| `api.runtime` | Старт: YOLO + энкодер SigLIP2 + DB; один раз выбирает OCR-движок (цепочка CUDA → PHOCR, иначе LLM, иначе без OCR); PHOCR строится лениво при первом rerank |
 | `api.eval_pipeline` | Общий пайплайн `run_search` (retrieve → decide → decision log) для eval и продукта |
 | `core.product` | DTO + `ProductService`; `CatalogProductService` (поиск, аналоги, каталог, справочники, отзывы) |
 | `core.retrieve` | Энкодер ONNX (SigLIP2; класс `DinoOnnxEncoder` — историческое имя) + `WineRetriever` (crop → encode → top-K) |
 | `core.policy` | Decision: margin / abs_min / OCR+fuzzy (confident rerank); JSONL decision log |
-| `core.ocr` | `IOCREngine`: `phocr` \| `llm` \| `mock` (`create_ocr_engine`) |
+| `core.ocr` | `IOCREngine`: `phocr` \| `llm` \| `mock` (`create_ocr_engine`); `select_ocr_engine` — чистая функция выбора движка; `OCRUnavailableError` — сбой LLM-OCR на запросе |
 | `core.text` | `FuzzyReranker` по shortlist |
 | `llm` | Клиент + factory задач + адаптер LLM-OCR |
 | `db` | SQLAlchemy + `WineRepository.search_by_embedding` |
@@ -53,6 +53,8 @@ YOLO crop → SigLIP2 encode (letterbox 256, L2) → pgvector top_k
     ▼
 policy.decide
     ├─ skip OCR if !enable_rerank OR margin ≥ margin_min OR single hit
+    ├─ нет OCR-движка (effective=none)      → skip, rerank_reason=ocr_unavailable
+    ├─ LLM-OCR упал (OCRUnavailableError)   → skip, rerank_reason=ocr_failed
     └─ else IOCREngine.recognize + FuzzyReranker on shortlist
          ├─ rerank_mode=always    → текстовый лидер = winner
          └─ rerank_mode=confident → label_evidence (производитель / сорт / бренд)
@@ -66,6 +68,20 @@ policy.decide
     ├── HTTP 200: {"slug": "<winner>"}   # всегда slug при непустых hits
     └── JSONL decision log (не в теле ответа)
 ```
+
+### Выбор OCR-движка (цепочка)
+
+Выполняется один раз при старте (`build_eval_runtime` → `core.ocr.selection.select_ocr_engine`), в лог пишется одна строка `OCR engine: configured=… effective=… reason=…`:
+
+| `ocr.engine` | Условие | Эффективный движок | `reason` |
+|---|---|---|---|
+| `phocr` | CUDA доступна | `phocr` (как раньше, `use_cuda=True`, лениво) | `cuda_available` |
+| `phocr` | CUDA нет | `llm` (задача `ocr.llm_task`) | `no_cuda` |
+| `phocr` / `llm` | LLM недоступен (нет ключа, ошибка YAML / клиента) | `none` | `llm_unavailable: <класс ошибки: сообщение>` |
+| `llm` | LLM доступен | `llm` (без проверки CUDA) | `configured_llm` |
+| `mock` | — | `mock` | `configured_mock` |
+
+«CUDA доступна» = `compute.device: cuda` **и** уже созданная сессия энкодера SigLIP2 реально работает на `CUDAExecutionProvider` (`session.get_providers()`); список `ort.get_available_providers()` не показателен (он содержит CUDA и при `CUDA_VISIBLE_DEVICES=""`). При `none` rerank пропускается, eval всё равно отдаёт slug (top-1 изображения). Переключения движка на лету нет — повторный выбор только при рестарте.
 
 Пустой каталог / 0 hits → HTTP 503.  
 `score_1 < abs_min` → флаг `garbage` в логе; slug всё равно top-1.  
@@ -100,22 +116,25 @@ CatalogProductService.search
     ├─ score_1 → status / confidence_level (пороги product.yaml → confidence)
     │     score_1 < not_found_min  → not_found / low, winner = None
     │     ≥ high_min → found/high;  ≥ medium_min → found/medium;  иначе low/low
-    ├─ low / not_found → аналоги по OCR-подсказкам
+    ├─ low / not_found → аналоги по сорту из OCR
     ├─ decision log + search_id, status, confidence_level, endpoint="product"
     └─ SearchResult → {queries_dir}/{search_id}.json
 ```
 
 ### Аналоги
 
-| Случай | `source` | Фильтры |
-|---|---|---|
-| `low` / `not_found`, OCR нашёл цвет или сорт | `ocr_filters` | `color`, `grape` (первый найденный), `exclude_slugs=[winner]` |
-| `found`, запрос `GET /search/{id}/analogs` | `winner_filters` | цвет + первый сорт победителя, `exclude_manufacturer` = производитель победителя |
-| нет подсказок / фильтры дали 0 | `vector` | кандидаты top-K с rank 2..K |
+Правило: **один фильтр — один сорт**, без цепочки повторов (решение владельца 2026-09-28).
 
-Если фильтры дали 0 — повтор без сорта (только цвет), затем `vector`. Выдача — до `limit` вин по `public_rating DESC NULLS LAST`, `id`; `total` — полное число совпадений.
+| Случай | `source` | Фильтры | OCR |
+|---|---|---|---|
+| Известное вино: `found`, запрос `GET /search/{id}/analogs` | `winner_filters` | первый сорт победителя из БД; `exclude_manufacturer` = производитель победителя; `exclude_slugs=[winner]`; цвет не задаётся | не вызывается |
+| Неизвестное вино: `low` / `not_found` (считается в `search`, `analogs_for` берёт сохранённые подсказки) | `ocr_filters` | только первый сорт из OCR; `exclude_slugs=[winner]`, если есть (low) победитель; цвет / производитель не задаются | единственный источник сорта |
 
-OCR-подсказки (`core/product/hints.py`, чистые функции без БД/OCR): строки OCR берутся из `decision.ocr_lines`, если rerank уже был, иначе OCR запускается на кропе. Цвет — словарь синонимов `analogs.color_synonyms` (ключи = `categories.name`, русские формы с окончаниями); сорта — целое название из справочника (все токены на этикетке, как `label_evidence`, с алиасами `fuzzy.aliases`); производитель — compact-совпадение с каталогом через `FuzzyReranker`. Ошибка OCR не валит поиск: аналоги уходят в `vector`.
+Нет сорта (у победителя в БД / в OCR, OCR отключён или упал) → пустой результат **без запроса в БД** (`wines=[]`, `total=0`). Сорт есть, но 0 совпадений → пусто, без повтора. Пустой результат сохраняет свой `source`; UI показывает «Аналог подобрать не удалось». Выдача — до `limit` вин по `public_rating DESC NULLS LAST`, `id`; `total` — полное число совпадений. `vector` в `AnalogSource` зарезервирован и сервисом не выдаётся.
+
+`hints` (для показа, фильтром не применяются): известное вино — цвет и сорт победителя (`ocr_ran=False`); неизвестное — полные OCR-подсказки.
+
+OCR-подсказки (`core/product/hints.py`, чистые функции без БД/OCR): строки OCR берутся из `decision.ocr_lines`, если rerank уже был, иначе OCR запускается на кропе выбранным при старте движком. Если policy пропустила rerank из-за OCR (`rerank_reason` = `ocr_unavailable` / `ocr_failed`) или движка нет / он упал — `OcrHints(ocr_ran=False)`, поиск не падает. Сорт — целое название из справочника: все токены на этикетке (как `label_evidence`: кириллица, транслит, общие алиасы `normalize.py`) **или** целая латинская фраза из `analogs.grape_aliases` (`SANGIOVESE` → «Санджовезе», `PINOT NOIR` → «Пино Нуар»); «ПИНО» отдельно не даёт «Пино Гри». Несколько сортов — сначала более длинные названия, затем порядок справочника. Цвет — словарь `analogs.color_synonyms`; производитель — compact-совпадение с каталогом через `FuzzyReranker` (оба — только в `hints`).
 
 ### Справочники
 

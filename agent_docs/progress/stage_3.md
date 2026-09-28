@@ -108,3 +108,53 @@ Verification (worktree `.worktrees/api`, `UV_PROJECT_ENVIRONMENT=../../.venv UV_
   `ocr_engine.md` «Engine selection». `web_ui.md` not edited (lives in `feat/web-ui`).
 - BLOCKED.md PROD-API question (DEF-1) → RESOLVED as obsolete.
 - INSTRUCTIONS_READY (PROD-API-FIX1): `agent_docs/instructions/coder_product_api_fix1.md` → `tester_product_api_fix1.md`.
+
+## 2026-09-28 — @Coder (PROD-API-FIX1, `feat/product-api`)
+
+- FIX1-001 analogs (`core/product/catalog_service.py`): found → `winner_filters` (winner's first grape, canonical;
+  `exclude_manufacturer`, `exclude_slugs=[winner]`, no color; hints = winner color + grape, `ocr_ran=False`, no OCR call);
+  low / not_found → `ocr_filters` (first OCR grape only, `exclude_slugs=[winner]` if any, no color). `grape is None` →
+  empty without DB query; 0 matches → empty, no retry. `_vector_analogs` + color-only retry removed; `candidates` param
+  dropped; `grep '"vector"'` empty. `_hints`: `rerank_reason in {ocr_unavailable, ocr_failed}` / no engine /
+  `OCRUnavailableError` → `OcrHints(ocr_ran=False)` (one WARNING, no stack trace).
+- FIX1-002 grapes: `ProductSettings.analogs.grape_aliases` (default `{}`, validated); `config/product.yaml` filled for 68
+  dictionary grapes (keys checked against the 139-grape DB dictionary; unknown keys → startup WARNING + ignored — none at
+  startup). `extract_grapes` / `extract_hints(grape_aliases=None)`: whole-phrase alias match (fold, token order free),
+  alias → its key only; union with `label_evidence`, same ordering. Checked: CABERNET SAUVIGNON → Каберне Совиньон;
+  SANGIOVESE → Санджовезе; PINOT NOIR → Пино Нуар; «ПИНО» / «PINOT» → none. Confidence thresholds untouched.
+- FIX1-003 OCR chain: `core/ocr/base.py::OCRUnavailableError`; `core/ocr/selection.py::select_ocr_engine` (pure);
+  `DinoOnnxEncoder.active_providers` (existing session, no new sessions); `build_eval_runtime` selects once, stores
+  `ocr_effective` / `ocr_reason`, logs `OCR engine: configured=… effective=… reason=…`; `get_ocr() -> IOCREngine | None`
+  (phocr lazily with the same args); `LLMOCREngine.recognize` → `OCRUnavailableError` on OpenAI / RuntimeError;
+  `decide(ocr_factory -> IOCREngine | None)`: None → `ocr_unavailable`, `OCRUnavailableError` → `ocr_failed` (only this
+  type caught); `recognize_crop -> list[str] | None`; `calibrate_confidence.py` help/docstring only. No decision-log
+  field added.
+- FIX1-004 manuals: `architecture.md`, `configuration_guide.md`, `quickstart.md`, `manual_testing.md` §5.
+
+| Command | Exit |
+|---|---|
+| `uv run ruff check src/` | 0 |
+| `uv run ruff check scripts/calibrate_confidence.py` (whole `scripts/`: 62 pre-existing errors in untouched scripts) | 0 |
+| `uv run mypy src/core/product/ src/core/ocr/ src/api/ --ignore-missing-imports --python-version 3.12` | 1 — 9 errors, all pre-existing (same 9 on HEAD), 0 new |
+| `uv run bandit -r src/ -ll` | 0 |
+| `timeout 1200 uv run pytest tests/ -q` | 1 — 195 passed, 8 failed (expected, old behaviour), 2 skipped |
+| API `:8081` GPU → `OCR engine: configured=phocr effective=phocr reason=cuda_available` | — |
+| `participant_test.sh` set 1 / set 2 → `:8081` GPU → `data/tmp/after_fix1_set{1,2}.jsonl` | 0 / 0 |
+| slugs vs `data/tmp/baseline_master_set{1,2}.jsonl` | 27/27 + 25/25 = **52/52 identical** (2 PHOCR reranks ran) |
+| API `:8081` `CUDA_VISIBLE_DEVICES=""` → `effective=none reason=llm_unavailable: ValueError: Environment variable 'QWEN_API_KEY' is missing or empty (…)`; `/v1/eval/predict` → slug | 0 |
+
+- Live: found `agora-muskat-chernyj` → `/analogs` = `winner_filters`, grape Мускат, color null, excl. AGORA WINERY, 5 wines
+  by rating (total 30); found Пино Нуар (Chateau Andre) → 5 other manufacturers, total 216. In-process: low + «SANGIOVESE /
+  ROSSO» → `ocr_filters`, grape Санджовезе, color None, total 12; «2019» / no engine / `ocr_failed` → empty, total 0.
+- Old-behaviour tests now failing by design (→ @Tester `tester_product_api_fix1.md`):
+  `test_product_api.py::test_search_low_uses_ocr_hint_analogs` (color-only hint → expects color filter),
+  `test_product_api.py::test_search_low_rerank_switch_vector_excludes_winner` (expects `vector`),
+  `test_product_service_db.py::test_analogs_for_found_winner_filters` (expects `filters.color == winner.color`),
+  `::test_analogs_ocr_filters_color_and_grape`, `::test_analogs_fallback_impossible_grape_to_color`,
+  `::test_analogs_fallback_impossible_color_to_vector`, `::test_analogs_no_hints_vector`,
+  `::test_analogs_winner_fallback_chain`.
+- Note: app INFO logs (incl. the `OCR engine:` line and the existing `eval runtime ready`) are not printed by plain
+  `uvicorn api.main:app` — no handler is configured for app loggers (pre-existing; `main.py` out of fix1 scope). Verified
+  via the same app started with `logging.basicConfig(level=INFO)` + `uvicorn.run(...)`.
+
+READY_FOR_TEST (PROD-API-FIX1)

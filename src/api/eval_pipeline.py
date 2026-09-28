@@ -88,10 +88,16 @@ def run_search(
     return SearchRun(bundle=bundle, decision=decision, latency_ms=latency_ms)
 
 
-def recognize_crop(runtime: EvalRuntime, crop_path: str) -> list[str]:
-    """OCR кропа этикетки (ленивый движок рантайма, под общим локом)."""
+def recognize_crop(runtime: EvalRuntime, crop_path: str) -> list[str] | None:
+    """OCR кропа этикетки (ленивый движок рантайма, под общим локом).
+
+    ``None`` — OCR-движка нет (выбор ``none`` при старте).
+    """
     with _PIPELINE_LOCK:
-        return list(runtime.get_ocr().recognize(crop_path))
+        ocr = runtime.get_ocr()
+        if ocr is None:
+            return None
+        return list(ocr.recognize(crop_path))
 
 
 def predict_slug(runtime: EvalRuntime, image_path: str | Path) -> str:
