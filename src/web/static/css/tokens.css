@@ -1,0 +1,51 @@
+/* Brand tokens «Своё Вино» (bordeaux accent, light background, rounded cards). */
+:root {
+  --color-bg: #f7f5f5;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1eded;
+  --color-text: #1a1a1a;
+  --color-text-muted: #5f5a5b;
+  --color-border: #e5dfe0;
+  --color-accent: #800020;
+  --color-accent-strong: #62001a;
+  --color-accent-light: #a31c3b;
+  --color-accent-soft: #f7e9ec;
+  --color-on-accent: #ffffff;
+  --color-success: #1d6b3a;
+  --color-success-soft: #e5f3ea;
+  --color-warn: #8a4b00;
+  --color-warn-soft: #fff3df;
+  --color-danger: #a8231c;
+  --color-danger-soft: #fdecea;
+  --color-overlay: rgba(20, 10, 12, 0.88);
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "Noto Sans", sans-serif;
+  --font-size-xs: 0.8125rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.375rem;
+  --font-size-xxl: 1.75rem;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+  --shadow: 0 4px 20px rgba(40, 10, 18, 0.08);
+  --shadow-strong: 0 8px 30px rgba(40, 10, 18, 0.16);
+
+  --touch: 44px;
+  --container: 1200px;
+  --header-h: 64px;
+  --tabbar-h: 64px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
