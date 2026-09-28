@@ -83,6 +83,25 @@
 - [ ] Train/eval-каталог: dedup только по файлам из CSV (сейчас выживает `shyopot-tsvetov-...-109` с фото «Ветер в травах» → `a0c040fc` gt_missing)
 - [ ] Прогон `owner_eval` 1+2 через API, сверка с golden (set2 `750a209e` уже исправлен на розовое)
 
+## Runtime profiles (2026-09-28)
+
+| ID | File | Status |
+|----|------|--------|
+| **CFG-DEVICE-001** | — | OPEN, low priority — разделить конфигурации GPU / CPU (основа сейчас GPU; CPU работает, лишние зависимости некритичны) |
+
+**Context:** замеры 2026-09-28 (медианы на запрос): GPU ≈150 мс без OCR (encode ~40 мс, PHOCR ~0.7 с);
+CPU ≈1.1 с без OCR (encode SigLIP fp32 ~1 с, PHOCR 5–7 с). Сейчас режим только в YAML
+(`compute.device` в `compute_cropper.yaml`, `ocr.engine` в `ocr_rerank.yaml`); пакеты: CPU = extra `ml`
+(`onnxruntime`), GPU = overlay `requirements-gpu.txt` (`onnxruntime-gpu` + CUDA wheels).
+Цепочка OCR «CUDA → PHOCR, нет CUDA → LLM, нет LLM → без OCR» — согласована отдельно (PROD-API follow-up).
+
+- [ ] `compute.device` / `ocr.engine`: значение `auto` (CUDA есть → cuda/phocr, иначе cpu/llm)
+- [ ] env-override (напр. `VINE_DEVICE=cpu|cuda|auto`, `VINE_OCR_ENGINE`) поверх YAML; дефолты не меняются
+- [ ] (опц., нужен ✅ на `pyproject.toml` + `uv.lock`) вынести `phocr` из `ml` в отдельный extra (`ocr-local`):
+  тянет `datasets`/pyarrow/pandas, `onnx`, второй OpenCV — не нужен CPU-сборке с LLM OCR
+- [ ] (опц.) int8-квантизация SigLIP для CPU (ожидаемо ×2–3; требует переимпорт каталога + `owner_eval`)
+- [ ] `manuals/configuration_guide.md` + `quickstart.md`: профили GPU / CPU, команды установки
+
 ## Related (done / not tickets)
 
 - Query OCR on GPU + `requirements-gpu.txt` / `LD_LIBRARY_PATH` — done locally 2026-09-24.
