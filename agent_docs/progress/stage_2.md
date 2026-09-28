@@ -138,3 +138,9 @@
 - Commands: `ruff check src/ tests/` exit 0; `pytest tests/` → 74 passed, 9 failed = Postgres auth (`OperationalError`, env), 1 pre-existing owner_eval artifact failure (stale `predictions.jsonl` null slug)
 - New: `tests/test_encoder_preprocess.py`, `tests/test_policy_confident.py`, `tests/test_catalog_clean_prepare.py`; fixed hardcoded 768 / model-file dependency
 - Offline regression `eval_ocr_gate.py --margins 0.08`: siglip2 confident 49/51, broken 0
+
+## 2026-09-28 — Planner (Stage 3/4 handoff)
+
+- SIG branch merged to `master` (user ✅); rollout done (TZ-GAP-001: 2091 wines SigLIP, owner_eval 51/52)
+- STATUS: INSTRUCTIONS_READY (PROD-000, PROD-API, WEB-UI) — plan `agent_docs/plans/web_product.md`; contracts `product_api.md`, `web_ui.md`
+- Progress for these tickets continues in `agent_docs/progress/stage_3.md`

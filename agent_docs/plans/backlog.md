@@ -57,6 +57,12 @@
 |----|------|--------|
 | **TZ-GAP-001** | [`../reports/ticket_tz_gap_001_remaining_scope.md`](../reports/ticket_tz_gap_001_remaining_scope.md) | OPEN — продуктовый API, F1 top-1/top-5, ARCHITECTURE.md, Docker, аналоги/сомелье, фронт |
 
+## Product API + Web UI (2026-09-28)
+
+| ID | File | Status |
+|----|------|--------|
+| **PROD-000 / PROD-API / WEB-UI** | [`web_product.md`](web_product.md) | INSTRUCTIONS_READY — PROD-000 on `master`, then parallel `feat/product-api` + `feat/web-ui` |
+
 ## Related (done / not tickets)
 
 - Query OCR on GPU + `requirements-gpu.txt` / `LD_LIBRARY_PATH` — done locally 2026-09-24.
