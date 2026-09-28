@@ -8,9 +8,10 @@
 
 | Документ | Назначение |
 |----------|------------|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Пайплайн и границы слоёв (обзор) |
 | [manuals/index.md](manuals/index.md) | Оглавление мануалов |
 | [manuals/quickstart.md](manuals/quickstart.md) | Быстрый запуск |
-| [manuals/architecture.md](manuals/architecture.md) | Архитектура системы |
+| [manuals/architecture.md](manuals/architecture.md) | Архитектура: детали модулей, policy, логов |
 | [manuals/configuration_guide.md](manuals/configuration_guide.md) | Настройки и профили |
 | [manuals/manual_testing.md](manuals/manual_testing.md) | Ручные проверки (HITL), Stage 2 |
 | [agent_docs/plans/stages.md](agent_docs/plans/stages.md) | Дорожная карта этапов |

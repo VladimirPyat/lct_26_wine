@@ -91,8 +91,8 @@ data/owner_database (wines_integrated_updated.csv + images) → prepare_clean_cs
        └─ fail / too small → data/tmp/catalog_crops_review/ (+ reasons.csv)
   → catalog_import:
        static/wines/{slug}.webp  = full bottle (UI / image_url)
-       wines.embedding           = SigLIP2(OK crop only, batched via dino.encode_batch_size);
-                                   review slugs skipped
+       wines.embedding           = SigLIP2(OK crop, batched via dino.encode_batch_size);
+                                   review slugs (no crop) → full bottle (rebuild_catalog_db.sh)
   → Postgres wines.embedding vector(embedding_dim)
 ```
 
