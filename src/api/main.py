@@ -15,6 +15,8 @@ from api.routers.product import router as product_router
 from api.runtime import build_eval_runtime
 from core.config import load_product_settings
 from core.product.catalog_service import CatalogProductService
+from web import STATIC_DIR as _WEB_STATIC
+from web import router as web_router
 
 logger = logging.getLogger(__name__)
 
@@ -61,8 +63,10 @@ app.mount(
     StaticFiles(directory=str(_STATIC_WINES)),
     name="static_wines",
 )
+app.mount("/ui-static", StaticFiles(directory=str(_WEB_STATIC)), name="ui_static")
 app.include_router(eval_router)
 app.include_router(product_router)
+app.include_router(web_router)
 
 
 @app.get("/health")

@@ -2,7 +2,7 @@
 
 Как поднять окружение, схему БД, каталог и eval API. Детали архитектуры и конфигов — в соседних мануалах.
 
-**Статус:** Stage 2B — uvicorn + `POST /v1/eval/predict` + owner_eval set1; Stage 3 — продуктовый API `/api/v1/*`.
+**Статус:** Stage 2B — uvicorn + `POST /v1/eval/predict` + owner_eval set1; Stage 3 — продуктовый API `/api/v1/*`; Stage 4 — веб-интерфейс (Jinja2).
 
 ## Зависимости
 
@@ -129,6 +129,32 @@ curl -s -o /dev/null -w "%{http_code}\n" -H 'Content-Type: application/json' \
 ```
 
 Фото запросов и JSON результатов — `data/tmp/search_queries/` (10 дней), отзывы — `data/tmp/search_feedback.jsonl`. Чистка по сроку — при старте и `uv run python scripts/cleanup_search_queries.py [--dry-run] [--days N]`.
+
+## Веб-интерфейс (Stage 4)
+
+UI работает в том же процессе FastAPI, что и API (Jinja2, без Node/npm и сборки):
+
+```bash
+uv run uvicorn api.main:app --app-dir src --host 0.0.0.0 --port 8080
+```
+
+Открыть `http://127.0.0.1:8080/`:
+
+| Страница | Что это |
+|---|---|
+| `/` | Сканер: камера с «прицелом» + «Загрузить фото» (на компьютере — ещё drag&drop) |
+| `/result/{id}` | Результат поиска: карточка вина / «не найдено» + аналоги, «Это то вино? Да / Нет» |
+| `/wine/{slug}` | Карточка вина |
+| `/catalog` | Каталог с фильтрами (цвет, сорт, регион, сладость, блюдо) |
+| `/me` | «Мои вина»: история, избранное, мои оценки (хранятся только в браузере) |
+
+Статика UI — `/ui-static/…` (`src/web/static/`), картинки каталога — по-прежнему `/static/wines/`.
+
+**Сервис.** UI работает на реальном `CatalogProductService` (тот же, что `/api/v1`). `StubProductService` (результат по имени файла: `*_low.jpg`, `*_notfound.jpg`) используется только в тестах `tests/web/`.
+
+**Камера на телефоне требует HTTPS** (браузер разрешает `getUserMedia` только в защищённом контексте; исключение — `localhost` на самом устройстве). По `http://<ip-компьютера>:8080` с телефона камера будет скрыта с подсказкой, а загрузка фото из галереи работает всегда. Для демо камеры нужен HTTPS-туннель или сертификат перед uvicorn.
+
+Отдельный порт для параллельной разработки UI (worktree): `--host 127.0.0.1 --port 8082`.
 
 ## Owner eval set 1
 

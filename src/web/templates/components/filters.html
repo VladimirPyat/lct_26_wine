@@ -1,0 +1,36 @@
+{% macro select_field(name, label, options, current) %}
+<div class="field">
+  <label class="field__label" for="f-{{ name }}">{{ label }}</label>
+  <select class="field__control" id="f-{{ name }}" name="{{ name }}">
+    <option value="">Любой</option>
+    {% for option in options %}
+    <option value="{{ option }}" {% if option == current %}selected{% endif %}>{{ option }}</option>
+    {% endfor %}
+    {% if current and current not in options %}
+    <option value="{{ current }}" selected>{{ current }}</option>
+    {% endif %}
+  </select>
+</div>
+{% endmacro %}
+
+{% macro filters_form(view) %}
+{% set f = view.filters %}
+{% set d = view.dictionaries %}
+<form class="filters" method="get" action="/catalog" role="search" aria-label="Фильтры каталога">
+  <div class="filters__head">
+    <h2 class="filters__title">Фильтры</h2>
+    <button type="button" class="btn btn--icon filters__close" data-filters-close aria-label="Закрыть фильтры">×</button>
+  </div>
+  {{ select_field('color', 'Цвет', d.colors, f.color) }}
+  {{ select_field('grape', 'Сорт винограда', d.grapes, f.grape) }}
+  {{ select_field('region', 'Регион', d.regions, f.region) }}
+  {{ select_field('sweetness', 'Сладость', d.sweetness, f.sweetness) }}
+  {{ select_field('dish', 'К блюду', d.dishes, f.dish) }}
+  {% if f.exclude_manufacturer %}<input type="hidden" name="exclude_manufacturer" value="{{ f.exclude_manufacturer }}">{% endif %}
+  {% for slug in f.exclude_slugs %}<input type="hidden" name="exclude_slugs" value="{{ slug }}">{% endfor %}
+  <div class="filters__actions">
+    <button type="submit" class="btn btn--primary">Показать</button>
+    <a class="btn btn--ghost" href="{{ view.reset_url }}">Сбросить</a>
+  </div>
+</form>
+{% endmacro %}

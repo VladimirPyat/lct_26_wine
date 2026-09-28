@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Мои вина — Своё Вино{% endblock %}
+{% block page_class %}me{% endblock %}
+{% block content %}
+<section class="me" aria-labelledby="me-title">
+  <h1 class="me__title" id="me-title">Мои вина</h1>
+  <noscript>
+    <p class="note">«Мои вина» работают с включённым JavaScript: история и избранное хранятся только в этом браузере.</p>
+  </noscript>
+
+  <div class="card me__guest" data-me-guest hidden>
+    <p>Войдите, чтобы видеть историю поисков, избранное и свои оценки.</p>
+    <button type="button" class="btn btn--primary" data-login>Войти</button>
+    <p class="me__hint">Демо-вход без логина и пароля. Данные хранятся только в этом браузере.</p>
+  </div>
+
+  <div class="me__cabinet" data-me-cabinet hidden>
+    <div class="me__toolbar">
+      <button type="button" class="btn btn--ghost btn--small" data-logout>Выйти</button>
+      <button type="button" class="btn btn--danger btn--small" data-clear>Очистить мои данные</button>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Разделы">
+      <button type="button" class="tabs__tab" role="tab" id="tab-history" aria-controls="panel-history" aria-selected="true" data-tab="history">История</button>
+      <button type="button" class="tabs__tab" role="tab" id="tab-favorites" aria-controls="panel-favorites" aria-selected="false" data-tab="favorites" tabindex="-1">Избранное</button>
+      <button type="button" class="tabs__tab" role="tab" id="tab-ratings" aria-controls="panel-ratings" aria-selected="false" data-tab="ratings" tabindex="-1">Мои оценки</button>
+    </div>
+    <div class="tabs__panel" role="tabpanel" id="panel-history" aria-labelledby="tab-history" data-panel="history">
+      <ul class="me-list" data-list="history"></ul>
+      <p class="empty__text" data-empty="history" hidden>История пуста. <a href="/">Отсканируйте первую бутылку</a>.</p>
+    </div>
+    <div class="tabs__panel" role="tabpanel" id="panel-favorites" aria-labelledby="tab-favorites" data-panel="favorites" hidden>
+      <ul class="me-list" data-list="favorites"></ul>
+      <p class="empty__text" data-empty="favorites" hidden>В избранном пока пусто.</p>
+    </div>
+    <div class="tabs__panel" role="tabpanel" id="panel-ratings" aria-labelledby="tab-ratings" data-panel="ratings" hidden>
+      <ul class="me-list" data-list="ratings"></ul>
+      <p class="empty__text" data-empty="ratings" hidden>Вы ещё не оценили ни одного вина.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

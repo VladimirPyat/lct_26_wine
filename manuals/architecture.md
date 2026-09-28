@@ -2,16 +2,17 @@
 
 Краткое описание компонентов, границ модулей и потоков данных. Не дублирует контракты и списки классов.
 
-**Статус:** Stage 2 — 2A LLM OCR + 2B eval predict; Stage 3 — продуктовый API `/api/v1/*` (`CatalogProductService`).
+**Статус:** Stage 2 — 2A LLM OCR + 2B eval predict; Stage 3 — продуктовый API `/api/v1/*` (`CatalogProductService`); Stage 4 — веб-интерфейс поверх того же `ProductService`.
 
 ## Компоненты
 
 | Компонент | Назначение |
 |-----------|------------|
-| `api` (FastAPI) | HTTP: `/health`, `/static/wines`, `POST /v1/eval/predict`, `/api/v1/*` (продукт) |
+| `api` (FastAPI) | HTTP: `/health`, `/static/wines`, `POST /v1/eval/predict`, `/api/v1/*` (продукт); подключает UI-роутер и `/ui-static` |
 | `api.runtime` | Старт: YOLO + энкодер SigLIP2 + DB; один раз выбирает OCR-движок (цепочка CUDA → PHOCR, иначе LLM, иначе без OCR); PHOCR строится лениво при первом rerank |
 | `api.eval_pipeline` | Общий пайплайн `run_search` (retrieve → decide → decision log) для eval и продукта |
-| `core.product` | DTO + `ProductService`; `CatalogProductService` (поиск, аналоги, каталог, справочники, отзывы) |
+| `core.product` | DTO + `ProductService`; `CatalogProductService` (поиск, аналоги, каталог, справочники, отзывы); `StubProductService` — для тестов UI |
+| `web` (Jinja2) | Публичный UI: сканер, результат, каталог, «Мои вина» (`src/web/`); вызывает тот же `ProductService` in-process |
 | `core.retrieve` | Энкодер ONNX (SigLIP2; класс `DinoOnnxEncoder` — историческое имя) + `WineRetriever` (crop → encode → top-K) |
 | `core.policy` | Decision: margin / abs_min / OCR+fuzzy (confident rerank); JSONL decision log |
 | `core.ocr` | `IOCREngine`: `phocr` \| `llm` \| `mock` (`create_ocr_engine`); `select_ocr_engine` — чистая функция выбора движка; `OCRUnavailableError` — сбой LLM-OCR на запросе |
@@ -149,6 +150,26 @@ OCR-подсказки (`core/product/hints.py`, чистые функции б�
 ### Каталог
 
 `find_wines` / `get_wine` → `WineRepository.search_filters` + `count_filters` (одни и те же фильтры): `color` → `categories.name`, `grape` → целый элемент `grape_variety` (regex по разделителям `,;/+`, без учёта регистра), `dish` → пересечение с `dishes`, `exclude_manufacturer`, `exclude_slugs`. Каждый вызов сервиса — своя сессия (`session_scope`).
+
+## Веб-интерфейс (Stage 4)
+
+```
+браузер ──HTML-формы / fetch──▶ src/web/router.py (страницы, PRG)
+                                   │  views.py: view models из DTO
+                                   │  templating.py: Jinja2 (autoescape, фильтры)
+                                   ▼
+                    request.app.state.product_service   (ProductService)
+                         ├─ CatalogProductService — рабочий сервис (YOLO → энкодер → pgvector → policy/OCR)
+                         └─ StubProductService    — фикстуры в памяти (только тесты UI)
+```
+
+- UI получает данные **только** через `app.state.product_service`; в `src/web/` нет импортов БД, ретривера, policy и OCR, HTTP-вызовов своего `/api/v1` тоже нет. В lifespan `src/api/main.py` подключён `CatalogProductService`; UI и `/api/v1` работают с одним экземпляром.
+- Лимиты загрузки (размер, типы) — из `app.state.product_settings.upload` (`config/product.yaml`), те же, что у API. Тип файла определяется по сигнатуре содержимого, а не по имени. Временный файл — `data/tmp/uploads/`, удаляется сразу после `service.search`.
+- Поток поиска: `POST /search` → 303 на `/result/{search_id}` (Post/Redirect/Get). Отзыв «Это то вино?» — `POST /result/{id}/feedback` → 303 на результат с `?fb=1`. Аналоги для «найдено» — по кнопке (`?analogs=1` → `service.analogs_for`).
+- Уверенность показывается только текстом (высокая / средняя / низкая), без процентов и cosine; `candidates` в UI не выводятся.
+- Прогрессивное улучшение: все сценарии работают обычными формами без JS. Модули `static/js/`: `camera.js` (камера, полный кадр в JPEG; «прицел» — только визуальный), `upload.js` (drag&drop, ошибки без перезагрузки), `lightbox.js` (просмотр фото с зумом), `store.js` («Мои вина» в `localStorage`, ключи `svoe_vino:v1:*`), `ui.js` (панель фильтров, заглушки «Скоро», запасная картинка).
+- «Личный кабинет» — без сервера: история поисков (без фото), избранное, мои оценки и отметки хранятся в браузере; вход — демо-кнопка без логина.
+- Адаптивность одними шаблонами (CSS media queries): телефон < 768px — нижняя таб-панель и липкая панель действий; 768–1023px — та же раскладка с сеткой в 2 колонки; ≥ 1024px — меню в шапке, две колонки, фильтры каталога сбоку.
 
 ## Каталог (Stage 1.2 + YOLO crop encode)
 
