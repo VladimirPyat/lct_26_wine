@@ -2,6 +2,8 @@
 # Full catalog rebuild for an encoder / embedding_dim change (SIG-007 rollout).
 #
 # Steps:
+#   0. preflight — scripts/preflight_check.py --mode index (models, CSV, photos, DB);
+#                stops here with hints if something is missing
 #   1. CSV     — prepare import CSV from the owner CSV (data/owner_database/...)
 #   2. assets  — old static/wines + catalog crops → .trash/; YOLO crop pass
 #                (crops = DB embeddings) + full bottles → static/wines (UI);
@@ -51,7 +53,7 @@ while [[ $# -gt 0 ]]; do
     --ready-csv) READY_CSV="$2"; shift 2 ;;
     --cropper-device) CROPPER_DEVICE="$2"; shift 2 ;;
     --) shift; IMPORT_ARGS=("$@"); break ;;
-    -h|--help) sed -n '2,24p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,26p' "$0"; exit 0 ;;
     *) echo "unknown arg: $1" >&2; exit 2 ;;
   esac
 done
@@ -67,6 +69,9 @@ NV_LIB="$REPO_ROOT/.venv/lib/python3.12/site-packages/nvidia"
 if [[ -d "$NV_LIB/cu13/lib" ]]; then
   export LD_LIBRARY_PATH="$NV_LIB/cu13/lib:$NV_LIB/cudnn/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 fi
+
+echo "== 0/3 preflight: models, catalog data, DB"
+uv run python scripts/preflight_check.py --mode index --input "$INPUT" --images-dir "$IMAGES_DIR"
 
 verify_assets() {
   uv run python scripts/catalog_prepare/verify_catalog_assets.py \

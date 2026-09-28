@@ -75,7 +75,7 @@ Eval организатора — эндпоинт `http://127.0.0.1:8080/v1/eva
 | `src/web/` | Веб-интерфейс: роутер, view-модели, шаблоны Jinja2, статика |
 | `config/` | YAML-настройки (модели, устройство, policy/OCR, продукт) |
 | `alembic/` | Миграции схемы БД |
-| `scripts/` | Индексация каталога (`rebuild_catalog_db.sh`, `catalog_import.py`), калибровка, очистка, отчёты eval |
+| `scripts/` | Проверка моделей и данных (`preflight_check.py`), индексация каталога (`rebuild_catalog_db.sh`, `catalog_import.py`), калибровка, очистка, отчёты eval |
 | `scripts/catalog_prepare/` | Подготовка CSV каталога и сверка ассетов |
 | `tests/`, `tests/web/` | Автотесты (pytest): ядро, API, UI |
 | `bin/` | ONNX-модели (не в git — ссылки в quickstart) |

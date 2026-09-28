@@ -251,7 +251,7 @@ uv run python scripts/catalog_import.py --crops-dir data/tmp/catalog_crops --rec
 2. `VINE_RESET_EMBEDDINGS=1 uv run alembic upgrade head` — миграция `0002_embedding_dim` переводит `wines.embedding` в `vector(N)`. Если размерность уже совпадает — no-op. На непустой таблице без переменной миграция **отказывается** работать; с `VINE_RESET_EMBEDDINGS=1` удаляет все строки `wines`.
 3. Полный реимпорт каталога (`--crop-first --recreate-wines`).
 
-Всё вместе (подготовка CSV → миграция → импорт) делает `scripts/rebuild_catalog_db.sh --yes`; см. `quickstart.md`.
+Всё вместе (проверка `scripts/preflight_check.py` → подготовка CSV → миграция → импорт) делает `scripts/rebuild_catalog_db.sh --yes`; см. `quickstart.md`.
 
 ## Чего здесь нет
 

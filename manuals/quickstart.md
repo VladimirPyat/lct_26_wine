@@ -4,7 +4,7 @@
 
 ---
 
-## Часть 1. Полный запуск в Docker (GPU)
+## Часть 1. Полный запуск в Docker (GPU) - РЕКОМЕНДУЕМЫЙ СПОСОБ
 
 В `docker-compose.full.yml` два сервиса: `db` (PostgreSQL + pgvector) и `app` (FastAPI: веб-интерфейс, eval API организатора и продуктовый API в одном процессе, GPU). Модели, фото каталога и данные подключаются в контейнер из папок репозитория.
 
@@ -19,16 +19,7 @@
 
 CUDA Toolkit ставить **не нужно**: библиотеки CUDA 13 / cuDNN 9 уже внутри образа.
 
-**NVIDIA Container Toolkit (Linux).** Официальная инструкция: [Installing the NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html). Для Ubuntu / Debian:
-
-```bash
-curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
-curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list \
-  | sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' \
-  | sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
-sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
-sudo nvidia-ctk runtime configure --runtime=docker && sudo systemctl restart docker
-```
+**NVIDIA Container Toolkit (Linux).** Официальная инструкция: [Installing the NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html). 
 
 Проверка (Linux и Windows): `docker run --rm --gpus all ubuntu nvidia-smi` — должна показаться видеокарта.
 
@@ -46,7 +37,7 @@ cd lct_vine_final
 | `bin/yolo_detect_labels_2.onnx` (~12 МБ, детектор этикетки) | [Google Drive](https://drive.google.com/file/d/1uKGYwkL7Ycm5QMgsWDl5KrTOpwwtCrtg/view?usp=drive_link) | [Google Drive (alt)](https://drive.google.com/file/d/1fZhse4rYECP1jjcPX2TwDg7lTK2l9dTU/view?usp=drive_link) |
 | `bin/siglip2_wine_p1_epoch_3_fp16.onnx` (~817 МБ, энкодер изображений) | [Google Drive](https://drive.google.com/file/d/1zVKvqYtkcNy-_OF8mIKMl_RVp-HHhOqK/view?usp=drive_link) | [Google Drive (alt)](https://drive.google.com/file/d/1wSSgStfcpW-JXLJvtdpUQAcWGXMQ8RoH/view?usp=drive_link) |
 
-**Фото каталога → `data/owner_database/images/`**: папка [images (Google Drive)](https://drive.google.com/drive/folders/1HYiy0he8OdAui_56cIZ8xUhYXN-mJo81?usp=drive_link) → «Скачать» (zip) → распаковать так, чтобы 2091 файл `{slug}.webp` лежал прямо в `data/owner_database/images/`. Список вин и данные сайта уже в репозитории (см. [3.1](#31-данные-каталога)).
+**Фото каталога → `data/owner_database/images/`**: архив [images.zip (Google Drive)](https://drive.google.com/file/d/1tDvAFd8aLY4e2D-3S_bHw6RTSO0afDK8/view?usp=sharing) — скачать браузером или менеджером загрузок и распаковать так, чтобы 2091 файл `{slug}.webp` лежал прямо в `data/owner_database/images/` (не во вложенной папке — это ловит проверка `preflight_check.py`). Список вин и данные сайта уже в репозитории (см. [3.1](#31-данные-каталога)).
 
 **Опционально — `.env`:** `cp .env.example .env` (ключ `QWEN_API_KEY` нужен только для OCR через LLM; на GPU используется локальный PHOCR). Файл не обязателен.
 
@@ -65,7 +56,50 @@ docker compose up -d db                                # PostgreSQL + pgvector
 docker compose run --rm app scripts/rebuild_catalog_db.sh --yes   # схема + индексация каталога
 ```
 
-Индексация: YOLO вырезает этикетку с каждого фото → SigLIP2 кодирует → векторы в БД; полные фото бутылок → `static/wines/` (их показывает интерфейс). На GPU — ~10 минут (RTX 3070 Laptop); 10 фото без найденной этикетки кодируются целиком — это нормально. В конце скрипт пишет `done.`, проверка:
+**Проверка перед индексацией.** Скрипт индексации первым шагом (`== 0/3 preflight`) запускает `scripts/preflight_check.py`. Тот проверяет модели в `bin/` (пути берутся из `config/`), CSV каталога, JSON сайта, фото в `data/owner_database/images/` и доступность БД. Если чего-то нет, индексация сразу останавливается: в выводе строки `FAIL`, а под каждой — что сделать (ссылка на модель или фото, команда). Проверку можно запустить и отдельно:
+
+```bash
+docker compose run --rm app python scripts/preflight_check.py                # перед индексацией
+docker compose run --rm app python scripts/preflight_check.py --mode serve   # перед запуском: БД заполнена, фото для UI на месте
+```
+
+Индексация: YOLO вырезает этикетку с каждого фото → SigLIP2 кодирует → векторы в БД; полные фото бутылок → `static/wines/` (их показывает интерфейс). На GPU — ~10 минут (RTX 3070 Laptop).
+
+**Что должно быть видно при успехе:**
+
+- `docker compose build` заканчивается строкой `Image vine-scanner:gpu Built`;
+- `docker compose up -d db` → `Container vine-db-1 Started`, в `docker compose ps` у `db` статус `(healthy)`;
+- индексация проходит по шагам (ключевые строки, между ними — прогресс):
+
+```text
+== 0/3 preflight: models, catalog data, DB
+  OK    model bin/yolo_detect_labels_2.onnx (12 MB)
+  OK    model bin/siglip2_wine_p1_epoch_3_fp16.onnx (856 MB)
+  OK    catalog CSV data/wines_integrated_updated.csv (2103 wines)
+  OK    site JSON data/site_database/wines_database_enriched.json
+  OK    catalog photos: 2091 of 2103 wines (12 without photo are skipped by indexing)
+  OK    database reachable
+preflight OK (0 warning(s))
+== 1/3 prepare import CSV from data/wines_integrated_updated.csv
+ready=2091 → scripts/catalog_prepare/wines_clean_ready.csv
+rejected=12 → scripts/catalog_prepare/wines_clean_rejected.csv
+== 2/3 assets: crops (DB) + full bottles (static)
+... YOLO ONNX providers: ['CUDAExecutionProvider', 'CPUExecutionProvider']
+... crop progress ok=50 review=0 / seen=50 ...
+== verify crops ⇔ static
+status: {'ok': 2081, 'review': 10}
+== 3/3 alembic upgrade head (VINE_RESET_EMBEDDINGS=1) + encode + import
+... Encoder ONNX model=siglip2_wine_p1_epoch_3_fp16.onnx providers=['CUDAExecutionProvider', ...]
+... Import done: {'seen': 2091, 'upserted': 2081, ..., 'skipped_missing_crop': 10, ...}
+== review rows (no YOLO crop) → embed the full bottle instead
+full-image fallback rows=10 → data/tmp/catalog_full_image_fallback.csv
+... Import done: {'seen': 10, 'upserted': 10, ...}
+done. Check: SELECT count(*), count(embedding) FROM wines;
+```
+
+Нормально и не ошибка: 12 вин без фото отбрасываются на шаге 1; у 10 фото YOLO не нашёл этикетку (`review`, строки `WARNING … skip …: no OK catalog crop`) — они в конце кодируются по полному фото. Итого 2081 + 10 = 2091. Если в строках `providers=` только `CPUExecutionProvider` — GPU в контейнер не проброшен (см. [3.5](#35-если-что-то-не-так)): индексация пройдёт, но заметно дольше.
+
+Финальная проверка:
 
 ```bash
 docker compose exec db psql -U vine -d vine -c "SELECT count(*), count(embedding) FROM wines;"
@@ -99,7 +133,6 @@ docker compose logs -f app          # дождаться "Uvicorn running on htt
 
 Файл `--output` не должен существовать (скрипт не перезаписывает его и завершится с `ERROR: output already exists`). На GPU один запрос — ~0.3–1.6 с.
 
-Пример на публичных наборах (если лежат в `data/owner_eval/`): те же флаги с путями `./data/owner_eval/1/queries`, `./data/owner_eval/1/queries.tsv`; set 2 — `data/owner_eval/2/`.
 
 ### 1.6. Интерфейс и ручная проверка
 
@@ -119,7 +152,7 @@ docker compose down -v              # полный сброс: удаляет Б
 
 ---
 
-## Часть 2. В Docker только база, приложение на хосте
+## Часть 2. В Docker только база, приложение на хосте (не повторять если уже запустили по методу ч.1)
 
 Подходит для разработки и для машины **без GPU** (приложение работает на CPU, медленнее: ~1 с на запрос против ~0.15 с). Нужны Linux/WSL (или macOS для CPU), Docker, [uv](https://docs.astral.sh/uv/getting-started/installation/). Используется обычный `docker-compose.yml` (только Postgres, порт 5432 на хосте) — это отдельная БД, не та, что в части 1.
 
@@ -151,13 +184,14 @@ uv run python -c "import onnxruntime as o; print(o.get_available_providers())"  
 
 ```bash
 docker compose up -d && docker compose ps       # healthy
-scripts/rebuild_catalog_db.sh --yes              # схема + индексация (на CPU заметно дольше)
+scripts/rebuild_catalog_db.sh --yes              # проверка + схема + индексация (на CPU заметно дольше)
 docker compose exec db psql -U vine -d vine -c "SELECT count(*), count(embedding) FROM wines;"   # 2091 | 2091
 ```
 
 ### 2.3. Запуск
 
 ```bash
+uv run python scripts/preflight_check.py --mode serve   # необязательно: модели, БД, фото для UI
 uv run uvicorn api.main:app --app-dir src --host 0.0.0.0 --port 8080
 ```
 
@@ -176,7 +210,7 @@ uv run uvicorn api.main:app --app-dir src --host 0.0.0.0 --port 8080
 | Список вин, по которому собрана БД (2103 вина) | `data/wines_integrated_updated.csv` | да |
 | Данные сайта: рейтинг, блюда, ссылка на страницу, крепость, температура подачи | `data/site_database/wines_database_enriched.json` | да |
 | Список проблемных фото | `data/wines_problem_images.csv` | да |
-| Фото бутылок `{slug}.webp` (2091 файл, ~130 МБ) | `data/owner_database/images/` | нет — [облако](https://drive.google.com/drive/folders/1HYiy0he8OdAui_56cIZ8xUhYXN-mJo81?usp=drive_link) |
+| Фото бутылок `{slug}.webp` (2091 файл, ~130 МБ) | `data/owner_database/images/` | нет — [images.zip](https://drive.google.com/file/d/1tDvAFd8aLY4e2D-3S_bHw6RTSO0afDK8/view?usp=sharing) |
 
 Часть совсем мелких фото (меньше 200 px) заменена на более крупные. Список приложен — `data/wines_problem_images.csv` (100 строк): 88 — мелкие фото (из них 7 ещё и дубли чужого фото), 12 — вина без фото (нет ни фото, ни страницы на сайте). Эти 12 в индекс не попадают: 2103 − 12 = 2091 вино в БД.
 
@@ -195,6 +229,7 @@ ls data/owner_database/images | wc -l        # 2091
 
 `--yes` обязателен: таблица `wines` очищается и заливается заново.
 
+0. **Проверка** — `scripts/preflight_check.py --mode index`: модели, CSV, JSON сайта, фото, БД; при `FAIL` скрипт останавливается и ничего не трогает.
 1. **CSV** — список вин + данные сайта → `scripts/catalog_prepare/wines_clean_ready.csv` (отбракованные — `wines_clean_rejected.csv`).
 2. **Ассеты** — YOLO вырезает этикетку → `data/tmp/catalog_crops/` (кодируется в БД); полные бутылки → `static/wines/` (показывает UI). Сверка — `data/tmp/catalog_assets_check.csv`; старые ассеты уезжают в `.trash/`.
 3. **БД** — `alembic upgrade head` (с `VINE_RESET_EMBEDDINGS=1`), кодирование SigLIP2 и вставка; фото, где YOLO не нашёл этикетку, кодируются целиком.
@@ -240,6 +275,8 @@ curl -s -o /dev/null -w "%{http_code}\n" -H 'Content-Type: application/json' \
 
 | Симптом | Что сделать |
 |---|---|
+| индексация остановилась на `== 0/3 preflight` с `FAIL` | выполнить подсказку под строкой `FAIL` (скачать модель / фото, поднять БД) и повторить |
+| не уверены, всё ли на месте | `docker compose run --rm app python scripts/preflight_check.py` (хост: `uv run python scripts/preflight_check.py`), после индексации — `--mode serve` |
 | `could not select device driver "nvidia"` / `unknown or invalid runtime name: nvidia` | не установлен / не настроен NVIDIA Container Toolkit (1.1), после настройки — `sudo systemctl restart docker` |
 | в логе энкодера только `CPUExecutionProvider` | Docker: контейнер без GPU — проверить `docker run --rm --gpus all ubuntu nvidia-smi`; хост: не экспортирован `LD_LIBRARY_PATH` или вернулось CPU-колесо после `uv sync` (2.1) |
 | `CUDA out of memory` | GPU занят другим процессом (`nvidia-smi`) — закрыть его |
