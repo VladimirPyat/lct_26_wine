@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Сканер этикеток — Своё Вино{% endblock %}
+{% block page_class %}scan{% endblock %}
+{% block scripts %}
+<script type="module" src="{{ url_for('ui_static', path='js/upload.js').path }}"></script>
+<script type="module" src="{{ url_for('ui_static', path='js/camera.js').path }}"></script>
+{% endblock %}
+{% block content %}
+<div class="scan">
+  <section class="scan__main" aria-labelledby="scan-title">
+    <h1 class="scan__title" id="scan-title">Узнайте вино по этикетке</h1>
+    <p class="scan__lead">Сфотографируйте бутылку или загрузите фото — найдём вино в каталоге «Своё Вино».</p>
+
+    <div class="camera" data-camera hidden>
+      <div class="camera__viewport">
+        <video class="camera__video" data-camera-video playsinline muted></video>
+        <div class="camera__aim" aria-hidden="true">
+          <span class="camera__corner camera__corner--tl"></span>
+          <span class="camera__corner camera__corner--tr"></span>
+          <span class="camera__corner camera__corner--bl"></span>
+          <span class="camera__corner camera__corner--br"></span>
+        </div>
+        <p class="camera__hint">Держите бутылку в центре рамки</p>
+        <div class="camera__start" data-camera-start-wrap>
+          <button type="button" class="btn btn--primary" data-camera-start>Включить камеру</button>
+        </div>
+      </div>
+      <div class="camera__controls">
+        <button type="button" class="camera__snap" data-camera-snap disabled aria-label="Сделать снимок">
+          <span class="camera__snap-inner" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+    <p class="note" data-camera-note hidden></p>
+
+    <form class="upload" method="post" action="/search" enctype="multipart/form-data"
+          data-upload data-max-bytes="{{ max_bytes }}" data-types="{{ accept }}" data-max-mb="{{ max_mb }}">
+      <p class="form-error" role="alert" data-upload-error {% if not error %}hidden{% endif %}>{{ error or '' }}</p>
+      <label class="dropzone" data-dropzone>
+        <input class="dropzone__input" type="file" name="image" accept="{{ accept }}" required data-upload-input>
+        <span class="dropzone__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v4h16v-4" /></svg>
+        </span>
+        <span class="dropzone__title">Загрузить фото</span>
+        <span class="dropzone__desktop">или перетащите файл сюда</span>
+        <span class="dropzone__hint">{{ type_names }}, до {{ max_mb }} МБ</span>
+      </label>
+      <button type="submit" class="btn btn--primary upload__submit" data-upload-submit>Распознать</button>
+      <p class="upload__status" data-upload-status role="status" aria-live="polite" hidden>
+        <span class="spinner" aria-hidden="true"></span> Распознаём вино…
+      </p>
+    </form>
+  </section>
+
+  <aside class="scan__side" aria-label="Подсказки">
+    <section class="card tips">
+      <h2 class="card__title">Как получить точный результат</h2>
+      <ul class="tips__list">
+        <li>Держите бутылку в центре кадра, этикеткой к камере.</li>
+        <li>Снимайте при хорошем освещении, без бликов.</li>
+        <li>Одна бутылка в кадре — лучше, чем несколько.</li>
+      </ul>
+    </section>
+    <section class="card recent" data-recent hidden>
+      <h2 class="card__title">Последние поиски</h2>
+      <ul class="recent__list" data-recent-list></ul>
+    </section>
+  </aside>
+</div>
+{% endblock %}
