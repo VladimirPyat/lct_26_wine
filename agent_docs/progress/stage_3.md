@@ -74,3 +74,22 @@ Verification (worktree `.worktrees/api`, `UV_PROJECT_ENVIRONMENT=../../.venv UV_
   score 0.89 ≥ 0.85) — matches are now ranked by share of name words found verbatim in OCR, then length.
 - Not live-verified over HTTP: `ocr_filters` via `POST /search` (needs a low-confidence real label photo with OCR on GPU).
 - Handoff → @Tester: `agent_docs/instructions/tester_product_api.md`.
+
+## 2026-09-28 — Tester (PROD-API, `feat/product-api`)
+
+- STATUS: TEST_FAIL (PROD-API) — 1 defect (DEF-1: `vector` analogs contain the winner when OCR rerank switched it to rank ≥2); all other items pass, 0 env-skips.
+- Report: `agent_docs/reports/test_product_api.md`; contract question appended to `agent_docs/reports/BLOCKED.md`.
+- New tests (119): `tests/test_product_{hints,status,storage,service_db,api,api_live,decision_log}.py` + `tests/product_helpers.py`; marker `db` registered in `tests/conftest.py`.
+- A 65/65 · B 16/16 · C 34/35 (fail: `test_product_api.py::test_search_low_rerank_switch_vector_excludes_winner`) · D 3/3 + regression.
+
+| Command | Exit |
+|---|---|
+| `uv run ruff check src/ tests/` | 0 |
+| `timeout 1200 uv run pytest tests/ -v -rs` | 1 — 204 passed, 1 failed, 0 skipped (205) |
+| `participant_test.sh` set 1 / set 2 → `:8081` (CPU-only) → `data/tmp/test_product_api_set{1,2}.jsonl` | 0 / 0 |
+| in-process CPU OCR `predict_slug` set 2 `q-000004`, `q-000020` | 0 |
+| `scripts/eval_ocr_gate.py --margins 0.08` branch / master | 0 / 0 (JSON identical) |
+
+- Regression: set 1 27/27 = master; set 2 23/25 over HTTP + 2 OCR queries (HTTP 500: PHOCR needs CUDA on CPU-only server, env) = baseline in-process → 52/52 identical, hit@1 51/52 unchanged.
+- Decision log: 52 eval lines with `score_1`/`score_2`, no product fields; product line has `search_id`, `status`, `confidence_level`.
+- Next: Planner answers BLOCKED question → @Coder fixes DEF-1 → re-run `tests/test_product_api.py`.

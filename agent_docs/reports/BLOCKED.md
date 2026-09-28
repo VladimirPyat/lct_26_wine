@@ -54,3 +54,23 @@ So filtering `wines.color = 'Красное'` returns nothing, and `Dictionaries
 Map contract «color» to `categories.name` (and keep `wines.color` as display-only shade), or keep
 `color` = `wines.color` and filter by `category` in analogs. Affects `CatalogProductService`
 filters, `Dictionaries.colors`, and UI filter labels.
+
+# OPEN — PROD-API vector analogs when OCR rerank switched the winner
+
+**Date:** 2026-09-28  
+**Role:** @Tester (tester_product_api, report `test_product_api.md` DEF-1)
+
+## Issue
+
+`product_api.md` §4.2 defines `vector` analogs as «candidates rank 2..K as cards». This assumes the
+winner is candidate rank 1. When OCR rerank switches the winner (`decision.slug` = candidate rank ≥ 2,
+typical in low-margin → `status=low` cases), `CatalogProductService._vector_analogs` still returns
+ranks 2..K, so the **winner itself is shown as its own analog**, and the image top-1 (not the winner)
+is dropped. `ocr_filters` / `winner_filters` do exclude the winner (`exclude_slugs=[winner]`).
+
+Repro: `tests/test_product_api.py::test_search_low_rerank_switch_vector_excludes_winner` (FAILS).
+
+## Decision needed (Planner)
+
+Confirm the intended rule: «all candidates except the winner» (test expectation) vs literal
+«ranks 2..K». Implementation change is @Coder scope; the test stays as written until decided.
