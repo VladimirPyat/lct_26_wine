@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% from "components/wine_card.html" import wine_tile with context %}
+{% from "components/filters.html" import filters_form %}
+{% block title %}Каталог — Своё Вино{% endblock %}
+{% block page_class %}catalog-page{% endblock %}
+{% block content %}
+<div class="catalog">
+  <aside class="catalog__filters" id="catalog-filters" data-filters-panel>
+    {{ filters_form(view) }}
+  </aside>
+  <div class="catalog__backdrop" data-filters-backdrop hidden></div>
+
+  <section class="catalog__results" aria-labelledby="catalog-title">
+    <div class="catalog__head">
+      <h1 class="catalog__title" id="catalog-title">Каталог</h1>
+      <p class="catalog__count">Найдено: {{ view.total }}</p>
+      <button type="button" class="btn btn--ghost btn--small catalog__filters-btn" data-filters-open
+              aria-controls="catalog-filters" aria-expanded="false">
+        Фильтры{% if view.chips %} ({{ view.chips|length }}){% endif %}
+      </button>
+    </div>
+
+    {% if view.chips %}
+    <ul class="chips chips--filters" aria-label="Активные фильтры">
+      {% for chip in view.chips %}
+      <li>
+        <a class="chip chip--removable" href="{{ chip.remove_url }}">
+          {{ chip.label }}<span class="chip__x" aria-hidden="true">×</span>
+          <span class="visually-hidden">— убрать фильтр</span>
+        </a>
+      </li>
+      {% endfor %}
+      <li><a class="chip chip--reset" href="{{ view.reset_url }}">Сбросить все</a></li>
+    </ul>
+    {% endif %}
+
+    {% if view.wines %}
+    <div class="grid grid--tiles">
+      {% for wine in view.wines %}{{ wine_tile(wine) }}{% endfor %}
+    </div>
+    {% if view.pages > 1 %}
+    <nav class="pagination" aria-label="Страницы">
+      {% if view.prev_url %}<a class="pagination__link" href="{{ view.prev_url }}" rel="prev">← Назад</a>{% endif %}
+      {% for link in view.page_links %}
+      {% if link.current %}<span class="pagination__link pagination__link--current" aria-current="page">{{ link.number }}</span>
+      {% else %}<a class="pagination__link" href="{{ link.url }}">{{ link.number }}</a>{% endif %}
+      {% endfor %}
+      {% if view.next_url %}<a class="pagination__link" href="{{ view.next_url }}" rel="next">Вперёд →</a>{% endif %}
+    </nav>
+    {% endif %}
+    {% else %}
+    <div class="empty">
+      <p class="empty__text">По этим фильтрам вин не нашлось.</p>
+      <a class="btn btn--ghost" href="{{ view.reset_url }}">Сбросить фильтры</a>
+    </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}
