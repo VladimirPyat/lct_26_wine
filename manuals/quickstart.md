@@ -82,7 +82,7 @@ docker compose run --rm app python scripts/preflight_check.py --mode serve   # �
 preflight OK (0 warning(s))
 == 1/3 prepare import CSV from data/wines_integrated_updated.csv
 ready=2091 → scripts/catalog_prepare/wines_clean_ready.csv
-rejected=12 → scripts/catalog_prepare/wines_clean_rejected.csv
+...
 == 2/3 assets: crops (DB) + full bottles (static)
 ... YOLO ONNX providers: ['CUDAExecutionProvider', 'CPUExecutionProvider']
 ... crop progress ok=50 review=0 / seen=50 ...

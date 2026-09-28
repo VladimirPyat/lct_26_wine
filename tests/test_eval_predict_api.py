@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import asyncio
+import time
 from io import BytesIO
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
+import httpx
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -46,6 +50,46 @@ def test_eval_predict_multipart_returns_slug(predict_client: TestClient) -> None
     body = response.json()
     assert body == {"slug": "agora-muskat-chernyj"}
     assert isinstance(body["slug"], str) and body["slug"]
+
+
+def test_eval_predict_does_not_block_other_requests(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Slow inference runs off the event loop: a parallel request is not stalled."""
+    predict_seconds = 0.8
+    app = FastAPI()
+    app.include_router(eval_router)
+    repo_root = Path(__file__).resolve().parents[1]
+    app.state.eval_runtime = SimpleNamespace(repo_root=repo_root)
+
+    @app.get("/ping")
+    async def ping() -> dict[str, str]:
+        return {"status": "ok"}
+
+    def slow_predict(_runtime: object, _path: object) -> str:
+        time.sleep(predict_seconds)
+        return "agora-muskat-chernyj"
+
+    monkeypatch.setattr(eval_router_mod, "predict_slug", slow_predict)
+
+    async def scenario() -> tuple[float, float, int]:
+        transport = httpx.ASGITransport(app=app)
+        client = httpx.AsyncClient(transport=transport, base_url="http://t")
+        async with client:
+            files = {"image": ("q.jpg", b"\xff\xd8\xfffakejpeg", "image/jpeg")}
+            started = time.perf_counter()
+            predict = asyncio.create_task(client.post("/v1/eval/predict", files=files))
+            await asyncio.sleep(0.1)
+            await client.get("/ping")
+            ping_done = time.perf_counter() - started
+            status = (await predict).status_code
+            predict_done = time.perf_counter() - started
+            return ping_done, predict_done, status
+
+    ping_done, predict_done, predict_status = asyncio.run(scenario())
+    assert predict_status == 200
+    assert predict_done >= predict_seconds
+    assert ping_done < predict_seconds / 2
 
 
 def test_eval_predict_empty_upload_400(predict_client: TestClient) -> None:

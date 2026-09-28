@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, File, HTTPException, Request, UploadFile
+from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 
 from api.eval_pipeline import EmptyCatalogError, predict_slug
@@ -52,7 +53,7 @@ async def eval_predict(
         if tmp_path.stat().st_size == 0:
             raise HTTPException(status_code=400, detail="empty image upload")
 
-        slug = predict_slug(runtime, tmp_path)
+        slug = await run_in_threadpool(predict_slug, runtime, tmp_path)
         return PredictResponse(slug=slug)
     except HTTPException:
         raise
