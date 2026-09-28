@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
-from typing import Any, Literal
+from typing import Any, Literal, TypeVar
 
-from sqlalchemy import Select, select
+from sqlalchemy import Select, false, func, select
 from sqlalchemy.orm import Session, joinedload
 
 from core.contracts import RankedHit
@@ -17,6 +18,16 @@ _WINE_LOAD = (
     joinedload(Wine.region),
     joinedload(Wine.sweetness),
 )
+_RowT = TypeVar("_RowT", bound=tuple[Any, ...])
+# Same separators as the grape dictionary split (``,;/+``).
+_GRAPE_SEP = r"[,;/+]"
+
+
+def _grape_element_pattern(names: Sequence[str]) -> str:
+    """Postgres ARE: one of ``names`` is a whole element of ``grape_variety``."""
+    # re.escape output (backslash + punctuation) is literal in Postgres ARE too.
+    alternatives = "|".join(re.escape(name.strip()) for name in names)
+    return rf"(^|{_GRAPE_SEP})\s*({alternatives})\s*($|{_GRAPE_SEP})"
 
 
 class WineRepository:
@@ -148,13 +159,105 @@ class WineRepository:
         rating_max: float | None = None,
         alcohol_min: float | None = None,
         alcohol_max: float | None = None,
+        exclude_manufacturer: str | None = None,
+        exclude_slugs: Sequence[str] | None = None,
+        grape_names_any: Sequence[str] | None = None,
+        dishes_any: Sequence[str] | None = None,
         sort_by_rating: Literal["asc", "desc"] | None = None,
         limit: int = 50,
         offset: int = 0,
     ) -> list[Wine]:
-        """AND attribute filters; no ``title ILIKE``; no vector combo."""
-        stmt: Select[tuple[Wine]] = select(Wine).options(*_WINE_LOAD)
+        """AND attribute filters; no ``title ILIKE``; no vector combo.
 
+        ``grape_names_any`` — хотя бы один сорт из списка совпадает целиком
+        (без учёта регистра) с элементом ``grape_variety``, разделённого по
+        ``,;/+``; ``dishes_any`` — пересечение с массивом ``dishes``.
+        """
+        stmt: Select[tuple[Wine]] = self._apply_filters(
+            select(Wine).options(*_WINE_LOAD),
+            category_name=category_name,
+            sweetness_name=sweetness_name,
+            region_name=region_name,
+            manufacturer=manufacturer,
+            grape_substring=grape_substring,
+            dish=dish,
+            rating_min=rating_min,
+            rating_max=rating_max,
+            alcohol_min=alcohol_min,
+            alcohol_max=alcohol_max,
+            exclude_manufacturer=exclude_manufacturer,
+            exclude_slugs=exclude_slugs,
+            grape_names_any=grape_names_any,
+            dishes_any=dishes_any,
+        )
+
+        if sort_by_rating == "asc":
+            stmt = stmt.order_by(Wine.public_rating.asc().nulls_last(), Wine.id)
+        elif sort_by_rating == "desc":
+            stmt = stmt.order_by(Wine.public_rating.desc().nulls_last(), Wine.id)
+        else:
+            stmt = stmt.order_by(Wine.id)
+
+        stmt = stmt.limit(limit).offset(offset)
+        return list(self._session.scalars(stmt).unique().all())
+
+    def count_filters(
+        self,
+        *,
+        category_name: str | None = None,
+        sweetness_name: str | None = None,
+        region_name: str | None = None,
+        manufacturer: str | None = None,
+        grape_substring: str | None = None,
+        dish: str | None = None,
+        rating_min: float | None = None,
+        rating_max: float | None = None,
+        alcohol_min: float | None = None,
+        alcohol_max: float | None = None,
+        exclude_manufacturer: str | None = None,
+        exclude_slugs: Sequence[str] | None = None,
+        grape_names_any: Sequence[str] | None = None,
+        dishes_any: Sequence[str] | None = None,
+    ) -> int:
+        """Число вин под теми же фильтрами, что и ``search_filters`` (без limit)."""
+        stmt: Select[tuple[int]] = self._apply_filters(
+            select(func.count(Wine.id)),
+            category_name=category_name,
+            sweetness_name=sweetness_name,
+            region_name=region_name,
+            manufacturer=manufacturer,
+            grape_substring=grape_substring,
+            dish=dish,
+            rating_min=rating_min,
+            rating_max=rating_max,
+            alcohol_min=alcohol_min,
+            alcohol_max=alcohol_max,
+            exclude_manufacturer=exclude_manufacturer,
+            exclude_slugs=exclude_slugs,
+            grape_names_any=grape_names_any,
+            dishes_any=dishes_any,
+        )
+        return int(self._session.scalar(stmt) or 0)
+
+    @staticmethod
+    def _apply_filters(
+        stmt: Select[_RowT],
+        *,
+        category_name: str | None,
+        sweetness_name: str | None,
+        region_name: str | None,
+        manufacturer: str | None,
+        grape_substring: str | None,
+        dish: str | None,
+        rating_min: float | None,
+        rating_max: float | None,
+        alcohol_min: float | None,
+        alcohol_max: float | None,
+        exclude_manufacturer: str | None,
+        exclude_slugs: Sequence[str] | None,
+        grape_names_any: Sequence[str] | None,
+        dishes_any: Sequence[str] | None,
+    ) -> Select[_RowT]:
         if category_name is not None:
             stmt = stmt.join(Wine.category).where(Category.name == category_name)
         if region_name is not None:
@@ -178,16 +281,19 @@ class WineRepository:
             stmt = stmt.where(Wine.alcohol_pct >= alcohol_min)
         if alcohol_max is not None:
             stmt = stmt.where(Wine.alcohol_pct <= alcohol_max)
-
-        if sort_by_rating == "asc":
-            stmt = stmt.order_by(Wine.public_rating.asc().nulls_last(), Wine.id)
-        elif sort_by_rating == "desc":
-            stmt = stmt.order_by(Wine.public_rating.desc().nulls_last(), Wine.id)
-        else:
-            stmt = stmt.order_by(Wine.id)
-
-        stmt = stmt.limit(limit).offset(offset)
-        return list(self._session.scalars(stmt).unique().all())
+        if exclude_manufacturer is not None:
+            stmt = stmt.where(Wine.manufacturer != exclude_manufacturer)
+        if exclude_slugs:
+            stmt = stmt.where(Wine.slug.not_in(list(exclude_slugs)))
+        if grape_names_any is not None:
+            if not grape_names_any:
+                return stmt.where(false())
+            stmt = stmt.where(
+                Wine.grape_variety.op("~*")(_grape_element_pattern(grape_names_any))
+            )
+        if dishes_any is not None:
+            stmt = stmt.where(Wine.dishes.overlap(list(dishes_any)))
+        return stmt
 
     def _reload(self, wine_id: int) -> Wine | None:
         # Expire so joinedloads re-fetch after flush.
