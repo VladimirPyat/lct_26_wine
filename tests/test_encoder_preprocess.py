@@ -195,7 +195,11 @@ def test_database_yaml_matches_preprocess_json() -> None:
     if not meta_path.is_file():
         pytest.skip(f"preprocess json not present: {meta_path}")
     meta = json.loads(meta_path.read_text(encoding="utf-8"))
-    assert Path(db.dino_model_path).name == "siglip2_wine_p1_epoch_3.onnx"
+    # fp16 export shares weights and preprocess with fp32
+    assert Path(db.dino_model_path).name in {
+        "siglip2_wine_p1_epoch_3.onnx",
+        "siglip2_wine_p1_epoch_3_fp16.onnx",
+    }
     assert db.embedding_dim == meta["dim"]
     assert db.dino.input_size == meta["input_size"]
     assert db.dino.resize_mode == "letterbox"

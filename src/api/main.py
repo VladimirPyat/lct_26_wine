@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -18,6 +19,27 @@ from core.product.catalog_service import CatalogProductService
 from web import STATIC_DIR as _WEB_STATIC
 from web import router as web_router
 
+_LOG_FORMAT = "%(asctime)s %(levelname)s %(name)s: %(message)s"
+
+
+def _configure_logging() -> None:
+    """Вывести логи приложения в stderr (uvicorn настраивает только свои логгеры).
+
+    Уровень — ``VINE_LOG_LEVEL`` (по умолчанию ``INFO``). Если у root уже есть
+    обработчики (pytest, внешний хост), ничего не меняем.
+    """
+    root = logging.getLogger()
+    if root.handlers:
+        return
+    level_name = os.environ.get("VINE_LOG_LEVEL", "INFO").upper()
+    level = logging.getLevelName(level_name)
+    if not isinstance(level, int):
+        msg = f"VINE_LOG_LEVEL must be a logging level name, got {level_name!r}"
+        raise ValueError(msg)
+    logging.basicConfig(level=level, format=_LOG_FORMAT)
+
+
+_configure_logging()
 logger = logging.getLogger(__name__)
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]

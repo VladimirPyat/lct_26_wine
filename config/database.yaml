@@ -1,11 +1,12 @@
 # Catalog DB / embedding column (probe ONNX once; do not hardcode in call sites).
 # Image encoder: SigLIP2 so400m fine-tune (google/siglip2-so400m-patch16-256, tag p1_epoch_3).
-# Probed from bin/siglip2_wine_p1_epoch_3.onnx graph output `pooler_output`: [batch, 1152]
-# Input: pixel_values [batch, 3, 256, 256]. Values must match
-# bin/siglip2_wine_p1_epoch_3_preprocess.json (training preprocess).
+# fp16 export of the same weights (cos vs fp32 ≥ 0.9995, R@1/R@5 equal on Dev-A/Dev-B).
+# Graph output `pooler_output`: [batch, 1152]; input pixel_values [batch, 3, 256, 256].
+# Preprocess values below must match training (bin/siglip2_wine_p1_epoch_3_preprocess.json, reference only).
 # Encoder refuses to start if the ONNX static output dim != embedding_dim.
 # Changing embedding_dim → VINE_RESET_EMBEDDINGS=1 uv run alembic upgrade head + full reimport.
-dino_model_path: bin/siglip2_wine_p1_epoch_3.onnx
+# fp32 fallback (same embedding space): bin/siglip2_wine_p1_epoch_3.onnx
+dino_model_path: bin/siglip2_wine_p1_epoch_3_fp16.onnx
 embedding_dim: 1152
 
 dino:
