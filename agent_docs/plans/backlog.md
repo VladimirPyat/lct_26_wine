@@ -63,6 +63,26 @@
 |----|------|--------|
 | **PROD-000 / PROD-API / WEB-UI** | [`web_product.md`](web_product.md) | INSTRUCTIONS_READY — PROD-000 on `master`, then parallel `feat/product-api` + `feat/web-ui` |
 
+## Pre-final rebuild (2026-09-28)
+
+| ID | File | Status |
+|----|------|--------|
+| **REBUILD-FINAL-001** | — | OPEN — перед финалом: одна модель для индекса и запросов + полная пересборка |
+
+**Context:** SigLIP fp16 (`siglip2_wine_p1_epoch_3_fp16.onnx`, 817 MiB vs 1.6 GiB fp32) прошёл Colab-гейт
+(Dev-A/Dev-B R@1/R@5/MRR = fp32, ни один запрос не просел; cos vs fp32 min 0.99959).
+Отчёт: Drive `_models_v4_siglip/siglip2_wine_p1_epoch_3_fp16_check.json`; ноутбук
+[`../drafts/dino_train/onnx_fp16_siglip.ipynb`](../drafts/dino_train/onnx_fp16_siglip.ipynb).
+Смешанный режим (индекс fp32 + запросы fp16) допустим временно — сдвиг скоров ~1e-3 ≪ min margin 0.011.
+
+- [ ] `bin/siglip2_wine_p1_epoch_3_fp16.onnx` + `_preprocess.json` скачаны
+- [ ] (опц.) `owner_eval` 1+2 с YOLO-кропом: fp16 ≥ fp32 (команда — последняя ячейка ноутбука)
+- [ ] `config/database.yaml`: `dino_model_path` → fp16 (`embedding_dim` 1152 без изменений)
+- [ ] Каталог: cleared CSV + фото из `data/owner_database/images` (51 фото «нет страницы на сайте»; 23 чужих фото без эмбеддинга)
+- [ ] Пересборка БД/эмбеддингов каталога той же моделью (`scripts/rebuild_catalog_db.sh`)
+- [ ] Train/eval-каталог: dedup только по файлам из CSV (сейчас выживает `shyopot-tsvetov-...-109` с фото «Ветер в травах» → `a0c040fc` gt_missing)
+- [ ] Прогон `owner_eval` 1+2 через API, сверка с golden (set2 `750a209e` уже исправлен на розовое)
+
 ## Related (done / not tickets)
 
 - Query OCR on GPU + `requirements-gpu.txt` / `LD_LIBRARY_PATH` — done locally 2026-09-24.
