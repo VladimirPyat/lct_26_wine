@@ -51,6 +51,12 @@
 | SIG-ABS-001 | — | Калибровка `abs_min` под шкалу SigLIP (нужно для not-found gate Stage 3) |
 | SIG-REF-001 | — | Рефакторинг имён `dino_*` → `encoder_*` |
 
+## TZ gap review (2026-09-28)
+
+| ID | File | Status |
+|----|------|--------|
+| **TZ-GAP-001** | [`../reports/ticket_tz_gap_001_remaining_scope.md`](../reports/ticket_tz_gap_001_remaining_scope.md) | OPEN — продуктовый API, F1 top-1/top-5, ARCHITECTURE.md, Docker, аналоги/сомелье, фронт |
+
 ## Related (done / not tickets)
 
 - Query OCR on GPU + `requirements-gpu.txt` / `LD_LIBRARY_PATH` — done locally 2026-09-24.
