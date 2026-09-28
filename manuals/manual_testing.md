@@ -94,6 +94,7 @@ uv run python scripts/collect_eval_report.py \
 
 - [ ] `policy.enable_rerank: false` → в логах `rerank_triggered: false`, OCR не вызывается; slug всё равно возвращается; latency ниже
 - [ ] `ocr.engine: llm` (нужен `QWEN_API_KEY` в `.env`, **не печатать**) → в логах `ocr_engine: llm`; slug непустой
+- [ ] `compute.device: cpu` (или `CUDA_VISIBLE_DEVICES=""`) + ключ LLM → в логе старта `OCR engine: configured=phocr effective=llm reason=no_cuda`; без ключа → `effective=none reason=llm_unavailable: …`, slug всё равно возвращается (`rerank_reason: ocr_unavailable` в decision log)
 - [ ] Вернуть `ocr.engine: phocr`, `enable_rerank: true` для основного приёмочного прогона
 - Ожидание: HTTP-тело по-прежнему только `{"slug":"..."}`; детали — только в decision log
 

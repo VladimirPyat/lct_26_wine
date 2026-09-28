@@ -209,10 +209,26 @@ class ConfidenceSettings(BaseModel):
 
 
 class AnalogSettings(BaseModel):
-    """Analog selection: result limit and OCR color synonyms."""
+    """Analog selection: result limit, OCR color synonyms, Latin grape aliases."""
 
     limit: int = Field(gt=0)
     color_synonyms: dict[str, list[str]] = Field(default_factory=dict)
+    # Catalog grape (dictionary value) → Latin / OCR spellings (whole-phrase match).
+    grape_aliases: dict[str, list[str]] = Field(default_factory=dict)
+
+    @field_validator("grape_aliases")
+    @classmethod
+    def grape_aliases_must_be_non_empty(
+        cls, value: dict[str, list[str]]
+    ) -> dict[str, list[str]]:
+        for grape, aliases in value.items():
+            if not grape.strip():
+                msg = "analogs.grape_aliases keys must be non-empty strings"
+                raise ValueError(msg)
+            if any(not alias.strip() for alias in aliases):
+                msg = f"analogs.grape_aliases[{grape!r}] has an empty alias"
+                raise ValueError(msg)
+        return value
 
 
 class StorageSettings(BaseModel):

@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from core.ocr.base import IOCREngine
+from core.ocr.base import IOCREngine, OCRUnavailableError
 from core.ocr.factory import create_ocr_engine
 from core.ocr.mock import MockOCREngine
 from llm.adapters.ocr import LLMOCREngine
@@ -128,3 +128,67 @@ def test_ocr_factory_swap_phocr_mock_vs_llm_mock(
     assert llm_eng.recognize(str(image)) == ["llm-mock-line"]
     assert mock_eng.recognize(str(image)) == []
     assert stub.calls == [str(image)]
+
+
+# --- PROD-API-FIX1: per-request LLM failure → OCRUnavailableError ----------
+
+
+class _RaisingLLMEngine:
+    def __init__(self, error: Exception) -> None:
+        self._error = error
+        self.calls = 0
+
+    def complete(self, *, image_path: str | None = None) -> list[str]:
+        self.calls += 1
+        raise self._error
+
+
+def _openai_error() -> Exception:
+    import httpx
+    from openai import APIConnectionError
+
+    request = httpx.Request("POST", "https://example.test/v1/chat/completions")
+    return APIConnectionError(request=request)
+
+
+@pytest.mark.parametrize(
+    "make_error",
+    [
+        _openai_error,
+        lambda: RuntimeError("LLM returned empty content"),
+    ],
+    ids=["openai_error", "runtime_error"],
+)
+def test_llm_ocr_failure_raises_ocr_unavailable(tmp_path: Path, make_error) -> None:
+    """[TEST-ID] FIX1-O1 сбой complete (OpenAIError / RuntimeError) →
+    OCRUnavailableError с __cause__.
+    """
+    image = _tiny_jpeg(tmp_path / "label.jpg")
+    error = make_error()
+    stub = _RaisingLLMEngine(error)
+    adapter = LLMOCREngine(task_name="ocr_label", engine=stub)  # type: ignore[arg-type]
+    with pytest.raises(OCRUnavailableError) as info:
+        adapter.recognize(str(image))
+    assert info.value.__cause__ is error
+    assert stub.calls == 1
+
+
+def test_llm_ocr_missing_image_still_file_not_found(tmp_path: Path) -> None:
+    """[TEST-ID] FIX1-O2 отсутствующий кроп → FileNotFoundError (не
+    OCRUnavailableError).
+    """
+    stub = _RaisingLLMEngine(RuntimeError("must not be called"))
+    adapter = LLMOCREngine(task_name="ocr_label", engine=stub)  # type: ignore[arg-type]
+    with pytest.raises(FileNotFoundError):
+        adapter.recognize(str(tmp_path / "missing.jpg"))
+    assert stub.calls == 0
+
+
+def test_llm_ocr_unexpected_error_not_wrapped(tmp_path: Path) -> None:
+    """[TEST-ID] FIX1-O3 прочие ошибки (не OpenAI / RuntimeError) не маскируются."""
+    image = _tiny_jpeg(tmp_path / "label.jpg")
+    adapter = LLMOCREngine(
+        task_name="ocr_label", engine=_RaisingLLMEngine(TypeError("bug"))  # type: ignore[arg-type]
+    )
+    with pytest.raises(TypeError):
+        adapter.recognize(str(image))

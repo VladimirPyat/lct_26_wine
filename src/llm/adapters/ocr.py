@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
-from core.ocr.base import IOCREngine
+from openai import OpenAIError
+
+from core.ocr.base import IOCREngine, OCRUnavailableError
 from llm.engine import LLMEngine
 from llm.factory import create_llm_engine
+
+logger = logging.getLogger(__name__)
 
 
 class LLMOCREngine(IOCREngine):
@@ -34,9 +39,18 @@ class LLMOCREngine(IOCREngine):
         self._engine = engine if engine is not None else create_llm_engine(task_name)
 
     def recognize(self, image_path: str) -> list[str]:
-        """Вернуть непустые stripped-строки текста с этикетки."""
+        """Вернуть непустые stripped-строки текста с этикетки.
+
+        Сбой LLM-вызова (ошибки клиента OpenAI, пустой ответ) →
+        ``OCRUnavailableError``; отсутствующий кроп → ``FileNotFoundError``.
+        """
         source = Path(image_path)
         if not source.is_file():
             msg = f"Image not found for OCR: {image_path}"
             raise FileNotFoundError(msg)
-        return self._engine.complete(image_path=str(source))
+        try:
+            return self._engine.complete(image_path=str(source))
+        except (OpenAIError, RuntimeError) as err:
+            logger.warning("LLM OCR failed for this request (task=%s)", self._task_name)
+            msg = f"LLM OCR failed (task={self._task_name})"
+            raise OCRUnavailableError(msg) from err

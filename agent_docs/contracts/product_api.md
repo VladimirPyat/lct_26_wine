@@ -3,6 +3,7 @@
 **Scope:** photo → one wine card + confidence; analogs; catalog filters; dictionaries; search feedback.  
 **Consumers:** JSON API `/api/v1/*` (backend branch) and Jinja UI `src/web/` (frontend branch) — both call the **same in-process `ProductService`**; UI never calls `/api/v1` over HTTP.  
 **Not changed:** `POST /v1/eval/predict` (always `{"slug"}`, see [`eval_predict.md`](eval_predict.md)).  
+**Changes:** 2026-09-28 owner decisions — analogs = same grape only, `vector` not produced (§4.2); OCR engine fallback chain ([`ocr_engine.md`](ocr_engine.md)).  
 **Sources:** TZ gap ticket [`../reports/ticket_tz_gap_001_remaining_scope.md`](../reports/ticket_tz_gap_001_remaining_scope.md) items 1, 2, 8, 9; design review [`../reports/frontend_design_review.md`](../reports/frontend_design_review.md) §3–4.
 
 ---
@@ -29,7 +30,7 @@ DB column `wines.color` is a free-text shade («Тёмно-рубиновый»)
 ```python
 ConfidenceLevel = Literal["high", "medium", "low"]
 SearchStatus = Literal["found", "low", "not_found"]
-AnalogSource = Literal["ocr_filters", "winner_filters", "vector"]
+AnalogSource = Literal["ocr_filters", "winner_filters", "vector"]   # "vector" reserved, not produced by the real service (§4.2)
 Verdict = Literal["match", "mismatch"]
 
 class WineCard(BaseModel):
@@ -76,8 +77,8 @@ class AnalogsResult(BaseModel):
     source: AnalogSource
     filters: CatalogFilters          # what was applied (UI shows as removable chips)
     hints: OcrHints
-    wines: list[WineCard]            # ≤ limit, sorted public_rating DESC NULLS LAST
-    total: int                       # matches before limit (UI: "показать все" → /catalog)
+    wines: list[WineCard]            # ≤ limit, sorted public_rating DESC NULLS LAST; may be empty (§4.2)
+    total: int                       # matches before limit (UI: "показать все" → /catalog); 0 when empty
 
 class SearchResult(BaseModel):
     search_id: str                   # uuid4 hex, unguessable
@@ -128,6 +129,7 @@ class ProductService(Protocol):
 - 5 fixture wines (different colors/grapes/manufacturers, one with `public_rating=None`, one without `product_url`).
 - `search`: status chosen by `original_name`: contains `notfound` → `not_found`; `low` → `low`; else `found`/`high`. Stores results in memory; `search_id` uuid4.
 - `find_wines` filters fixtures in memory, sorts by rating desc; `dictionaries` from fixtures; `record_feedback` appends to an in-memory list; `query_photo_path` returns the copied temp file.
+- The stub may keep producing `source="vector"` (UI development only); the real service never does (§4.2, owner decision 2026-09-28).
 
 ## 4. Real implementation (backend branch)
 
@@ -142,20 +144,38 @@ class ProductService(Protocol):
    - `score_1 < not_found_min` → `status=not_found`, `confidence_level=low`, `winner=None`;
    - else `score_1 ≥ high_min` → `high`; `≥ medium_min` → `medium`; else `low`;
    - `high|medium` → `status=found`; `low` → `status=low`.
-5. `low` / `not_found` → analogs (§4.2) with OCR hints; `found` → `analogs=None`.
+5. `low` / `not_found` → analogs (§4.2, unknown wine: OCR grape only); `found` → `analogs=None` (no OCR call for analogs; OCR runs only if the eval rerank rules trigger it).
 6. Persist `SearchResult` JSON → `{queries_dir}/{search_id}.json`; decision log line (add `score_1`, `score_2`, `search_id`, `status`, `confidence_level`, `endpoint: "product"`).
 
 ### 4.2 Analogs
 
-| Case | `source` | Filters |
-|---|---|---|
-| `low` / `not_found`, OCR found ≥1 of color / grape / manufacturer | `ocr_filters` | `color`, `grape` (first matched), and `manufacturer`-based ordering is **not** used as filter; `exclude_slugs=[winner]` |
-| `found`, user pressed «Подобрать аналоги» (`analogs_for`) | `winner_filters` | `color` + first grape of winner; `exclude_manufacturer = winner.manufacturer` (TZ: «из других виноделен») |
-| no usable hints / filter result empty | `vector` | candidates rank 2..K as cards |
+**Owner decisions 2026-09-28** (supersede the earlier OCR-color / color-only / `vector` chain). Rule for both
+cases: **one filter = one grape**; no fallback chain, no color-only retry, no vector analogs («не будем мудрить»).
 
-- OCR: reuse `decision.ocr_lines` if rerank ran; else run OCR on the crop (`runtime.get_ocr()`).
-- Hint extraction: color via synonym map in `product.yaml` (ru + latin → catalog color value); grapes via dictionary + alias closure from `ocr_rerank.yaml` (`fuzzy.aliases`), whole-name match like `label_evidence` (all tokens of the grape name present); manufacturer via compact match against distinct catalog manufacturers (reuse `FuzzyReranker` helpers, no new fuzzy code).
-- More than `limit` matches → first `limit` by `public_rating DESC NULLS LAST`, `total` = full count. If filters return 0 → drop `grape`, retry with `color` only → then `vector`.
+| Case | `source` | Applied `filters` | OCR |
+|---|---|---|---|
+| **A. Known wine** — `found`, user pressed «Подобрать аналоги» (`analogs_for`) | `winner_filters` | `grape` = winner's first grape; `exclude_manufacturer = winner.manufacturer` (TZ: «из других виноделен»); `exclude_slugs=[winner.slug]`; `color` / `region` **not** set | **none** — characteristics from DB (`winner`) |
+| **B. Unknown wine** — `low` / `not_found` (computed in `search`; `analogs_for` re-queries from the stored `analogs.hints`, no new OCR) | `ocr_filters` | `grape` = first OCR grape (`hints.grapes[0]`); `exclude_slugs=[winner.slug]` when a (low) winner exists, else `[]`; `color` / `manufacturer` **not** set | only source of the grape |
+| A without a winner grape / B without an OCR grape (or OCR unavailable / failed) | same as the row above | `grape=None` (exclusions as above) | — |
+
+Result rules:
+- `grape` set → `find_wines(filters, limit)`: first `limit` by `public_rating DESC NULLS LAST` (then `id`), `total` = full count. `total == 0` → empty result, **no retry**.
+- `grape is None` → **no DB query**; `wines=[]`, `total=0` (a filter without grape would return the whole catalog).
+- Empty result keeps its `source` (`winner_filters` / `ocr_filters`); UI decides the message from `wines == []`.
+- A: winner's first grape = `split_grapes(winner.grape_variety)[0]` canonicalized by the grape dictionary (§4.3, same split / normalization). Grape filter = whole element match (`grape_names_any`), so «Пино» ≠ «Пино Гри».
+- `hints` (display / UI chips, never auto-applied): A → `OcrHints(color=winner.color, grapes=[grape] or [], manufacturer=None, ocr_ran=False)` (region is on `SearchResult.winner.region`); B → full OCR hints (`color`, `grapes`, `manufacturer`, `ocr_ran`). The UI may add color / region later as user-chosen filters via `find_wines`.
+- `vector` is **reserved** in `AnalogSource` (kept so the parallel `feat/web-ui` stub keeps compiling) and **never produced** by `CatalogProductService`. The former rule «candidates rank 2..K» and its defect DEF-1 are obsolete.
+
+OCR for B (hint extraction):
+- Lines: reuse `decision.ocr_lines` if rerank ran and OCR succeeded; else OCR on the crop via the runtime OCR engine (see [`ocr_engine.md`](ocr_engine.md) «Engine selection»). No engine (`none`) or per-request OCR failure → `OcrHints(ocr_ran=False)` → empty analogs. Never raises into the request.
+- Grape (the only field used as a filter): dictionary grapes, whole-name match like `label_evidence` (all tokens of the grape name present; «ПИНО» alone ≠ «Пино Гри»), across scripts: Cyrillic, Latin, transliteration (`core/text/normalize.py` aliases + `FuzzyReranker` fuzzy token match), plus a **product-only** Latin alias map `analogs.grape_aliases` in `product.yaml` (catalog grape → Latin / OCR spellings, e.g. `Санджовезе: [sangiovese]`, `Пино Нуар: [pinot noir, pinot nero]`), so imported labels («CABERNET SAUVIGNON», «SANGIOVESE», «PINOT NOIR») map to catalog names. Alias phrases also match whole-phrase only. Several grapes → most specific (more tokens) first, then dictionary order. The shared `_TOKEN_ALIASES` table in `normalize.py` is **not** extended here (eval reranker uses it; eval must stay byte-identical). Note: `ocr_rerank.yaml` has no `fuzzy.aliases` block — the earlier reference was wrong.
+- Color via `analogs.color_synonyms`; manufacturer via compact match against catalog manufacturers — reported in `hints` only.
+
+**UI impact** (for the later merge with `feat/web-ui`; `web_ui.md` is edited in that branch, not here — no DTO change):
+- `status in {low, not_found}`: right after «вино не найдено в каталоге» offer «Посмотреть аналоги из каталога» (analogs already in `SearchResult.analogs`).
+- `analogs.wines == []` (any source) → text «Аналог подобрать не удалось» (no cards, no «показать все»).
+- `source == "winner_filters"` with results → note: for more precise matching use the sommelier service (stub link).
+- Chips show `filters.grape` (+ exclusions); color / region from `hints` / `winner` may be offered as optional chips that call `find_wines`.
 
 ### 4.3 Dictionaries
 
@@ -194,11 +214,15 @@ confidence:            # cosine of image top-1; PLACEHOLDERS until calibration (
   not_found_min: 0.50
 analogs:
   limit: 5
-  color_synonyms:      # OCR token → categories.name
+  color_synonyms:      # OCR token → categories.name (hints only)
     Красное: [красное, красн, red, rosso, tinto, rouge]
     Белое: [белое, бел, white, bianco, blanco, blanc]
     Розовое: [розовое, розе, rose, rosé, rosado, rosato]
     Оранжевое: [оранжевое, orange, arancione, naranja]
+  grape_aliases:       # catalog grape (dictionary value) → Latin / OCR spellings (whole-phrase match); optional, default {}
+    Санджовезе: [sangiovese]
+    Пино Нуар: [pinot noir, pinot nero]
+    # … filled by @Coder for dictionary grapes with international names (fix1)
 storage:
   queries_dir: data/tmp/search_queries
   retention_days: 10

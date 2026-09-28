@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 
 from core.config import PolicySettings
 from core.contracts import RankedHit, SearchResult, WineRecord
-from core.ocr.base import IOCREngine
+from core.ocr.base import IOCREngine, OCRUnavailableError
 from core.text.fuzzy import FuzzyReranker, LabelEvidence
 from core.text.normalize import expand_token_aliases, normalize_text
 
@@ -40,14 +40,17 @@ def decide(
     *,
     crop_path: str,
     policy: PolicySettings,
-    ocr_factory: Callable[[], IOCREngine],
+    ocr_factory: Callable[[], IOCREngine | None],
     reranker: FuzzyReranker,
     rerank_top: int,
 ) -> PolicyDecision:
     """Pick always-a-slug winner when ``hits`` is non-empty.
 
     OCR is created via ``ocr_factory`` only when rerank runs (lazy), so
-    ``enable_rerank: false`` never loads PHOCR/LLM.
+    ``enable_rerank: false`` never loads PHOCR/LLM. Factory returns ``None``
+    (no OCR engine) → rerank skipped, ``rerank_reason="ocr_unavailable"``;
+    ``OCRUnavailableError`` from ``recognize`` → ``rerank_reason="ocr_failed"``.
+    Other OCR errors (PHOCR) propagate.
 
     ``rerank_mode: always`` — text leader wins. ``confident`` — text leader
     replaces image top-1 only when OCR confirms one of ``strong_combos`` for it
@@ -71,7 +74,7 @@ def decide(
     )
     latency: dict[str, float] = {"ocr": 0.0, "rerank": 0.0}
 
-    if skip_rerank:
+    def no_rerank(reason: str | None) -> PolicyDecision:
         return PolicyDecision(
             slug=winner_before,
             garbage=garbage,
@@ -85,11 +88,21 @@ def decide(
             ocr_lines=[],
             hits=list(hits),
             latency_ms=latency,
+            rerank_reason=reason,
         )
 
+    if skip_rerank:
+        return no_rerank(None)
+
     ocr = ocr_factory()
+    if ocr is None:
+        return no_rerank("ocr_unavailable")
     t0 = time.perf_counter()
-    lines = ocr.recognize(crop_path)
+    try:
+        lines = ocr.recognize(crop_path)
+    except OCRUnavailableError:
+        latency["ocr"] = (time.perf_counter() - t0) * 1000.0
+        return no_rerank("ocr_failed")
     latency["ocr"] = (time.perf_counter() - t0) * 1000.0
 
     candidates = [_hit_to_search_result(hit) for hit in hits]

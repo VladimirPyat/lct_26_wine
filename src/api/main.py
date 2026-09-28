@@ -11,9 +11,10 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from api.routers.eval import router as eval_router
+from api.routers.product import router as product_router
 from api.runtime import build_eval_runtime
 from core.config import load_product_settings
-from core.product import StubProductService
+from core.product.catalog_service import CatalogProductService
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +36,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.eval_runtime.ocr_rerank.policy.top_k,
     )
     app.state.product_settings = load_product_settings()
-    # PRODUCT SERVICE: backend branch replaces this line with the real service.
-    app.state.product_service = StubProductService()
+    app.state.product_service = CatalogProductService(
+        app.state.eval_runtime, app.state.product_settings
+    )
     try:
         yield
     finally:
@@ -60,6 +62,7 @@ app.mount(
     name="static_wines",
 )
 app.include_router(eval_router)
+app.include_router(product_router)
 
 
 @app.get("/health")

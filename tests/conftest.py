@@ -25,6 +25,9 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line(
         "markers", "e2e: live API / owner_eval harness (needs running uvicorn)"
     )
+    config.addinivalue_line(
+        "markers", "db: read-only checks against Compose Postgres (skip if down)"
+    )
 
 
 @pytest.fixture
