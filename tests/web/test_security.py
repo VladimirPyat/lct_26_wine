@@ -217,11 +217,24 @@ def test_d3_no_inline_event_handlers(path: Path) -> None:
     assert not re.search(r"\son[a-z]+\s*=", text, re.IGNORECASE)
 
 
+# FIX-WEB-02 (owner-approved): OSM tiles + attribution for the demo shops map only.
+_ALLOWED_EXTERNAL = (
+    "https://tile.openstreetmap.org",
+    "https://www.openstreetmap.org/copyright",
+)
+
+
+def _external_urls(text: str) -> list[str]:
+    for allowed in _ALLOWED_EXTERNAL:
+        text = text.replace(allowed, "")
+    return re.findall(r"https?://\S*", text)
+
+
 @pytest.mark.parametrize("path", TEMPLATE_FILES, ids=lambda p: p.name)
 def test_d3_no_external_links_in_templates(path: Path) -> None:
     """[D-3] no http(s):// (CDN) links in templates."""
     text = path.read_text(encoding="utf-8")
-    assert not re.search(r"https?://", text)
+    assert _external_urls(text) == []
 
 
 def test_d3_no_external_urls_in_css_js() -> None:
@@ -230,7 +243,7 @@ def test_d3_no_external_urls_in_css_js() -> None:
         if path.suffix not in (".css", ".js"):
             continue
         text = path.read_text(encoding="utf-8")
-        assert not re.search(r"https?://", text), path
+        assert _external_urls(text) == [], path
 
 
 def test_d3_no_markup_bypass_in_python() -> None:
