@@ -38,6 +38,8 @@ def emit_decision_log(
     record: dict[str, Any] = {
         "ts": datetime.now(UTC).isoformat(),
         "top_k": top_k,
+        "score_1": decision.score_1,
+        "score_2": decision.score_2,
         "margin": decision.margin,
         "abs_min": policy.abs_min,
         "margin_min": policy.margin_min,
