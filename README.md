@@ -23,6 +23,7 @@ Eval организатора — эндпоинт `http://127.0.0.1:8080/v1/eva
 | [manuals/user_interface.md](manuals/user_interface.md) | Веб-интерфейс: экраны, состояния результата, аналоги, «Мои вина» |
 | [manuals/architecture.md](manuals/architecture.md) | Архитектура: модули, пайплайн поиска, policy, аналоги, логи |
 | [manuals/configuration_guide.md](manuals/configuration_guide.md) | Настройки (`config/*.yaml`, `.env`, переменные окружения) |
+| [manuals/embedding_training.md](manuals/embedding_training.md) | Дообучение SigLIP/DINO: данные, методики, ноутбуки, отчёты |
 | [manuals/manual_testing.md](manuals/manual_testing.md) | Ручные проверки (HITL) |
 | [manuals/index.md](manuals/index.md) | Оглавление мануалов |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Пайплайн и границы слоёв (обзор) |

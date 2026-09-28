@@ -8,6 +8,8 @@
 | [user_interface.md](user_interface.md) | Веб-интерфейс: сканер, результат (найдено / низкая уверенность / не найдено), аналоги, карточка, каталог, «Мои вина», заглушки | @Coder / @BugFixer |
 | [architecture.md](architecture.md) | Модули, eval-пайплайн, policy / OCR-цепочка, продуктовый поток, аналоги, слой UI | @Coder / @BugFixer |
 | [configuration_guide.md](configuration_guide.md) | Энкодер (SigLIP2 fp16), device, policy, OCR, `product.yaml`, LLM tasks, логи (`VINE_LOG_LEVEL`), decision log | @Coder / @BugFixer |
+| [embedding_training.md](embedding_training.md) | Дообучение энкодера: датасет (market + aug), near-разметка, Phase 1 vs margin, ноутбуки Colab, ссылки на reports | @Coder / @BugFixer |
+| [presentation_skeleton.md](presentation_skeleton.md) | Скелет презентации (LCT / питч): задача, tech vs marketing, ~12 слайдов решения, пометки под скриншоты | @Coder / @BugFixer |
 | [manual_testing.md](manual_testing.md) | HITL: owner_eval / API / логи; чеклист UI | @Tester |
 
 Корневой хаб со ссылками: [../README.md](../README.md). Обзор пайплайна по слоям: [../ARCHITECTURE.md](../ARCHITECTURE.md).
