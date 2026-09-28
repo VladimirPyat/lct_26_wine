@@ -93,3 +93,18 @@ Verification (worktree `.worktrees/api`, `UV_PROJECT_ENVIRONMENT=../../.venv UV_
 - Regression: set 1 27/27 = master; set 2 23/25 over HTTP + 2 OCR queries (HTTP 500: PHOCR needs CUDA on CPU-only server, env) = baseline in-process → 52/52 identical, hit@1 51/52 unchanged.
 - Decision log: 52 eval lines with `score_1`/`score_2`, no product fields; product line has `search_id`, `status`, `confidence_level`.
 - Next: Planner answers BLOCKED question → @Coder fixes DEF-1 → re-run `tests/test_product_api.py`.
+
+## 2026-09-28 — Planner (PROD-API owner decisions → fix1, `feat/product-api`)
+
+- DECISION (owner, 2026-09-28): analogs = same grape only. Found → `winner_filters` from DB (winner's first grape,
+  `exclude_manufacturer`, `exclude_slugs`), no OCR, color/region not applied. Low / not_found → `ocr_filters` with the
+  OCR grape only (Latin/transliterated names mapped; product-only `analogs.grape_aliases` in `product.yaml`); no grape
+  or 0 matches → empty, `total=0`. No color-only retry, no `vector` (kept in `AnalogSource` as reserved; stub may use it).
+- DECISION (owner): OCR engine chain at startup — `phocr` + CUDA → PHOCR (GPU path byte-identical); no CUDA → LLM OCR
+  (`ocr_label`); LLM unavailable / per-request LLM failure → no OCR (rerank skipped, unknown-wine analogs empty).
+  No config default changes, no new packages (profiles → CFG-DEVICE-001). Out of scope: live GPU re-verification,
+  `product.yaml` threshold changes, UI merge.
+- Contracts: `product_api.md` §2 note, §3 stub note, §4.1 step 5, §4.2 rewritten (+ «UI impact»), §6 `grape_aliases`;
+  `ocr_engine.md` «Engine selection». `web_ui.md` not edited (lives in `feat/web-ui`).
+- BLOCKED.md PROD-API question (DEF-1) → RESOLVED as obsolete.
+- INSTRUCTIONS_READY (PROD-API-FIX1): `agent_docs/instructions/coder_product_api_fix1.md` → `tester_product_api_fix1.md`.

@@ -93,7 +93,8 @@
 CPU ≈1.1 с без OCR (encode SigLIP fp32 ~1 с, PHOCR 5–7 с). Сейчас режим только в YAML
 (`compute.device` в `compute_cropper.yaml`, `ocr.engine` в `ocr_rerank.yaml`); пакеты: CPU = extra `ml`
 (`onnxruntime`), GPU = overlay `requirements-gpu.txt` (`onnxruntime-gpu` + CUDA wheels).
-Цепочка OCR «CUDA → PHOCR, нет CUDA → LLM, нет LLM → без OCR» — согласована отдельно (PROD-API follow-up).
+Цепочка OCR «CUDA → PHOCR, нет CUDA → LLM, нет LLM → без OCR» — согласована отдельно (PROD-API follow-up:
+`coder_product_api_fix1.md` FIX1-003, контракт `ocr_engine.md`); значение `auto` / env-override остаются здесь.
 
 - [ ] `compute.device` / `ocr.engine`: значение `auto` (CUDA есть → cuda/phocr, иначе cpu/llm)
 - [ ] env-override (напр. `VINE_DEVICE=cpu|cuda|auto`, `VINE_OCR_ENGINE`) поверх YAML; дефолты не меняются

@@ -55,7 +55,13 @@ Map contract «color» to `categories.name` (and keep `wines.color` as display-o
 `color` = `wines.color` and filter by `category` in analogs. Affects `CatalogProductService`
 filters, `Dictionaries.colors`, and UI filter labels.
 
-# OPEN — PROD-API vector analogs when OCR rerank switched the winner
+# RESOLVED (obsolete) — PROD-API vector analogs when OCR rerank switched the winner
+
+**Resolution 2026-09-28 (Planner, owner decisions A–C):** the `vector` analog source is no longer produced by
+`CatalogProductService` (kept in `AnalogSource` as reserved for the stub). Analogs = same grape only
+(`winner_filters` from DB for found; `ocr_filters` from the OCR grape for low / not_found; no grape or 0 matches →
+empty). Both sources exclude the winner via `exclude_slugs`. DEF-1 is obsolete; the test is rewritten per
+`agent_docs/instructions/tester_product_api_fix1.md` §A. Contract: `product_api.md` §4.2. Original question below.
 
 **Date:** 2026-09-28  
 **Role:** @Tester (tester_product_api, report `test_product_api.md` DEF-1)

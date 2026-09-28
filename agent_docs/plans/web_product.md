@@ -10,7 +10,10 @@
 - `/v1/eval/predict` unchanged (organizer harness).
 - Feedback → JSONL log (not DB). Query photos → `data/tmp/search_queries/`, 10-day retention.
 - Confidence = text level from image cosine; thresholds are placeholders until calibration (not a UI concern).
-- Analogs: OCR hints → catalog filters (≤5 by `public_rating`); for `found` only on button, «from other wineries».
+- Analogs (owner 2026-09-28, supersedes OCR-color / vector chain): same grape only, ≤5 by `public_rating`. `found` → on button, winner's grape from DB, no OCR, «from other wineries»; `low` / `not_found` → OCR grape only (Latin names mapped); no grape / 0 matches → empty («аналог подобрать не удалось»). `vector` not produced.
+- OCR engine chain (owner 2026-09-28): CUDA → PHOCR; no CUDA → LLM OCR; no LLM → no OCR (rerank skipped).
+
+**Status (2026-09-28):** PROD-API implemented + tested (DEF-1 obsolete); follow-up [`coder_product_api_fix1.md`](../instructions/coder_product_api_fix1.md) → [`tester_product_api_fix1.md`](../instructions/tester_product_api_fix1.md) INSTRUCTIONS_READY. UI impact for the merge with `feat/web-ui` — `product_api.md` §4.2 «UI impact».
 - Browser-only cabinet (localStorage), demo «Войти» button; sommelier / map / chat = stubs.
 
 ## Order
