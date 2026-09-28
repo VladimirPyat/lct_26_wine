@@ -1,48 +1,41 @@
-# User-specific stuff
+# Build context = code + config only. Models, data and catalog images are mounted at runtime
+# (docker-compose.full.yml), never baked into the image.
+.git
+.gitignore
+.worktrees/
+.trash/
+_migration/
+_data
+_out
+.venv/
+.cursor/
 .idea/
 .gigaide/
-
-# Gradle
-.gradle/
-/build/
-
-
-# IDE-specific files
-*.iml
-*.ipr
-*.iws
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Logs and databases
-*.log
-*.sql
-*.sqlite
-
-# Node.js
-node_modules/
-.next/
-
-
-# Python
-__pycache__
-*.pyc
+**/__pycache__
+**/*.pyc
 .pytest_cache
-
-#cursor
-.cursor/indexing.db
-.cursor/*.tmp
-.cursor/*.lock
-
-docs/
-
-# environment
-.venv/
+.mypy_cache
+.ruff_cache
 
 # secrets
 .env
+*.pem
+*.key
+credentials.json
+service-account*.json
 
-_data
-_out
+# large / runtime trees (mounted)
+bin/
+data/
+static/wines/
+db/
+
+# docs and agent artefacts (not needed at runtime)
+docs/
+agent_docs/
+manuals/
+tests/
+csv
+*.log
+*.sql
+*.sqlite

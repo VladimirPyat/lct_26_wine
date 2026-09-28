@@ -13,7 +13,7 @@ from fastapi.staticfiles import StaticFiles
 
 from api.routers.eval import router as eval_router
 from api.routers.product import router as product_router
-from api.runtime import build_eval_runtime
+from api.runtime import EvalRuntime, build_eval_runtime
 from core.config import load_product_settings
 from core.product.catalog_service import CatalogProductService
 from web import STATIC_DIR as _WEB_STATIC
@@ -47,9 +47,27 @@ _STATIC_WINES = _REPO_ROOT / "static" / "wines"
 _TMP_UPLOADS = _REPO_ROOT / "data" / "tmp" / "uploads"
 
 
+def _warm_up_ocr(runtime: EvalRuntime) -> None:
+    """Построить PHOCR до приёма запросов.
+
+    При первом запуске PHOCR скачивает веса (~270 МБ); если делать это на первом
+    rerank-запросе, клиент с таймаутом 60 с (скрипт заказчика) получит ошибку.
+    Сбой прогрева не фатален: движок снова попробует построиться лениво.
+    """
+    if runtime.ocr_effective != "phocr" or not runtime.ocr_rerank.policy.enable_rerank:
+        return
+    logger.info("warming up PHOCR (first run downloads weights)…")
+    try:
+        runtime.get_ocr()
+    except Exception:
+        logger.exception("PHOCR warm-up failed; OCR will be retried on first rerank")
+        return
+    logger.info("PHOCR ready")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Load YOLO/DINO/DB once; OCR stays lazy until first rerank."""
+    """Load YOLO/DINO/DB once and warm up PHOCR before serving."""
     _TMP_UPLOADS.mkdir(parents=True, exist_ok=True)
     logger.info("building eval runtime (YOLO + DINO + DB)…")
     app.state.eval_runtime = build_eval_runtime(_REPO_ROOT)
@@ -59,6 +77,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.eval_runtime.ocr_rerank.policy.enable_rerank,
         app.state.eval_runtime.ocr_rerank.policy.top_k,
     )
+    _warm_up_ocr(app.state.eval_runtime)
     app.state.product_settings = load_product_settings()
     app.state.product_service = CatalogProductService(
         app.state.eval_runtime, app.state.product_settings

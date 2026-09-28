@@ -155,7 +155,7 @@ OCR engine: configured=phocr effective=llm reason=no_cuda
 OCR engine: configured=phocr effective=none reason=llm_unavailable: ValueError: Environment variable 'QWEN_API_KEY' is missing or empty (…)
 ```
 
-Сбой LLM-OCR на конкретном запросе (исчерпаны ретраи, пустой ответ) → rerank этого запроса пропускается (`rerank_reason: ocr_failed` в decision log), аналоги неизвестного вина пустые; при `none` — `rerank_reason: ocr_unavailable`. Переключения на лету нет — повторный выбор только при рестарте. PHOCR строится **лениво** при первом rerank; при `enable_rerank: false` движок не грузится. Полноценные профили GPU / CPU — бэклог `CFG-DEVICE-001`.
+Сбой LLM-OCR на конкретном запросе (исчерпаны ретраи, пустой ответ) → rerank этого запроса пропускается (`rerank_reason: ocr_failed` в decision log), аналоги неизвестного вина пустые; при `none` — `rerank_reason: ocr_unavailable`. Переключения на лету нет — повторный выбор только при рестарте. PHOCR строится при старте приложения, до приёма запросов (первый старт качает веса ~270 МБ, чтобы первый запрос не упёрся в таймаут клиента); если прогрев упал — повторная попытка при первом rerank; при `enable_rerank: false` движок не грузится. Полноценные профили GPU / CPU — бэклог `CFG-DEVICE-001`.
 
 ## LLM tasks (Stage 2A)
 

@@ -1,156 +1,186 @@
 # Быстрый запуск
 
-Полная инструкция: от чистой машины до открытой страницы сканера. Детали модулей — [architecture.md](architecture.md), настройки — [configuration_guide.md](configuration_guide.md), описание экранов — [user_interface.md](user_interface.md).
+Сначала — короткое руководство: всё в Docker на GPU (Linux или Windows). Дальше — вариант «в Docker только база, приложение на хосте» (в том числе без GPU) и подробности. Описание экранов — [user_interface.md](user_interface.md), ручные проверки — [manual_testing.md](manual_testing.md), настройки — [configuration_guide.md](configuration_guide.md).
 
-**Схема запуска.** В Docker работает только PostgreSQL + pgvector (`docker-compose.yml`). Приложение (FastAPI: eval API, продуктовый API и веб-интерфейс в одном процессе) запускается на хосте через `uv`. GPU использует приложение на хосте, а не контейнер.
+---
 
-## 0. Требования
+## Часть 1. Полный запуск в Docker (GPU)
 
-| Что | Зачем | Проверка |
-|---|---|---|
-| Linux x86_64 (проверено на Ubuntu 22.04 / 24.04) | — | `uname -m` → `x86_64` |
-| Docker Engine + Docker Compose v2 | PostgreSQL + pgvector | `docker --version`, `docker compose version` |
-| `git`, `curl` | клон репозитория, установщики | — |
-| `uv` | Python 3.12 и зависимости | `uv --version` |
-| ~15 ГБ диска | venv (с GPU-колёсами ~4 ГБ), модели ~0.9 ГБ, фото каталога ~0.15 ГБ, БД | `df -h .` |
-| Интернет при первой установке | пакеты PyPI, веса PHOCR (~270 МБ, скачиваются при первом OCR) | — |
-| **Опционально:** NVIDIA GPU + драйвер ≥ 580 (CUDA 13) | ускорение энкодера (~40 мс против ~1 с на CPU) и OCR | `nvidia-smi` → `CUDA Version: 13.x` |
+В `docker-compose.full.yml` два сервиса: `db` (PostgreSQL + pgvector) и `app` (FastAPI: веб-интерфейс, eval API организатора и продуктовый API в одном процессе, GPU). Модели, фото каталога и данные подключаются в контейнер из папок репозитория.
 
-## 1. Docker и Docker Compose
+### 1.1. Что нужно на машине
 
-Если уже установлены — пропустите. Официальная инструкция: [Install Docker Engine on Ubuntu](https://docs.docker.com/engine/install/ubuntu/) (Compose v2 ставится пакетом `docker-compose-plugin`).
+| Что | Где взять |
+|---|---|
+| Docker + Docker Compose v2 | Linux: [Install Docker Engine](https://docs.docker.com/engine/install/); Windows: [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) с бэкендом WSL2 |
+| Драйвер NVIDIA ≥ 580 (CUDA 13) | [nvidia.com/drivers](https://www.nvidia.com/drivers); проверка: `nvidia-smi` → `CUDA Version: 13.x` |
+| Доступ контейнеров к GPU | Linux: **NVIDIA Container Toolkit** (ниже); Windows: ничего дополнительно — Docker Desktop + WSL2 пробрасывает GPU сам ([GPU support in Docker Desktop](https://docs.docker.com/desktop/features/gpu/)) |
+| ~15 ГБ диска, интернет при первом запуске | образ (~6 ГБ с библиотеками CUDA), модели ~0.9 ГБ, фото ~0.15 ГБ, веса PHOCR ~270 МБ (качаются при первом старте приложения) |
+
+CUDA Toolkit ставить **не нужно**: библиотеки CUDA 13 / cuDNN 9 уже внутри образа.
+
+**NVIDIA Container Toolkit (Linux).** Официальная инструкция: [Installing the NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html). Для Ubuntu / Debian:
 
 ```bash
-# Ubuntu: официальный репозиторий Docker
-sudo apt-get update
-sudo apt-get install -y ca-certificates curl
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-sudo chmod a+r /etc/apt/keyrings/docker.asc
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
-https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
-  | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt-get update
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-# запуск docker без sudo (перелогиниться после команды)
-sudo usermod -aG docker "$USER"
-
-docker run --rm hello-world
-docker compose version
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list \
+  | sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' \
+  | sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
+sudo nvidia-ctk runtime configure --runtime=docker && sudo systemctl restart docker
 ```
 
-## 2. Драйвер NVIDIA (только для GPU)
+Проверка (Linux и Windows): `docker run --rm --gpus all ubuntu nvidia-smi` — должна показаться видеокарта.
 
-Нужен **только драйвер** на хосте. CUDA Toolkit и cuDNN ставить не нужно — нужные библиотеки CUDA 13 / cuDNN 9 приходят pip-колёсами (шаг 4). **NVIDIA Container Toolkit не нужен**: в Docker крутится только Postgres, GPU ему не нужен.
-
-```bash
-# Ubuntu: рекомендуемый драйвер (или явно: sudo apt install nvidia-driver-580)
-sudo ubuntu-drivers install
-sudo reboot
-
-nvidia-smi        # должно показать GPU и "CUDA Version: 13.0" или выше
-```
-
-Без GPU всё работает на CPU (медленнее, см. шаг 4 «Вариант CPU»).
-
-## 3. uv и репозиторий
+### 1.2. Код, модели, фото каталога
 
 ```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh     # установщик uv (https://docs.astral.sh/uv/)
-exec $SHELL -l                                        # подхватить PATH
-
 git clone <URL репозитория> lct_vine_final
 cd lct_vine_final
 ```
 
-Все дальнейшие команды — из корня репозитория.
+**Модели → `bin/`** (скачать в браузере, сохранить с этими именами):
 
-## 4. Python-окружение
+| Файл | Ссылка | Запасная ссылка |
+|---|---|---|
+| `bin/yolo_detect_labels_2.onnx` (~12 МБ, детектор этикетки) | [Google Drive](https://drive.google.com/file/d/1uKGYwkL7Ycm5QMgsWDl5KrTOpwwtCrtg/view?usp=drive_link) | [Google Drive (alt)](https://drive.google.com/file/d/1fZhse4rYECP1jjcPX2TwDg7lTK2l9dTU/view?usp=drive_link) |
+| `bin/siglip2_wine_p1_epoch_3_fp16.onnx` (~817 МБ, энкодер изображений) | [Google Drive](https://drive.google.com/file/d/1zVKvqYtkcNy-_OF8mIKMl_RVp-HHhOqK/view?usp=drive_link) | [Google Drive (alt)](https://drive.google.com/file/d/1wSSgStfcpW-JXLJvtdpUQAcWGXMQ8RoH/view?usp=drive_link) |
+
+**Фото каталога → `data/owner_database/images/`**: папка [images (Google Drive)](https://drive.google.com/drive/folders/1HYiy0he8OdAui_56cIZ8xUhYXN-mJo81?usp=drive_link) → «Скачать» (zip) → распаковать так, чтобы 2091 файл `{slug}.webp` лежал прямо в `data/owner_database/images/`. Список вин и данные сайта уже в репозитории (см. [3.1](#31-данные-каталога)).
+
+**Опционально — `.env`:** `cp .env.example .env` (ключ `QWEN_API_KEY` нужен только для OCR через LLM; на GPU используется локальный PHOCR). Файл не обязателен.
+
+### 1.3. Создание базы
+
+Чтобы не повторять `-f docker-compose.full.yml` в каждой команде:
+
+```bash
+export COMPOSE_FILE=docker-compose.full.yml           # Linux / WSL / Git Bash
+# $env:COMPOSE_FILE = "docker-compose.full.yml"      # Windows PowerShell
+```
+
+```bash
+docker compose build                                   # образ приложения (первый раз ~5–10 мин)
+docker compose up -d db                                # PostgreSQL + pgvector
+docker compose run --rm app scripts/rebuild_catalog_db.sh --yes   # схема + индексация каталога
+```
+
+Индексация: YOLO вырезает этикетку с каждого фото → SigLIP2 кодирует → векторы в БД; полные фото бутылок → `static/wines/` (их показывает интерфейс). На GPU — ~10 минут (RTX 3070 Laptop); 10 фото без найденной этикетки кодируются целиком — это нормально. В конце скрипт пишет `done.`, проверка:
+
+```bash
+docker compose exec db psql -U vine -d vine -c "SELECT count(*), count(embedding) FROM wines;"
+# 2091 | 2091
+```
+
+### 1.4. Запуск решения
+
+```bash
+docker compose up -d app
+docker compose logs -f app          # дождаться "Uvicorn running on http://0.0.0.0:8080", выход — Ctrl+C
+```
+
+В логе старта: `Encoder ONNX model=siglip2_wine_p1_epoch_3_fp16.onnx providers=['CUDAExecutionProvider', ...]`, `OCR engine: configured=phocr effective=phocr reason=cuda_available`, затем `PHOCR ready`. При **первом** старте перед `PHOCR ready` качаются веса PHOCR (~270 МБ, до пары минут; дальше они лежат в томе `phocr_models`) — сервер начинает отвечать только после этого, поэтому скрипт заказчика запускать после `Uvicorn running`. Проверка: `curl http://127.0.0.1:8080/health` → `{"status":"ok"}`.
+
+Порт по умолчанию — `8080`; другой: `VINE_PORT=8090 docker compose up -d app`.
+
+### 1.5. Скрипт заказчика (eval)
+
+Эндпоинт для скрипта: **`http://127.0.0.1:8080/v1/eval/predict`** (multipart-поле `image` → `{"slug": "..."}`).
+
+Скрипт — bash, нужны `curl`, `jq`, `awk`. На Windows запускать из WSL (Ubuntu): `localhost` там ведёт в Docker Desktop.
+
+```bash
+./participant_test.sh \
+  --images-dir ./queries \
+  --manifest ./queries.tsv \
+  --endpoint 'http://127.0.0.1:8080/v1/eval/predict' \
+  --output ./predictions.jsonl
+```
+
+Файл `--output` не должен существовать (скрипт не перезаписывает его и завершится с `ERROR: output already exists`). На GPU один запрос — ~0.3–1.6 с.
+
+Пример на публичных наборах (если лежат в `data/owner_eval/`): те же флаги с путями `./data/owner_eval/1/queries`, `./data/owner_eval/1/queries.tsv`; set 2 — `data/owner_eval/2/`.
+
+### 1.6. Интерфейс и ручная проверка
+
+- Интерфейс: [http://127.0.0.1:8080/](http://127.0.0.1:8080/) — экраны и сценарии: [user_interface.md](user_interface.md).
+- Swagger (JSON API): [http://127.0.0.1:8080/docs](http://127.0.0.1:8080/docs), примеры — [часть 3.3](#33-продуктовый-api-apiv1).
+- Ручная проверка: [manual_testing.md](manual_testing.md).
+
+Камера на телефоне работает только по HTTPS или на `localhost`; по `http://<IP-компьютера>:8080` доступна загрузка фото из галереи.
+
+### 1.7. Остановка и обновление
+
+```bash
+docker compose down                 # остановить (БД и веса PHOCR сохраняются в томах)
+docker compose up -d --build app    # после обновления кода
+docker compose down -v              # полный сброс: удаляет БД — потом снова 1.3
+```
+
+---
+
+## Часть 2. В Docker только база, приложение на хосте
+
+Подходит для разработки и для машины **без GPU** (приложение работает на CPU, медленнее: ~1 с на запрос против ~0.15 с). Нужны Linux/WSL (или macOS для CPU), Docker, [uv](https://docs.astral.sh/uv/getting-started/installation/). Используется обычный `docker-compose.yml` (только Postgres, порт 5432 на хосте) — это отдельная БД, не та, что в части 1.
+
+### 2.1. Окружение
 
 ```bash
 uv python install 3.12
 uv sync --python 3.12 --extra ml --extra db --extra dev
+cp .env.example .env              # DATABASE_URL=postgresql+psycopg://vine:vine@127.0.0.1:5432/vine
 ```
 
-Это базовый (CPU) набор: колесо `onnxruntime`, OpenCV, PHOCR, SQLAlchemy/pgvector, pytest.
-
-### Вариант GPU (рекомендуется, если есть NVIDIA)
-
-Колёса `onnxruntime` (CPU) и `onnxruntime-gpu` в одном окружении не уживаются — ставим GPU-overlay поверх:
+**GPU на хосте** (нужен только драйвер NVIDIA ≥ 580; CUDA Toolkit и Container Toolkit не нужны):
 
 ```bash
 uv pip uninstall onnxruntime
-uv pip install -r requirements-gpu.txt       # onnxruntime-gpu[cuda,cudnn] + pip-колёса CUDA 13 / cuDNN 9
-
-# библиотеки CUDA из venv — нужно в КАЖДОМ терминале перед запуском приложения / индексации
+uv pip install -r requirements-gpu.txt
+# в КАЖДОМ терминале перед запуском / индексацией:
 export LD_LIBRARY_PATH="$(pwd)/.venv/lib/python3.12/site-packages/nvidia/cu13/lib:$(pwd)/.venv/lib/python3.12/site-packages/nvidia/cudnn/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-
-uv run python -c "import onnxruntime as o; print(o.get_available_providers())"
-# ожидается: [..., 'CUDAExecutionProvider', 'CPUExecutionProvider']
+uv run python -c "import onnxruntime as o; print(o.get_available_providers())"   # есть CUDAExecutionProvider
 ```
 
-`config/compute_cropper.yaml` → `compute.device: cuda` (значение по умолчанию в репозитории).
+После GPU-overlay не запускайте `uv sync` (вернёт CPU-колесо); `uv run …` безопасен.
 
-> После GPU-overlay **не запускайте `uv sync`** — он вернёт CPU-колесо `onnxruntime`. Обычный `uv run …` безопасен. Если всё же вернулось — повторите две команды `uv pip …` выше.
+**CPU:** в `config/compute_cropper.yaml` поставить `compute.device: cpu`. OCR без CUDA переключается на LLM (нужен `QWEN_API_KEY` в `.env`), без ключа работает без OCR (поиск только по изображению). Итог выбора — строка `OCR engine: …` в логе старта.
 
-### Вариант CPU
+Модели и фото — как в [1.2](#12-код-модели-фото-каталога).
 
-Ничего дополнительно ставить не нужно. В `config/compute_cropper.yaml` поставьте `compute.device: cpu`. OCR без CUDA автоматически переключается на LLM (нужен ключ `QWEN_API_KEY` в `.env`), без ключа — работает без OCR (поиск только по изображению). Итог выбора виден в логе старта (шаг 9).
-
-## 5. Модели → `bin/`
-
-Модели не хранятся в git. Скачайте (в браузере, кнопка «Скачать») и положите **с этими именами**:
-
-| Файл в `bin/` | Назначение | Ссылка | Запасная ссылка |
-|---|---|---|---|
-| `bin/yolo_detect_labels_2.onnx` (~12 МБ) | YOLO — детектор этикетки (кроп) | [Google Drive](https://drive.google.com/file/d/1uKGYwkL7Ycm5QMgsWDl5KrTOpwwtCrtg/view?usp=drive_link) | [Google Drive (alt)](https://drive.google.com/file/d/1fZhse4rYECP1jjcPX2TwDg7lTK2l9dTU/view?usp=drive_link) |
-| `bin/siglip2_wine_p1_epoch_3_fp16.onnx` (~817 МБ) | SigLIP2 so400m (дообучен на вине), fp16 — энкодер изображений, вектор 1152 | [Google Drive](https://drive.google.com/file/d/1zVKvqYtkcNy-_OF8mIKMl_RVp-HHhOqK/view?usp=drive_link) | [Google Drive (alt)](https://drive.google.com/file/d/1wSSgStfcpW-JXLJvtdpUQAcWGXMQ8RoH/view?usp=drive_link) |
-
-Из консоли (опционально, утилита `gdown` запускается через `uvx`, в проект не ставится):
+### 2.2. База и индексация
 
 ```bash
-mkdir -p bin
-uvx gdown --fuzzy 'https://drive.google.com/file/d/1uKGYwkL7Ycm5QMgsWDl5KrTOpwwtCrtg/view' -O bin/yolo_detect_labels_2.onnx
-uvx gdown --fuzzy 'https://drive.google.com/file/d/1zVKvqYtkcNy-_OF8mIKMl_RVp-HHhOqK/view' -O bin/siglip2_wine_p1_epoch_3_fp16.onnx
-ls -la bin/
+docker compose up -d && docker compose ps       # healthy
+scripts/rebuild_catalog_db.sh --yes              # схема + индексация (на CPU заметно дольше)
+docker compose exec db psql -U vine -d vine -c "SELECT count(*), count(embedding) FROM wines;"   # 2091 | 2091
 ```
 
-Пути прописаны в конфиге: `config/compute_cropper.yaml` → `yolo_model_path: bin/yolo_detect_labels_2.onnx`, `config/database.yaml` → `dino_model_path: bin/siglip2_wine_p1_epoch_3_fp16.onnx`, `embedding_dim: 1152`. При несовпадении размерности приложение и импорт падают при старте с понятной ошибкой.
-
-**PHOCR** (локальный OCR этикеток) качает свои веса (~270 МБ, modelscope.cn) сам при первом запросе, где нужен OCR, — в папку пакета внутри `.venv`. Нужен интернет один раз.
-
-## 6. Файл `.env`
+### 2.3. Запуск
 
 ```bash
-cp .env.example .env
+uv run uvicorn api.main:app --app-dir src --host 0.0.0.0 --port 8080
 ```
 
-- `DATABASE_URL=postgresql+psycopg://vine:vine@127.0.0.1:5432/vine` — уже совпадает с `docker-compose.yml`.
-- `QWEN_API_KEY` — нужен только для OCR через LLM (режим без CUDA). Не коммитьте `.env`.
+Дальше — как в [1.5](#15-скрипт-заказчика-eval) и [1.6](#16-интерфейс-и-ручная-проверка). Остановка — `Ctrl+C`, база — `docker compose down`.
 
-## 7. База данных (PostgreSQL + pgvector)
+Тесты: `uv run pytest tests/ -q` (DB-тесты используют эту Postgres), линт — `uv run ruff check src/ tests/`.
 
-```bash
-docker compose up -d
-docker compose ps                  # STATUS: healthy (≈10 с)
-uv run alembic upgrade head        # схема: таблицы каталога + колонка vector(1152)
-```
+---
 
-Данные БД живут в Docker-томе `pgdata` и переживают `docker compose down`/перезагрузку. Полный сброс тома — `docker compose down -v` (**удаляет каталог**, потом снова шаги 7–8).
+## Часть 3. Подробности
 
-## 8. Каталог и индексация
-
-### Исходные данные
+### 3.1. Данные каталога
 
 | Что | Где | В git |
 |---|---|---|
-| Список вин, по которому собрана БД (владелец, 2103 вина) | `data/wines_integrated_updated.csv` | да |
-| Обогащение с сайта: рейтинг, блюда, ссылка на страницу, крепость, температура подачи | `data/site_database/wines_database_enriched.json` | да |
+| Список вин, по которому собрана БД (2103 вина) | `data/wines_integrated_updated.csv` | да |
+| Данные сайта: рейтинг, блюда, ссылка на страницу, крепость, температура подачи | `data/site_database/wines_database_enriched.json` | да |
 | Список проблемных фото | `data/wines_problem_images.csv` | да |
-| Фото бутылок `{slug}.webp` (2091 файл, ~130 МБ) | `data/owner_database/images/` | нет — скачать |
+| Фото бутылок `{slug}.webp` (2091 файл, ~130 МБ) | `data/owner_database/images/` | нет — [облако](https://drive.google.com/drive/folders/1HYiy0he8OdAui_56cIZ8xUhYXN-mJo81?usp=drive_link) |
 
-Фото каталога — папка в облаке: [images (Google Drive)](https://drive.google.com/drive/folders/1HYiy0he8OdAui_56cIZ8xUhYXN-mJo81?usp=drive_link). В браузере: папка → «Скачать» (Google Drive отдаёт один или несколько zip). Распакуйте так, чтобы файлы лежали прямо в `data/owner_database/images/`:
+Часть совсем мелких фото (меньше 200 px) заменена на более крупные. Список приложен — `data/wines_problem_images.csv` (100 строк): 88 — мелкие фото (из них 7 ещё и дубли чужого фото), 12 — вина без фото (нет ни фото, ни страницы на сайте). Эти 12 в индекс не попадают: 2103 − 12 = 2091 вино в БД.
+
+Распаковка zip из Google Drive (Linux / WSL):
 
 ```bash
 mkdir -p data/owner_database/images /tmp/vine_images
@@ -159,80 +189,19 @@ find /tmp/vine_images -name '*.webp' -exec mv -t data/owner_database/images/ {} 
 ls data/owner_database/images | wc -l        # 2091
 ```
 
-(`gdown --folder` для этой папки не подходит — он скачивает не больше 50 файлов.)
+Модели из консоли (опционально): `uvx gdown --fuzzy '<ссылка на файл>' -O bin/<имя файла>`. Пути в конфиге: `config/compute_cropper.yaml` → `yolo_model_path`, `config/database.yaml` → `dino_model_path` (`embedding_dim: 1152`); при несовпадении размерности приложение падает при старте с понятной ошибкой.
 
-**Про фото.** Часть совсем мелких фото (меньше 200 px) заменена на более крупные. Список проблемных позиций приложен — `data/wines_problem_images.csv` (100 строк): 88 — мелкие фото (из них 7 ещё и дубли чужого фото), 12 — вина без фото (нет ни фото, ни страницы на сайте). Эти 12 в индекс не попадают: 2103 вина в CSV − 12 = 2091 в БД.
+### 3.2. Что делает индексация (`scripts/rebuild_catalog_db.sh --yes`)
 
-### Индексация (одна команда)
+`--yes` обязателен: таблица `wines` очищается и заливается заново.
 
-```bash
-# GPU: в этом терминале должен быть экспортирован LD_LIBRARY_PATH (шаг 4)
-docker compose up -d
-scripts/rebuild_catalog_db.sh --yes
-```
+1. **CSV** — список вин + данные сайта → `scripts/catalog_prepare/wines_clean_ready.csv` (отбракованные — `wines_clean_rejected.csv`).
+2. **Ассеты** — YOLO вырезает этикетку → `data/tmp/catalog_crops/` (кодируется в БД); полные бутылки → `static/wines/` (показывает UI). Сверка — `data/tmp/catalog_assets_check.csv`; старые ассеты уезжают в `.trash/`.
+3. **БД** — `alembic upgrade head` (с `VINE_RESET_EMBEDDINGS=1`), кодирование SigLIP2 и вставка; фото, где YOLO не нашёл этикетку, кодируются целиком.
 
-Что делает скрипт (`--yes` обязателен — таблица `wines` очищается и заливается заново):
+Раздельно: `--prepare-only` (шаги 1–2, БД не трогается), затем `--yes --reuse-assets` (шаг 3). Меньше видеопамяти — `-- --encode-batch-size 8`. В Docker все команды — через `docker compose run --rm app scripts/rebuild_catalog_db.sh …`.
 
-1. **CSV** — `data/wines_integrated_updated.csv` + JSON сайта → `scripts/catalog_prepare/wines_clean_ready.csv` (отбракованные — `wines_clean_rejected.csv`).
-2. **Ассеты** — YOLO вырезает этикетку из каждого фото → `data/tmp/catalog_crops/` (это кодируется в БД); полные бутылки → `static/wines/` (их показывает UI). Сверка: `data/tmp/catalog_assets_check.csv`. Старые ассеты уезжают в `.trash/`.
-3. **БД** — `alembic upgrade head` (с `VINE_RESET_EMBEDDINGS=1`), кодирование кропов SigLIP2 и вставка в `wines`; фото, где YOLO не нашёл этикетку, кодируются целиком.
-
-Время: на GPU — минуты, на CPU — заметно дольше (кодирование ~1 с на фото). Батч энкодера — `-- --encode-batch-size 8` (уменьшить при нехватке видеопамяти).
-
-Раздельно: `scripts/rebuild_catalog_db.sh --prepare-only` (шаги 1–2, БД не трогается), затем `scripts/rebuild_catalog_db.sh --yes --reuse-assets` (шаг 3).
-
-### Проверка
-
-```bash
-docker compose exec -T db psql -U vine -d vine -c "SELECT count(*), count(embedding) FROM wines;"
-# ожидается: 2091 | 2091
-ls static/wines | wc -l                                  # 2091
-```
-
-## 9. Запуск решения
-
-```bash
-# GPU: export LD_LIBRARY_PATH=... (шаг 4) в этом терминале
-uv run uvicorn api.main:app --app-dir src --host 0.0.0.0 --port 8080
-```
-
-Старт занимает ~10 с. В логе должны быть строки:
-
-```text
-INFO core.retrieve.dino_encoder: Encoder ONNX model=siglip2_wine_p1_epoch_3_fp16.onnx providers=['CUDAExecutionProvider', ...] embedding_dim=1152 ...
-INFO api.runtime: OCR engine: configured=phocr effective=phocr reason=cuda_available
-INFO core.product.catalog_service: product dictionaries: 4 colors, 139 grapes, ...
-INFO:     Uvicorn running on http://0.0.0.0:8080
-```
-
-На CPU вместо `CUDAExecutionProvider` будет только `CPUExecutionProvider`, а OCR — `effective=llm` или `effective=none` с причиной. Подробность логов — переменная `VINE_LOG_LEVEL` (`DEBUG` / `INFO` / `WARNING`, по умолчанию `INFO`).
-
-### Открыть
-
-| Адрес | Что |
-|---|---|
-| [http://127.0.0.1:8080/](http://127.0.0.1:8080/) | **Веб-интерфейс** — сканер этикетки (описание экранов — [user_interface.md](user_interface.md)) |
-| [http://127.0.0.1:8080/catalog](http://127.0.0.1:8080/catalog) | Каталог с фильтрами |
-| [http://127.0.0.1:8080/docs](http://127.0.0.1:8080/docs) | Swagger: все JSON-эндпоинты |
-| [http://127.0.0.1:8080/health](http://127.0.0.1:8080/health) | `{"status":"ok"}` |
-
-С другого устройства в сети — `http://<IP-компьютера>:8080/`. **Камера на телефоне требует HTTPS** (браузер даёт доступ к камере только в защищённом контексте или на `localhost`); по обычному `http://<IP>` работает загрузка фото из галереи. Для демо камеры — HTTPS-туннель или сертификат перед uvicorn.
-
-### Smoke-проверка из консоли
-
-```bash
-curl -s http://127.0.0.1:8080/health
-curl -s -F "image=@./data/owner_eval/1/queries/04f3ce15.jpg" http://127.0.0.1:8080/v1/eval/predict
-# {"slug":"chateau-de-talu-ruzh-kaberne-sovinon-krasnoe-suhoe-14"}
-```
-
-(`data/owner_eval/` — набор организатора; если его нет, подставьте любое фото этикетки.)
-
-### Остановка
-
-`Ctrl+C` в терминале uvicorn; БД — `docker compose down` (данные сохраняются в томе).
-
-## 10. Продуктовый API (`/api/v1`)
+### 3.3. Продуктовый API (`/api/v1`)
 
 Тот же процесс. Пороги и лимиты — `config/product.yaml` ([configuration_guide.md](configuration_guide.md)).
 
@@ -261,46 +230,24 @@ curl -s -o /dev/null -w "%{http_code}\n" -H 'Content-Type: application/json' \
   -d "{\"search_id\":\"$SID\",\"verdict\":\"match\"}" $B/feedback      # 204
 ```
 
-Фото запросов и JSON результатов — `data/tmp/search_queries/` (хранятся 10 дней), отзывы — `data/tmp/search_feedback.jsonl`, лог решений — `data/tmp/eval_decisions.jsonl`. Чистка по сроку — при старте и `uv run python scripts/cleanup_search_queries.py [--dry-run] [--days N]`.
+Рабочие файлы (в `data/tmp/`, в Docker — та же папка через том): фото запросов и JSON результатов — `search_queries/` (10 дней), отзывы — `search_feedback.jsonl`, лог решений — `eval_decisions.jsonl`. Чистка по сроку — при старте и `scripts/cleanup_search_queries.py [--dry-run] [--days N]`. Отчёт по eval: `uv run python scripts/collect_eval_report.py --log data/tmp/eval_decisions.jsonl --predictions <predictions.jsonl> --mapping <mapping.json>`.
 
-## 11. Eval организатора (owner_eval)
+### 3.4. Логи
 
-Приложение должно слушать `:8080`:
+Приложение пишет логи в stderr (`docker compose logs app` или терминал uvicorn). Уровень — `VINE_LOG_LEVEL` (`DEBUG` / `INFO` / `WARNING`, по умолчанию `INFO`); в Docker — строкой `VINE_LOG_LEVEL=DEBUG` в `.env`.
 
-```bash
-./data/owner_eval/1/participant_test.sh \
-  --images-dir ./data/owner_eval/1/queries \
-  --manifest ./data/owner_eval/1/queries.tsv \
-  --endpoint 'http://127.0.0.1:8080/v1/eval/predict' \
-  --output ./data/owner_eval/1/predictions.jsonl
-```
-
-Set 2 — те же пути под `data/owner_eval/2/`. Отчёт по логу решений:
-
-```bash
-uv run python scripts/collect_eval_report.py \
-  --log data/tmp/eval_decisions.jsonl \
-  --predictions data/owner_eval/1/predictions.jsonl \
-  --mapping data/owner_eval/1/mapping.json
-```
-
-## 12. Тесты
-
-```bash
-uv run pytest tests/ -q          # юнит + API + UI; DB-тесты используют Postgres из шага 7
-uv run ruff check src/ tests/
-```
-
-## 13. Если что-то не так
+### 3.5. Если что-то не так
 
 | Симптом | Что сделать |
 |---|---|
-| `DATABASE_URL is not set` | нет `.env` — шаг 6 |
-| `connection refused … 5432` | `docker compose up -d`, дождаться `healthy` |
-| порт 5432 или 8080 занят | остановить чужой процесс (`ss -ltnp \| grep 5432`) или поменять порт (`--port 8081`; для БД — секция `ports` в `docker-compose.yml` и `DATABASE_URL`) |
-| в логе энкодера только `CPUExecutionProvider` при наличии GPU | не экспортирован `LD_LIBRARY_PATH` в этом терминале или стоит CPU-колесо после `uv sync` — шаг 4 «Вариант GPU» |
-| `CUDA out of memory` | GPU занят другим процессом (`nvidia-smi`); закрыть его или `compute.device: cpu` |
-| PHOCR падает / не качает веса | нет интернета при первом OCR; временно `policy.enable_rerank: false` в `config/ocr_rerank.yaml` (поиск только по изображению) |
-| `alembic upgrade head` ругается на размерность 768 | БД от старого энкодера — `VINE_RESET_EMBEDDINGS=1 uv run alembic upgrade head` и индексация (шаг 8) |
-| в UI у вин нет рейтинга / блюд | индексация шла без `data/site_database/wines_database_enriched.json` — вернуть файл и повторить шаг 8 |
-| ошибка размерности энкодера при старте | в `bin/` не та модель — шаг 5 |
+| `could not select device driver "nvidia"` / `unknown or invalid runtime name: nvidia` | не установлен / не настроен NVIDIA Container Toolkit (1.1), после настройки — `sudo systemctl restart docker` |
+| в логе энкодера только `CPUExecutionProvider` | Docker: контейнер без GPU — проверить `docker run --rm --gpus all ubuntu nvidia-smi`; хост: не экспортирован `LD_LIBRARY_PATH` или вернулось CPU-колесо после `uv sync` (2.1) |
+| `CUDA out of memory` | GPU занят другим процессом (`nvidia-smi`) — закрыть его |
+| порт 8080 занят | `VINE_PORT=8090 docker compose up -d app` (хост: `--port 8090`) |
+| `DATABASE_URL is not set` (хост) | нет `.env` — 2.1 |
+| `connection refused … 5432` (хост) | `docker compose up -d`, дождаться `healthy` |
+| пустой каталог / 503 на поиске | не выполнена индексация (1.3 / 2.2) или нет фото в `data/owner_database/images/` |
+| в UI у вин нет рейтинга / блюд | индексация шла без `data/site_database/wines_database_enriched.json` — вернуть файл и повторить индексацию |
+| ошибка размерности энкодера при старте | в `bin/` не та модель — 1.2 |
+| PHOCR не качает веса (`PHOCR warm-up failed` в логе) | нет интернета при первом старте; временно `policy.enable_rerank: false` в `config/ocr_rerank.yaml` (поиск только по изображению) |
+| `alembic upgrade head` ругается на размерность 768 | БД от старого энкодера — индексация `rebuild_catalog_db.sh --yes` (сама сбрасывает эмбеддинги) |

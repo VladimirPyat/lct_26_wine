@@ -2,15 +2,24 @@
 
 Фото этикетки вина → одна карточка каталога «Своё Вино» с уровнем уверенности (или «не найдено» + аналоги из каталога). Веб-интерфейс для пользователя, eval API организатора и продуктовый JSON API — в одном FastAPI-приложении.
 
-**Стек (кратко):** Python 3.12 / `uv`, FastAPI + Jinja2 (UI без Node/сборки), PostgreSQL + pgvector (Docker Compose), ONNX Runtime (CPU / CUDA): YOLO (кроп этикетки) + SigLIP2 so400m fp16 (энкодер изображений), PHOCR / LLM (OCR этикетки для спорных случаев).
+**Стек (кратко):** Python 3.12 / `uv`, FastAPI + Jinja2 (UI без Node/сборки), PostgreSQL + pgvector, Docker Compose (GPU), ONNX Runtime (CUDA / CPU): YOLO (кроп этикетки) + SigLIP2 so400m fp16 (энкодер изображений), PHOCR / LLM (OCR этикетки для спорных случаев).
 
-**Запуск с нуля — [manuals/quickstart.md](manuals/quickstart.md)** (Docker, драйвер NVIDIA, модели, база, индексация, запуск). После запуска интерфейс открывается на [http://127.0.0.1:8080/](http://127.0.0.1:8080/), описание экранов — [manuals/user_interface.md](manuals/user_interface.md).
+**Запуск — [manuals/quickstart.md](manuals/quickstart.md).** Коротко (GPU, нужны Docker, драйвер NVIDIA и NVIDIA Container Toolkit; модели в `bin/` и фото в `data/owner_database/images/` — по ссылкам из quickstart):
+
+```bash
+export COMPOSE_FILE=docker-compose.full.yml
+docker compose build && docker compose up -d db
+docker compose run --rm app scripts/rebuild_catalog_db.sh --yes    # база + индексация каталога
+docker compose up -d app                                           # http://127.0.0.1:8080/
+```
+
+Eval организатора — эндпоинт `http://127.0.0.1:8080/v1/eval/predict`. Интерфейс — [manuals/user_interface.md](manuals/user_interface.md), ручные проверки — [manuals/manual_testing.md](manuals/manual_testing.md).
 
 ## Документация
 
 | Документ | Назначение |
 |----------|------------|
-| [manuals/quickstart.md](manuals/quickstart.md) | Полная инструкция по запуску: окружение, модели, БД, индексация каталога, запуск, eval |
+| [manuals/quickstart.md](manuals/quickstart.md) | Запуск: полный в Docker (GPU) → база + индексация → решение → скрипт заказчика; вариант «только база в Docker» (хост / CPU); подробности |
 | [manuals/user_interface.md](manuals/user_interface.md) | Веб-интерфейс: экраны, состояния результата, аналоги, «Мои вина» |
 | [manuals/architecture.md](manuals/architecture.md) | Архитектура: модули, пайплайн поиска, policy, аналоги, логи |
 | [manuals/configuration_guide.md](manuals/configuration_guide.md) | Настройки (`config/*.yaml`, `.env`, переменные окружения) |
@@ -79,4 +88,6 @@
 | `manuals/` | Человекочитаемые мануалы |
 | `agent_docs/` | Планы, контракты, инструкции, прогресс, отчёты |
 | `docs/` | Требования (ТЗ) |
-| `docker-compose.yml` | PostgreSQL + pgvector |
+| `Dockerfile` | Образ приложения (GPU: onnxruntime-gpu + CUDA 13 / cuDNN 9 pip-колёсами) |
+| `docker-compose.full.yml` | Полный запуск: Postgres + приложение на GPU (основной способ) |
+| `docker-compose.yml` | Только PostgreSQL + pgvector (приложение на хосте, разработка / CPU) |

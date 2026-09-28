@@ -9,7 +9,7 @@
 | Компонент | Назначение |
 |-----------|------------|
 | `api` (FastAPI) | HTTP: `/health`, `/static/wines`, `POST /v1/eval/predict`, `/api/v1/*` (продукт); подключает UI-роутер и `/ui-static` |
-| `api.runtime` | Старт: YOLO + энкодер SigLIP2 + DB; один раз выбирает OCR-движок (цепочка CUDA → PHOCR, иначе LLM, иначе без OCR); PHOCR строится лениво при первом rerank |
+| `api.runtime` | Старт: YOLO + энкодер SigLIP2 + DB; один раз выбирает OCR-движок (цепочка CUDA → PHOCR, иначе LLM, иначе без OCR); PHOCR прогревается в `lifespan` до приёма запросов (первый старт качает веса), при сбое прогрева — лениво при первом rerank |
 | `api.eval_pipeline` | Общий пайплайн `run_search` (retrieve → decide → decision log) для eval и продукта |
 | `core.product` | DTO + `ProductService`; `CatalogProductService` (поиск, аналоги, каталог, справочники, отзывы); `StubProductService` — для тестов UI |
 | `web` (Jinja2) | Публичный UI: сканер, результат, каталог, «Мои вина» (`src/web/`); вызывает тот же `ProductService` in-process |
@@ -76,7 +76,7 @@ policy.decide
 
 | `ocr.engine` | Условие | Эффективный движок | `reason` |
 |---|---|---|---|
-| `phocr` | CUDA доступна | `phocr` (как раньше, `use_cuda=True`, лениво) | `cuda_available` |
+| `phocr` | CUDA доступна | `phocr` (как раньше, `use_cuda=True`, прогрев при старте) | `cuda_available` |
 | `phocr` | CUDA нет | `llm` (задача `ocr.llm_task`) | `no_cuda` |
 | `phocr` / `llm` | LLM недоступен (нет ключа, ошибка YAML / клиента) | `none` | `llm_unavailable: <класс ошибки: сообщение>` |
 | `llm` | LLM доступен | `llm` (без проверки CUDA) | `configured_llm` |
@@ -193,6 +193,15 @@ Query / eval: YOLO crop → SigLIP2; if no/empty box → **full frame** + ERROR 
 **Выбор бокса YOLO (`select_label_box`):** кандидаты `score ≥ confidence`; предпочтение доли площади кадра в `[box_area_min, box_area_max]` и `conf ≥ max_conf * box_conf_keep_ratio`; среди них max `conf * (1 - dist_to_center)`; иначе max confidence.
 
 **Device:** YOLO EP — `cropper.device` (`cpu` \| `cuda` \| `auto`, default `cpu`). PHOCR + SigLIP2 — `compute.device`. Online eval оставляет YOLO на CPU, чтобы не делить VRAM с OCR/энкодером.
+
+## Развёртывание
+
+| Режим | Файл | Что в Docker |
+|---|---|---|
+| Основной (GPU, Linux / Windows + WSL2) | `docker-compose.full.yml` + `Dockerfile` | `db` (pgvector) и `app` (FastAPI + UI, GPU через NVIDIA Container Toolkit); миграции при старте `app`, индексация — `docker compose run --rm app scripts/rebuild_catalog_db.sh --yes` |
+| Разработка / CPU | `docker-compose.yml` | только `db`; приложение на хосте через `uv` |
+
+В образ входят код и конфиги; модели (`bin/`, только чтение), данные (`data/`) и фото каталога (`static/wines/`) подключаются томами из репозитория, веса PHOCR — именованный том `phocr_models`. Библиотеки CUDA 13 / cuDNN 9 — pip-колёса `onnxruntime-gpu[cuda,cudnn]` внутри образа (CUDA Toolkit на хосте не нужен). Проекты compose разные (`vine` и `lct_vine_final`) — у каждого своя БД.
 
 ## Внешние зависимости
 

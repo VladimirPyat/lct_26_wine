@@ -242,3 +242,11 @@ TEST_PASS (WEB-UI A–D)
 - Catalog inputs tracked in git: `data/wines_integrated_updated.csv` (2103 wines), `data/wines_problem_images.csv` (100), `data/site_database/wines_database_enriched.json` (rating/dishes/url); defaults of `rebuild_catalog_db.sh` / `prepare_clean_csv.py` → `data/wines_integrated_updated.csv`. Dry-run prepare: ready=2091, rejected=12.
 - Docs: `manuals/quickstart.md` rewritten (Docker, NVIDIA driver, uv, models + links, DB, indexing, run/open UI, API, eval, troubleshooting); new `manuals/user_interface.md`; README (docs, UI + API endpoints, layout), `manuals/index.md`, `configuration_guide.md`, `ARCHITECTURE.md`, `manual_testing.md` synced.
 - Commands: `ruff check src/ tests/` exit 0; `pytest tests/ -q` exit 0 — 404 passed, 2 skipped, 1 xfailed.
+
+### 2026-09-28 — isolated GPU Docker run (master)
+
+- New `Dockerfile` (python:3.12-slim + uv 0.9.24, `uv sync --frozen --extra ml --extra db` → swap to `onnxruntime-gpu` via `requirements-gpu.txt`, CUDA 13/cuDNN 9 pip libs on `LD_LIBRARY_PATH`; CMD = `alembic upgrade head` + uvicorn :8080) and `docker-compose.full.yml` (project `vine`: `db` pgvector without published port + `app` with GPU reservation; `bin/` ro, `data/`, `static/wines/` bind mounts, `phocr_models` volume). `.dockerignore` rewritten. No CPU container (owner: test on GPU; CPU = DB-only compose + host app).
+- `src/api/main.py`: PHOCR warm-up in lifespan (first start downloads ~270 MB weights; previously the first rerank request hit the customer script 60 s timeout). Healthcheck start-period 300 s.
+- Verified: image build OK; in-container `rebuild_catalog_db.sh --yes` ≈10 min on GPU → 2091|2091; app log CUDA EP + `OCR engine … effective=phocr` + `PHOCR ready`; `/`, `/catalog`, `/docs` 200; customer script vs container: set1 27/27, set2 25/25 identical to master baseline (max latency 1.6 s). Windows / Docker Desktop path not tested.
+- Docs: `manuals/quickstart.md` restructured (Part 1 short Docker GPU guide: requirements via links, DB, run, customer script endpoint, UI/manual testing links; Part 2 DB-only + host app; Part 3 details); README, `manuals/index.md`, `architecture.md` (deployment section), `configuration_guide.md` synced.
+- Commands: `ruff check src/` exit 0; `pytest tests/ -q` — 404 passed, 2 skipped, 1 xfailed.

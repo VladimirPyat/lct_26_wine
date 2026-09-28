@@ -1,0 +1,52 @@
+# Fully isolated run: Postgres + app (GPU) in Docker.
+#   docker compose -f docker-compose.full.yml up -d --build
+# Host requirements: NVIDIA driver >= 580 + NVIDIA Container Toolkit (Linux) or Docker Desktop + WSL2 (Windows).
+# Separate project name → own DB volume; does not touch the DB of docker-compose.yml (DB-only mode).
+name: vine
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: vine
+      POSTGRES_PASSWORD: vine
+      POSTGRES_DB: vine
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vine -d vine"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  app:
+    build: .
+    image: vine-scanner:gpu
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgresql+psycopg://vine:vine@db:5432/vine
+    ports:
+      - "${VINE_PORT:-8080}:8080"
+    volumes:
+      - ./bin:/app/bin:ro
+      - ./data:/app/data
+      - ./static/wines:/app/static/wines
+      - phocr_models:/app/.venv/lib/python3.12/site-packages/phocr/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  phocr_models:
