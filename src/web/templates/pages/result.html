@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% from "components/wine_card.html" import wine_details, wine_image, cabinet_actions with context %}
+{% from "components/confidence_badge.html" import confidence_badge %}
+{% from "components/analogs.html" import analogs_block with context %}
+{% from "components/feedback.html" import feedback_bar with context %}
+{% from "components/stub_feature.html" import stub_features with context %}
+{% block title %}{% if view.winner %}{{ view.winner.title }}{% else %}Вино не найдено{% endif %} — Своё Вино{% endblock %}
+{% block page_class %}result result--{{ view.status }}{% endblock %}
+{% block scripts %}
+<script type="module" src="{{ url_for('ui_static', path='js/lightbox.js').path }}"></script>
+{% endblock %}
+{% block content %}
+<div hidden data-search-meta
+     data-search-id="{{ view.search_id }}"
+     data-status="{{ view.status }}"
+     data-level="{{ view.level }}"
+     data-slug="{{ view.winner.slug if view.winner else '' }}"
+     data-title="{{ view.winner.title if view.winner else '' }}"
+     data-feedback-verdict="{{ view.feedback_verdict or '' }}"></div>
+
+{% if view.status == 'not_found' %}
+<section class="notice notice--warn" aria-labelledby="nf-title">
+  <h1 class="notice__title" id="nf-title">Вино не найдено в каталоге</h1>
+  <p class="notice__text">Вино не найдено в каталоге. Воспользуйтесь подбором аналогов.</p>
+  <div class="notice__actions">
+    <a class="btn btn--primary" href="{{ view.refine_url }}">Уточнить в каталоге</a>
+    <a class="btn btn--ghost" href="{{ view.photo_url }}" data-lightbox data-lightbox-alt="Исходное фото">Исходное фото</a>
+    <a class="btn btn--ghost" href="/">Сканировать ещё</a>
+  </div>
+</section>
+{% if view.analogs %}{{ analogs_block(view.analogs) }}{% endif %}
+{% else %}
+<article class="result">
+  <div class="result__media">
+    <a class="result__image-link" href="{{ view.winner.image_url }}" data-lightbox data-lightbox-alt="{{ view.winner.title }}">
+      {{ wine_image(view.winner, css_class='result__image') }}
+    </a>
+    <a class="btn btn--ghost btn--small result__photo-btn" href="{{ view.photo_url }}" data-lightbox data-lightbox-alt="Исходное фото">
+      Исходное фото
+    </a>
+  </div>
+  <div class="result__info">
+    {{ confidence_badge(view.level) }}
+    {{ wine_details(view.winner) }}
+    {{ cabinet_actions(view.winner) }}
+    {% if view.show_analogs_button %}
+    <p class="result__analogs-btn"><a class="btn btn--ghost" href="{{ view.analogs_url }}">Подобрать аналоги</a></p>
+    {% endif %}
+    {{ feedback_bar(view) }}
+  </div>
+</article>
+{% if view.analogs %}{{ analogs_block(view.analogs) }}{% endif %}
+{{ stub_features(view.sommelier) }}
+{% endif %}
+{% endblock %}

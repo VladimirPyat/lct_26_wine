@@ -1,0 +1,33 @@
+{# Upcoming features: visible, marked «Скоро»; ui.js shows a toast on click. #}
+{% macro stub_feature(title, text, icon='') %}
+<article class="stub">
+  <div class="stub__head">
+    {% if icon %}<img class="stub__icon" src="{{ url_for('ui_static', path=icon).path }}" alt="" width="28" height="28">{% endif %}
+    <h3 class="stub__title">{{ title }}</h3>
+    <span class="stub__soon">Скоро</span>
+  </div>
+  <p class="stub__text">{{ text }}</p>
+  {{ caller() if caller is defined else '' }}
+  <button type="button" class="btn btn--ghost btn--small" data-soon aria-disabled="true">Скоро</button>
+</article>
+{% endmacro %}
+
+{% macro stub_features(sommelier) %}
+<section class="section stubs" aria-labelledby="stubs-title">
+  <h2 class="section__title" id="stubs-title">Ещё возможности</h2>
+  <div class="grid grid--stubs">
+    {% call stub_feature('Цифровой сомелье', 'Подберём вино к вашему блюду.', 'img/public-rating-wine-in-glass.svg') %}
+    <ul class="chips">
+      {% for dish in sommelier %}
+      <li>
+        {% if dish.url %}<a class="chip" href="{{ dish.url }}">{{ dish.label }}</a>
+        {% else %}<span class="chip chip--disabled">{{ dish.label }}</span>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% endcall %}
+    {{ stub_feature('Найти в магазинах рядом', 'Покажем, где купить это вино поблизости.') }}
+    {{ stub_feature('Чат', 'Задайте вопрос о вине и получите ответ.') }}
+  </div>
+</section>
+{% endmacro %}

@@ -1,0 +1,35 @@
+{% from "components/wine_card.html" import wine_tile with context %}
+
+{% macro analogs_block(analogs) %}
+<section class="section analogs" id="analogs" aria-labelledby="analogs-title">
+  <div class="section__head">
+    <h2 class="section__title" id="analogs-title">{{ analogs.title }}</h2>
+    {% if analogs.total %}<p class="section__meta">Найдено: {{ analogs.total }}</p>{% endif %}
+  </div>
+  {% if analogs.chips %}
+  <ul class="chips chips--filters" aria-label="Применённые фильтры">
+    {% for chip in analogs.chips %}
+    <li>
+      <a class="chip chip--removable" href="{{ chip.remove_url }}" title="Убрать фильтр и открыть каталог">
+        {{ chip.label }}<span class="chip__x" aria-hidden="true">×</span>
+        <span class="visually-hidden">— убрать фильтр</span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% if analogs.wines %}
+  <div class="grid grid--tiles">
+    {% for wine in analogs.wines %}{{ wine_tile(wine) }}{% endfor %}
+  </div>
+  {% if analogs.show_all_url %}
+  <p class="section__more"><a class="btn btn--ghost" href="{{ analogs.show_all_url }}">Показать все ({{ analogs.total }})</a></p>
+  {% endif %}
+  {% else %}
+  <div class="empty">
+    <p class="empty__text">Ничего похожего не нашли.</p>
+    <a class="btn btn--ghost" href="/catalog">Открыть каталог</a>
+  </div>
+  {% endif %}
+</section>
+{% endmacro %}

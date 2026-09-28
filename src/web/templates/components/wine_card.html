@@ -1,0 +1,101 @@
+{% macro rating(wine) %}
+{% set glasses = wine.public_rating|rating_glasses %}
+{% if glasses %}
+<div class="rating" role="img" aria-label="Народный рейтинг {{ wine.public_rating|rating_text }} из 5">
+  {% for state in glasses %}
+  <img class="rating__glass" src="{{ url_for('ui_static', path='img/glass_filled_straight.png' if state == 'full' else 'img/glass_empty_straight.png').path }}" alt="" width="22" height="25">
+  {% endfor %}
+  <span class="rating__value">{{ wine.public_rating|rating_text }}</span>
+</div>
+{% else %}
+<p class="rating rating--none">Нет оценок</p>
+{% endif %}
+{% endmacro %}
+
+{% macro wine_image(wine, lazy=false, css_class='wine-image') %}
+<img class="{{ css_class }}" src="{{ wine.image_url }}" alt="{{ wine.title }}" data-fallback
+     width="300" height="400" {% if lazy %}loading="lazy" decoding="async"{% endif %}>
+{% endmacro %}
+
+{# Full wine card: result page and /wine/{slug}. #}
+{% macro wine_details(wine, heading_tag='h1') %}
+<div class="wine">
+  <p class="wine__manufacturer">{{ wine.manufacturer }}</p>
+  <{{ heading_tag }} class="wine__title">{{ wine.title }}</{{ heading_tag }}>
+  <ul class="tags" aria-label="Характеристики">
+    <li><a class="tag tag--accent" href="/catalog?color={{ wine.color|urlencode }}">{{ wine.color }}</a></li>
+    {% if wine.region %}<li><a class="tag" href="/catalog?region={{ wine.region|urlencode }}">{{ wine.region }}</a></li>{% endif %}
+    {% if wine.sweetness %}<li><a class="tag" href="/catalog?sweetness={{ wine.sweetness|urlencode }}">{{ wine.sweetness }}</a></li>{% endif %}
+  </ul>
+  {% if wine.shade %}<p class="wine__shade">{{ wine.shade }}</p>{% endif %}
+  {{ rating(wine) }}
+  <dl class="facts">
+    {% if wine.grape_variety %}<div class="facts__row"><dt>Сорт винограда</dt><dd>{{ wine.grape_variety }}</dd></div>{% endif %}
+    {% if wine.alcohol_pct is not none %}<div class="facts__row"><dt>Крепость</dt><dd>{{ wine.alcohol_pct|num }}%</dd></div>{% endif %}
+    {% if wine.serving_temperature %}<div class="facts__row"><dt>Подача</dt><dd>{{ wine.serving_temperature }}</dd></div>{% endif %}
+  </dl>
+  {% if wine.description %}<p class="wine__description">{{ wine.description }}</p>{% endif %}
+  {% if wine.dishes %}
+  <div class="dishes">
+    <h2 class="dishes__title">Сочетается с</h2>
+    <ul class="chips">
+      {% for dish in wine.dishes %}
+      <li><a class="chip" href="/catalog?dish={{ dish|urlencode }}">{{ dish }}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+</div>
+{% endmacro %}
+
+{# Cabinet widgets (visible only when logged in, managed by store.js). #}
+{% macro cabinet_actions(wine) %}
+<div class="cabinet-actions">
+  <button type="button" class="btn btn--ghost fav-btn" data-fav-slug="{{ wine.slug }}" data-fav-title="{{ wine.title }}"
+          data-requires-login aria-pressed="false" hidden>
+    <span class="fav-btn__icon" aria-hidden="true"></span>
+    <span data-fav-label>В избранное</span>
+  </button>
+  <div class="my-rating" data-my-rating="{{ wine.slug }}" data-title="{{ wine.title }}" data-requires-login hidden>
+    <span class="my-rating__label" id="my-rating-{{ wine.slug }}">Моя оценка</span>
+    <div class="my-rating__glasses" role="group" aria-labelledby="my-rating-{{ wine.slug }}">
+      {% for value in range(1, 6) %}
+      <button type="button" class="my-rating__btn" data-value="{{ value }}" aria-pressed="false" aria-label="{{ value }} из 5">
+        <img src="{{ url_for('ui_static', path='img/glass_empty_straight.png').path }}"
+             data-src-empty="{{ url_for('ui_static', path='img/glass_empty_straight.png').path }}"
+             data-src-full="{{ url_for('ui_static', path='img/glass_filled_straight.png').path }}"
+             alt="" width="22" height="25">
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+  <p class="login-hint" data-requires-logout hidden>
+    <a href="/me">Войдите</a>, чтобы сохранять избранное и свои оценки.
+  </p>
+</div>
+{% endmacro %}
+
+{# Compact tile for grids (analogs, catalog). #}
+{% macro wine_tile(wine) %}
+<article class="tile">
+  <a class="tile__link" href="/wine/{{ wine.slug|urlencode }}">
+    <div class="tile__media">{{ wine_image(wine, lazy=true, css_class='tile__image') }}</div>
+    <div class="tile__body">
+      <p class="tile__manufacturer">{{ wine.manufacturer }}</p>
+      <h3 class="tile__title">{{ wine.title }}</h3>
+      <p class="tile__meta">{{ wine.color }}{% if wine.region %} · {{ wine.region }}{% endif %}{% if wine.sweetness %} · {{ wine.sweetness }}{% endif %}</p>
+      {% if wine.public_rating is not none %}
+      <p class="tile__rating"><img src="{{ url_for('ui_static', path='img/glass_filled_straight.png').path }}" alt="" width="14" height="16"> {{ wine.public_rating|rating_text }}</p>
+      {% else %}
+      <p class="tile__rating tile__rating--none">Нет оценок</p>
+      {% endif %}
+    </div>
+  </a>
+</article>
+{% endmacro %}
+
+{% macro site_link(wine, css_class='btn btn--primary') %}
+{% if wine.product_url is http_url %}
+<a class="{{ css_class }}" href="{{ wine.product_url }}" target="_blank" rel="noopener noreferrer">Открыть на сайте</a>
+{% endif %}
+{% endmacro %}

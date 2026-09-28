@@ -1,0 +1,6 @@
+{% macro confidence_badge(level) %}
+<p class="badge badge--{{ level }}">
+  <span class="badge__dot" aria-hidden="true"></span>
+  {{ level|confidence_label }}
+</p>
+{% endmacro %}

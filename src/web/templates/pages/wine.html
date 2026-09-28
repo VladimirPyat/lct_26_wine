@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "components/wine_card.html" import wine_details, wine_image, cabinet_actions, site_link with context %}
+{% block title %}{{ wine.title }} — Своё Вино{% endblock %}
+{% block page_class %}wine-page{% endblock %}
+{% block scripts %}
+<script type="module" src="{{ url_for('ui_static', path='js/lightbox.js').path }}"></script>
+{% endblock %}
+{% block content %}
+<article class="result">
+  <div class="result__media">
+    <a class="result__image-link" href="{{ wine.image_url }}" data-lightbox data-lightbox-alt="{{ wine.title }}">
+      {{ wine_image(wine, css_class='result__image') }}
+    </a>
+  </div>
+  <div class="result__info">
+    {{ wine_details(wine) }}
+    {{ cabinet_actions(wine) }}
+    <div class="result__links">
+      {{ site_link(wine) }}
+      <a class="btn btn--ghost" href="/catalog?color={{ wine.color|urlencode }}">Похожие в каталоге</a>
+    </div>
+  </div>
+</article>
+{% endblock %}

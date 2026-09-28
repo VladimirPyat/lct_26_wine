@@ -1,0 +1,29 @@
+{% from "components/wine_card.html" import site_link with context %}
+
+{# Result action bar: feedback «Это то вино?» + site link; sticky on phones. #}
+{% macro feedback_bar(view) %}
+<div class="action-bar" id="feedback">
+  {% if view.feedback_sent %}
+  <div class="action-bar__thanks" role="status">
+    {% if view.feedback_verdict == 'mismatch' %}
+    <p class="action-bar__text">Спасибо! Жаль, что не угадали.</p>
+    {% if view.show_analogs_button %}
+    <a class="btn btn--primary" href="{{ view.analogs_url }}">Подобрать аналоги</a>
+    {% endif %}
+    {% else %}
+    <p class="action-bar__text">Спасибо за ответ!</p>
+    {% endif %}
+  </div>
+  {% else %}
+  <form class="feedback" method="post" action="{{ view.feedback_url }}">
+    <p class="feedback__question" id="feedback-q">Это то вино?</p>
+    {% if view.winner %}<input type="hidden" name="slug" value="{{ view.winner.slug }}">{% endif %}
+    <div class="feedback__buttons" role="group" aria-labelledby="feedback-q">
+      <button class="btn btn--yes" type="submit" name="verdict" value="match">Да</button>
+      <button class="btn btn--no" type="submit" name="verdict" value="mismatch">Нет</button>
+    </div>
+  </form>
+  {% endif %}
+  {% if view.winner %}{{ site_link(view.winner, 'btn btn--primary action-bar__site') }}{% endif %}
+</div>
+{% endmacro %}
