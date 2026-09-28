@@ -15,8 +15,8 @@ Follow quickstart from manuals (compose, `.env`, alembic, prepare, import) as im
 
 ### Files
 
-- [ ] `scripts/catalog_prepare/wines_ready.csv` exists, non-empty (~1932 ± small drift if data changed)
-- [ ] `wines_additional.csv` exists (~15 rows expected)
+- [ ] `scripts/catalog_prepare/wines_ready.csv` exists, non-empty (no fixed row count — catalog size changes)
+- [ ] `wines_additional.csv` exists, non-empty
 - [ ] `wines_rejected.csv` exists with `reason` column
 - [ ] Enrich columns present on all three (rating / alcohol / dishes / temperature as applicable)
 

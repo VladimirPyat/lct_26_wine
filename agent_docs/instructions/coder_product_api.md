@@ -16,7 +16,7 @@
 - Constructor takes `EvalRuntime` + `ProductSettings`; builds dictionaries at init (§4.3) and runs retention cleanup (§4.4).
 - `search` per §4.1 (status / level from `product.yaml`), persistence `{id}{ext}` + `{id}.json`.
 - `get_search` / `query_photo_path` validate id `^[0-9a-f]{32}$`.
-- `get_wine`, `find_wines` → `WineRepository` (add `color` and `exclude_manufacturer` / `exclude_slugs` filters to `search_filters`, plus a `count` variant; keep existing params working). Sort `public_rating DESC NULLS LAST`, then `id`.
+- `get_wine`, `find_wines` → `WineRepository` (`CatalogFilters.color` maps to the existing `category_name` filter — color = `categories.name`, contract §2; add `exclude_manufacturer` / `exclude_slugs` filters to `search_filters`, plus a `count` variant; keep existing params working). Sort `public_rating DESC NULLS LAST`, then `id`.
 - `analogs_for` / analogs inside `search` per §4.2, reusing OCR lines when present, `FuzzyReranker` helpers and `ocr_rerank.yaml` aliases for hints. Keep hint extraction in a pure module (e.g. `core/product/hints.py`) — testable without DB/OCR.
 - `record_feedback` → JSONL append (§4.5), file lock not required (single process) but write whole line at once.
 - DB sessions via `session_scope(runtime.session_factory)` per call.
@@ -30,8 +30,6 @@
 
 - `scripts/cleanup_search_queries.py` (`--dry-run`, `--days` override).
 - `scripts/calibrate_confidence.py` (§7): print score_1 stats for hits / misses on owner_eval, suggested thresholds; do **not** auto-edit YAML. Record output in `agent_docs/reports/confidence_calibration.md`.
-- Check `color_synonyms` keys against `SELECT DISTINCT color FROM wines`; fix keys to real values.
-
 ### API-005 — Docs (Russian)
 
 `manuals/architecture.md` (product flow, analogs, storage), `manuals/configuration_guide.md` (`product.yaml`), `manuals/quickstart.md` (curl examples for `/api/v1/search`), `ARCHITECTURE.md` §4–5 status «готово». README endpoint list.

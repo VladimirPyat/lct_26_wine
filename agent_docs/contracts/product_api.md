@@ -22,6 +22,10 @@ After this commit both branches **import** these types; changing a DTO = contrac
 
 ## 2. DTOs (`src/core/product/schemas.py`)
 
+**Color = `categories.name`** (`Красное` / `Белое` / `Розовое` / `Оранжевое`) everywhere in this API:
+`WineCard.color`, `OcrHints.color`, `CatalogFilters.color`, `Dictionaries.colors`, `product.yaml` synonym keys.
+DB column `wines.color` is a free-text shade («Тёмно-рубиновый») → exposed only as `WineCard.shade` (display, never filtered).
+
 ```python
 ConfidenceLevel = Literal["high", "medium", "low"]
 SearchStatus = Literal["found", "low", "not_found"]
@@ -32,8 +36,8 @@ class WineCard(BaseModel):
     slug: str
     title: str
     manufacturer: str
-    color: str
-    category: str
+    color: str                       # categories.name, e.g. "Красное"
+    shade: str                       # wines.color, display only, e.g. "Тёмно-рубиновый"
     region: str
     grape_variety: str
     sweetness: str | None
@@ -54,16 +58,15 @@ class Candidate(BaseModel):          # vector top-K (TZ: confidence for top-1 an
     score: float                     # cosine, higher = better
 
 class OcrHints(BaseModel):
-    color: str | None = None         # catalog color value, e.g. "Красное"
+    color: str | None = None         # categories.name, e.g. "Красное"
     grapes: list[str] = []           # values from dictionaries.grapes
     manufacturer: str | None = None  # exact catalog manufacturer
     ocr_ran: bool = False
 
 class CatalogFilters(BaseModel):
-    color: str | None = None
+    color: str | None = None         # categories.name
     grape: str | None = None
     region: str | None = None
-    category: str | None = None
     sweetness: str | None = None
     dish: str | None = None
     exclude_manufacturer: str | None = None
@@ -90,10 +93,9 @@ class SearchResult(BaseModel):
     latency_ms: float
 
 class Dictionaries(BaseModel):
-    colors: list[str]
+    colors: list[str]                # categories.name
     grapes: list[str]                # normalized, blends split
     regions: list[str]
-    categories: list[str]
     sweetness: list[str]
     dishes: list[str]
 
@@ -157,7 +159,7 @@ class ProductService(Protocol):
 
 ### 4.3 Dictionaries
 
-Built **once at startup** from DB (`categories`, `regions`, `sweetness_levels`, distinct `wines.color`, split `wines.grape_variety` on `,;/+`, unnest `wines.dishes`), trimmed, case-normalized, sorted (ru collation-insensitive); cached on the service. Refresh = restart. No new table / migration.
+Built **once at startup** from DB (`categories` → `colors`, `regions`, `sweetness_levels`, split `wines.grape_variety` on `,;/+`, unnest `wines.dishes`), trimmed, case-normalized, sorted (ru collation-insensitive); cached on the service. Refresh = restart. No new table / migration.
 
 ### 4.4 Storage and retention
 
@@ -177,7 +179,7 @@ Append JSONL to `feedback_log` (default `data/tmp/search_feedback.jsonl`, **not*
 | `GET /api/v1/search/{search_id}` | — | `SearchResult` | 404 |
 | `GET /api/v1/search/{search_id}/analogs?limit=5` | — | `AnalogsResult` | 404 |
 | `GET /api/v1/wines/{slug}` | — | `WineCard` | 404 |
-| `GET /api/v1/wines?color=&grape=&region=&category=&sweetness=&dish=&exclude_manufacturer=&limit=5&offset=0` | — | `{"items": [WineCard], "total": int}` | 422 (`limit` 1..50) |
+| `GET /api/v1/wines?color=&grape=&region=&sweetness=&dish=&exclude_manufacturer=&limit=5&offset=0` | — | `{"items": [WineCard], "total": int}` | 422 (`limit` 1..50) |
 | `GET /api/v1/dictionaries` | — | `Dictionaries` | — |
 | `POST /api/v1/feedback` | JSON `FeedbackIn` | 204 | 404 unknown search |
 
@@ -192,10 +194,11 @@ confidence:            # cosine of image top-1; PLACEHOLDERS until calibration (
   not_found_min: 0.50
 analogs:
   limit: 5
-  color_synonyms:      # OCR token → catalog color value
+  color_synonyms:      # OCR token → categories.name
     Красное: [красное, красн, red, rosso, tinto, rouge]
     Белое: [белое, бел, white, bianco, blanco, blanc]
     Розовое: [розовое, розе, rose, rosé, rosado, rosato]
+    Оранжевое: [оранжевое, orange, arancione, naranja]
 storage:
   queries_dir: data/tmp/search_queries
   retention_days: 10
@@ -205,7 +208,7 @@ upload:
   content_types: [image/jpeg, image/png, image/webp]
 ```
 
-Color values must match distinct `wines.color` in the DB (check; fix map keys accordingly).
+Synonym keys are `categories.name` values (see §2). A category missing from the map simply gets no OCR color hint.
 
 ## 7. Calibration hook (backend branch, no UI dependency)
 

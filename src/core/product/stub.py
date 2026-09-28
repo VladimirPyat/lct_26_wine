@@ -64,8 +64,8 @@ def _fixture_wines() -> list[WineCard]:
             slug=slugs[0],
             title="Abrau Estates красное",
             manufacturer="Абрау-Дюрсо",
-            color="Тёмно-гранатовый",
-            category="Красное",
+            color="Красное",
+            shade="Тёмно-гранатовый",
             region="Кубань",
             grape_variety="Каберне Совиньон, Мерло",
             sweetness="сухое",
@@ -84,8 +84,8 @@ def _fixture_wines() -> list[WineCard]:
             slug=slugs[1],
             title="101 оттенок красного. Каберне",
             manufacturer="Фанагория",
-            color="Тёмно-рубиновый",
-            category="Красное",
+            color="Красное",
+            shade="Тёмно-рубиновый",
             region="Кубань",
             grape_variety="Каберне Совиньон",
             sweetness="сухое",
@@ -104,8 +104,8 @@ def _fixture_wines() -> list[WineCard]:
             slug=slugs[2],
             title="Adagum Estate Rose",
             manufacturer="Olymp Winery",
-            color="Нежный бледно-лососевый",
-            category="Розовое",
+            color="Розовое",
+            shade="Нежный бледно-лососевый",
             region="Кубань",
             grape_variety="Каберне Совиньон, Мерло",
             sweetness="сухое",
@@ -124,8 +124,8 @@ def _fixture_wines() -> list[WineCard]:
             slug=slugs[3],
             title="Cantiani Aligote Riesling",
             manufacturer="Шато АЛВИСА",
-            color="Светло-золотистый",
-            category="Белое",
+            color="Белое",
+            shade="Светло-золотистый",
             region="Дагестан",
             grape_variety="Алиготе, Рислинг Рейнский",
             sweetness="сухое",
@@ -149,8 +149,8 @@ def _fixture_wines() -> list[WineCard]:
             slug=slugs[4],
             title="4 elements. Совиньон Блан",
             manufacturer="Усадьба Родное Гнездо",
-            color="Светло-соломенный",
-            category="Белое",
+            color="Белое",
+            shade="Светло-соломенный",
             region="Крым",
             grape_variety="Совиньон Блан",
             sweetness="полусладкое",
@@ -180,8 +180,6 @@ def _matches(wine: WineCard, filters: CatalogFilters) -> bool:
     if filters.color is not None and not _eq(wine.color, filters.color):
         return False
     if filters.region is not None and not _eq(wine.region, filters.region):
-        return False
-    if filters.category is not None and not _eq(wine.category, filters.category):
         return False
     if filters.sweetness is not None and not _eq(wine.sweetness, filters.sweetness):
         return False
@@ -305,6 +303,7 @@ class StubProductService:
         winner = result.winner
         grapes = _split_grapes(winner.grape_variety)
         filters = CatalogFilters(
+            color=winner.color,
             grape=grapes[0] if grapes else None,
             exclude_manufacturer=winner.manufacturer,
             exclude_slugs=[winner.slug],
@@ -353,7 +352,6 @@ class StubProductService:
             colors=uniq([w.color for w in wines]),
             grapes=uniq([g for w in wines for g in _split_grapes(w.grape_variety)]),
             regions=uniq([w.region for w in wines]),
-            categories=uniq([w.category for w in wines]),
             sweetness=uniq([w.sweetness for w in wines if w.sweetness is not None]),
             dishes=uniq([d for w in wines for d in w.dishes]),
         )
@@ -367,9 +365,9 @@ class StubProductService:
             self._feedback.append(feedback)
 
     def _ocr_analogs(self, winner: WineCard | None, *, limit: int) -> AnalogsResult:
-        grape = _STUB_HINTS.grapes[0]
         filters = CatalogFilters(
-            grape=grape,
+            color=_STUB_HINTS.color,
+            grape=_STUB_HINTS.grapes[0],
             exclude_slugs=[winner.slug] if winner is not None else [],
         )
         wines, total = self.find_wines(filters, limit=limit)

@@ -6,10 +6,12 @@ import time
 from pathlib import Path
 
 import pytest
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from core.config import load_database_settings
 from core.retrieve import encode_image
+from db.models import Wine
 from db.repository import WineRepository
 from db.test_support import (
     DEFAULT_SAMPLE_IMAGE,
@@ -220,20 +222,23 @@ class TestWineRepositorySearch:
         for w in (red_high, red_low, white):
             track_wine(w.id)
         db_session.flush()
+        # Limit = whole catalog so test rows are never cut off by real wines.
+        everything = db_session.scalar(select(func.count()).select_from(Wine))
+        assert everything
 
-        by_cat = repo.search_filters(category_name="Красное", limit=50)
+        by_cat = repo.search_filters(category_name="Красное", limit=everything)
         cat_slugs = {w.slug for w in by_cat}
         assert red_high.slug in cat_slugs
         assert red_low.slug in cat_slugs
         assert white.slug not in cat_slugs
 
-        by_rating = repo.search_filters(rating_min=4.0, limit=50)
+        by_rating = repo.search_filters(rating_min=4.0, limit=everything)
         rating_slugs = {w.slug for w in by_rating}
         assert red_high.slug in rating_slugs
         assert white.slug in rating_slugs
         assert red_low.slug not in rating_slugs
 
-        by_dish = repo.search_filters(dish="стейк", limit=50)
+        by_dish = repo.search_filters(dish="стейк", limit=everything)
         dish_slugs = {w.slug for w in by_dish}
         assert red_high.slug in dish_slugs
         assert white.slug in dish_slugs
@@ -242,7 +247,7 @@ class TestWineRepositorySearch:
         sorted_desc = repo.search_filters(
             category_name="Красное",
             sort_by_rating="desc",
-            limit=50,
+            limit=everything,
         )
         our_desc = [w for w in sorted_desc if w.slug.startswith(slug_prefix)]
         assert len(our_desc) >= 2
@@ -252,7 +257,7 @@ class TestWineRepositorySearch:
         sorted_asc = repo.search_filters(
             category_name="Красное",
             sort_by_rating="asc",
-            limit=50,
+            limit=everything,
         )
         our_asc = [w for w in sorted_asc if w.slug.startswith(slug_prefix)]
         assert our_asc[0].slug == red_low.slug

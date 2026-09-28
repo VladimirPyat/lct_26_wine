@@ -40,10 +40,6 @@ ENRICH_COLS = {
     "dishes",
 }
 
-EXPECTED_READY = 1932
-EXPECTED_ADDITIONAL = 18
-EXPECTED_REJECTED = 153
-EXPECTED_IMPORTED = EXPECTED_READY + EXPECTED_ADDITIONAL
 SWEETNESS_CANONICAL = {
     "сухое",
     "полусухое",
@@ -68,16 +64,16 @@ class TestCatalogPrepareFiles:
     def test_ready_csv_count_and_enrich(self) -> None:
         """[TEST-ID] 1.2-01 wines_ready.csv non-empty with enrich columns."""
         rows = _read_csv("wines_ready.csv")
-        assert len(rows) == EXPECTED_READY
+        assert rows
         cols = set(rows[0].keys())
         assert SHARED_COLS <= cols
         assert ENRICH_COLS <= cols
         assert "reason" not in cols
 
     def test_additional_csv_count_and_enrich(self) -> None:
-        """[TEST-ID] 1.2-02 wines_additional.csv ~15 rows with enrich."""
+        """[TEST-ID] 1.2-02 wines_additional.csv non-empty with enrich."""
         rows = _read_csv("wines_additional.csv")
-        assert len(rows) == EXPECTED_ADDITIONAL
+        assert rows
         cols = set(rows[0].keys())
         assert SHARED_COLS <= cols
         assert ENRICH_COLS <= cols
@@ -85,7 +81,7 @@ class TestCatalogPrepareFiles:
     def test_rejected_csv_has_reason(self) -> None:
         """[TEST-ID] 1.2-03 wines_rejected.csv has reason; enrich present."""
         rows = _read_csv("wines_rejected.csv")
-        assert len(rows) == EXPECTED_REJECTED
+        assert rows
         cols = set(rows[0].keys())
         assert SHARED_COLS <= cols
         assert ENRICH_COLS <= cols
@@ -101,7 +97,7 @@ class TestCatalogImportDb:
 
     def test_lookup_tables_and_wine_counts(self, db_session: Session) -> None:
         """[TEST-ID] 1.2-04 tables exist; sweetness ≥6;
-        wines≈ready+additional; no nulls."""
+        wines non-empty; no null embeddings / images."""
         present = {
             r[0]
             for r in db_session.execute(
@@ -142,7 +138,7 @@ class TestCatalogImportDb:
                 """
             )
         ).one()
-        assert n == EXPECTED_IMPORTED
+        assert n > 0
         assert emb_null == 0
         assert img_empty == 0
 

@@ -18,13 +18,17 @@ class _FrozenModel(BaseModel):
 
 
 class WineCard(_FrozenModel):
-    """Карточка вина для UI и JSON API."""
+    """Карточка вина для UI и JSON API.
+
+    ``color`` — цвет из ``categories.name`` («Красное»); ``shade`` — оттенок
+    из ``wines.color`` («Тёмно-рубиновый»), только для отображения.
+    """
 
     slug: str
     title: str
     manufacturer: str
     color: str
-    category: str
+    shade: str
     region: str
     grape_variety: str
     sweetness: str | None
@@ -63,7 +67,6 @@ class CatalogFilters(_FrozenModel):
     color: str | None = None
     grape: str | None = None
     region: str | None = None
-    category: str | None = None
     sweetness: str | None = None
     dish: str | None = None
     exclude_manufacturer: str | None = None
@@ -102,7 +105,6 @@ class Dictionaries(_FrozenModel):
     colors: list[str]
     grapes: list[str]
     regions: list[str]
-    categories: list[str]
     sweetness: list[str]
     dishes: list[str]
 

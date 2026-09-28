@@ -11,7 +11,7 @@
 - Postgres: `docker compose up -d` (healthy)
 - Зависимости: `uv sync --extra ml --extra db --extra dev`
 - Миграции: `uv run alembic upgrade head`
-- Каталог загружен (~1950 вин с embedding)
+- Каталог загружен (все вина с embedding)
 - Веса PHOCR скачаны (первый `recognize` тянет ONNX с modelscope; при таймауте — докачать `ru_rec_decoder_v1.onnx` в `.venv/.../phocr/models/`)
 - Команды — из `tooling.mdc` / `manuals/quickstart.md`
 - **Не печатать** содержимое `.env` / ключи

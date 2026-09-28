@@ -49,7 +49,7 @@ All user-facing text in Russian. Unknown errors → `error.html` (no stack trace
 
 | `status` / level | Must show |
 |---|---|
-| `found` (`high` / `medium`) | Wine card (image, manufacturer, title, tags color/category/region, grape, description, `public_rating` as glasses or «нет оценок», dishes chips), confidence badge «Высокая / Средняя уверенность», **«Открыть на сайте»** (`product_url`; hidden if null), **feedback «Это то вино? Да / Нет»**, «Подобрать аналоги» button (no auto analogs), «Исходное фото» (lightbox from `/result/{id}/photo`), favorite toggle |
+| `found` (`high` / `medium`) | Wine card (image, manufacturer, title, tags color/region (+ `shade` as secondary text), grape, description, `public_rating` as glasses or «нет оценок», dishes chips), confidence badge «Высокая / Средняя уверенность», **«Открыть на сайте»** (`product_url`; hidden if null), **feedback «Это то вино? Да / Нет»**, «Подобрать аналоги» button (no auto analogs), «Исходное фото» (lightbox from `/result/{id}/photo`), favorite toggle |
 | `low` | Same card + badge «Низкая уверенность — возможно, это не то вино» + analogs block shown immediately + feedback |
 | `not_found` | Message «Вино не найдено в каталоге. Воспользуйтесь подбором аналогов» + analogs block (filters chips from OCR hints, cards) + link «Уточнить в каталоге» (`/catalog?…` with the same filters). No winner card |
 | analogs block | Title by `source` (`ocr_filters`: «Похожие по этикетке», `winner_filters`: «Аналоги от других виноделен», `vector`: «Похожие по виду»); applied filters as chips linking to `/catalog` with that filter removed; ≤5 cards; «Показать все (N)» → `/catalog` if `total > 5`; empty → «Ничего похожего не нашли» + link to catalog |

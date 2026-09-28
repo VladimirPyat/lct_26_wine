@@ -21,7 +21,13 @@ Unblocked for `ocr.engine=phocr` + `enable_rerank=true`. Proceed with @Tester `t
 
 ---
 
-# OPEN QUESTION — PROD-000 (non-blocking for PROD-000, needs Planner before PROD-API)
+# RESOLVED — PROD-000 color semantics (owner decision 2026-09-28: color = `categories.name`)
+
+Contract `product_api.md` §2 updated: `WineCard.color` = `categories.name`, new `WineCard.shade` = `wines.color`
+(display only); `CatalogFilters.category` / `Dictionaries.categories` removed (duplicated color).
+Original question kept below for history.
+
+## Original question
 
 **Date:** 2026-09-28  
 **Role:** @Coder (coder_prod_000_shared)

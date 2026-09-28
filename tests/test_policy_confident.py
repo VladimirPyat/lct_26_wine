@@ -17,6 +17,8 @@ from core.text.fuzzy import FuzzyReranker
 
 _AGORA = "AGORA WINERY"
 _OCR_CAB = ["AGORA", "CABERNET", "SAUVIGNON", "YACHTING"]
+# Synthetic top-2 gaps below (0.02–0.05) must trigger OCR regardless of the prod value.
+_TEST_MARGIN_MIN = 0.08
 
 
 @pytest.fixture(scope="module")
@@ -76,7 +78,11 @@ def _decide(
     **policy_overrides: Any,
 ) -> tuple[PolicyDecision, MagicMock]:
     policy = settings.policy.model_copy(
-        update={"rerank_mode": "confident", **policy_overrides}
+        update={
+            "rerank_mode": "confident",
+            "margin_min": _TEST_MARGIN_MIN,
+            **policy_overrides,
+        }
     )
     ocr = MagicMock()
     ocr.recognize.return_value = lines
