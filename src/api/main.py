@@ -12,6 +12,8 @@ from fastapi.staticfiles import StaticFiles
 
 from api.routers.eval import router as eval_router
 from api.runtime import build_eval_runtime
+from core.config import load_product_settings
+from core.product import StubProductService
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +34,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.eval_runtime.ocr_rerank.policy.enable_rerank,
         app.state.eval_runtime.ocr_rerank.policy.top_k,
     )
+    app.state.product_settings = load_product_settings()
+    # PRODUCT SERVICE: backend branch replaces this line with the real service.
+    app.state.product_service = StubProductService()
     try:
         yield
     finally:

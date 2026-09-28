@@ -12,6 +12,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 _DEFAULT_DATABASE_YAML = _REPO_ROOT / "config" / "database.yaml"
 _DEFAULT_COMPUTE_CROPPER_YAML = _REPO_ROOT / "config" / "compute_cropper.yaml"
 _DEFAULT_OCR_RERANK_YAML = _REPO_ROOT / "config" / "ocr_rerank.yaml"
+_DEFAULT_PRODUCT_YAML = _REPO_ROOT / "config" / "product.yaml"
 
 
 class ComputeSettings(BaseModel):
@@ -188,6 +189,56 @@ class OcrRerankSettings(BaseModel):
     rerank_top: int = Field(gt=0)
 
 
+class ConfidenceSettings(BaseModel):
+    """Image top-1 cosine thresholds for product confidence levels."""
+
+    high_min: float
+    medium_min: float
+    not_found_min: float
+
+    @model_validator(mode="after")
+    def thresholds_must_be_ordered(self) -> ConfidenceSettings:
+        if not self.not_found_min <= self.medium_min <= self.high_min:
+            msg = (
+                "confidence thresholds must satisfy "
+                "not_found_min <= medium_min <= high_min, got "
+                f"{self.not_found_min} / {self.medium_min} / {self.high_min}"
+            )
+            raise ValueError(msg)
+        return self
+
+
+class AnalogSettings(BaseModel):
+    """Analog selection: result limit and OCR color synonyms."""
+
+    limit: int = Field(gt=0)
+    color_synonyms: dict[str, list[str]] = Field(default_factory=dict)
+
+
+class StorageSettings(BaseModel):
+    """Query photo storage and retention."""
+
+    queries_dir: str
+    retention_days: int = Field(gt=0)
+
+
+class UploadSettings(BaseModel):
+    """Upload validation limits (checked by the caller before ``search``)."""
+
+    max_mb: float = Field(gt=0)
+    content_types: list[str] = Field(min_length=1)
+
+
+class ProductSettings(BaseModel):
+    """Product API / UI settings from ``config/product.yaml``."""
+
+    confidence: ConfidenceSettings
+    analogs: AnalogSettings
+    storage: StorageSettings
+    feedback_log: str
+    upload: UploadSettings
+
+
 def _load_yaml_mapping(yaml_path: Path) -> dict[object, object]:
     raw = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
     if not isinstance(raw, dict):
@@ -210,6 +261,14 @@ def load_app_settings(
     """Load YOLO + compute settings from ``config/compute_cropper.yaml``."""
     yaml_path = Path(path) if path is not None else _DEFAULT_COMPUTE_CROPPER_YAML
     return AppSettings.model_validate(_load_yaml_mapping(yaml_path))
+
+
+def load_product_settings(
+    path: Path | str | None = None,
+) -> ProductSettings:
+    """Load confidence, analogs, storage, feedback, and upload settings."""
+    yaml_path = Path(path) if path is not None else _DEFAULT_PRODUCT_YAML
+    return ProductSettings.model_validate(_load_yaml_mapping(yaml_path))
 
 
 def load_ocr_settings(
