@@ -2,7 +2,7 @@
 
 Зачем и когда менять настройки (профили, YAML, режимы запуска). Полные схемы ключей — в `agent_docs/contracts/`, не здесь.
 
-**Статус:** Stage 2 — энкодер SigLIP2, policy (confident rerank), ocr.engine, LLM tasks, decision log.
+**Статус:** Stage 2 — энкодер SigLIP2, policy (confident rerank), ocr.engine, LLM tasks, decision log; Stage 3 — `product.yaml`.
 
 ## Где лежат настройки
 
@@ -12,6 +12,7 @@
 | `config/database.yaml` | `dino_model_path` (ONNX энкодера, сейчас SigLIP2), `embedding_dim`, preprocess (`dino:`), `dino.encode_batch_size` |
 | `config/compute_cropper.yaml` | `compute.device` / threads, `cropper.device`, YOLO cropper, catalog crop dirs / `min_crop_side` |
 | `config/ocr_rerank.yaml` | OCR backend, fuzzy, **policy**, **decision_log** |
+| `config/product.yaml` | Продукт: пороги уверенности, аналоги, хранилище запросов, отзывы, загрузка фото |
 | `src/llm/tasks/*.yaml` | base_url / model / `api_key_env` / retries для LLM-задач |
 | `src/llm/prompts/` | тексты промптов (путь в task YAML) |
 | `docker-compose.yml` | сервис `db`, порт `5432` |
@@ -65,6 +66,57 @@ OCR запускается, только если зазор `s1 - s2 < margin_m
 | Ложные переключения | добавить слова в `producer_stopwords` / `generic_title_tokens` или задать `max_img_drop` |
 | Калибровка garbage | править `abs_min` после owner_eval |
 
+## Продукт (`config/product.yaml`)
+
+Читается при старте (`load_product_settings()` → `app.state.product_settings`); изменения — после рестарта. UI использует только `upload`, продуктовый сервис — всё.
+
+```yaml
+confidence:            # косинус image top-1; ПЛЕЙСХОЛДЕРЫ до калибровки
+  high_min: 0.80
+  medium_min: 0.65
+  not_found_min: 0.50
+analogs:
+  limit: 5
+  color_synonyms:      # слово OCR → categories.name
+    Красное: [красное, красн, red, rosso, tinto, rouge]
+    ...
+storage:
+  queries_dir: data/tmp/search_queries
+  retention_days: 10
+feedback_log: data/tmp/search_feedback.jsonl
+upload:
+  max_mb: 15
+  content_types: [image/jpeg, image/png, image/webp]
+```
+
+| Ключ | Зачем менять |
+|------|--------------|
+| `confidence.high_min` / `medium_min` | Граница `found/high` → `found/medium` → `low`. Меньше — чаще «уверенный» ответ, больше ошибок среди них |
+| `confidence.not_found_min` | Ниже порога — `not_found` (без победителя, только аналоги). Нужны фото вне каталога для честной калибровки |
+| `analogs.limit` | Сколько аналогов в ответе поиска (у `GET /analogs` — параметр `limit`, 1..50) |
+| `analogs.color_synonyms` | Ключ — точное `categories.name`; значения — слова этикетки (регистр и диакритика не важны; русские слова совпадают и с окончаниями: «красного»). Цвет без ключа просто не даёт подсказки |
+| `storage.queries_dir` | Куда сохранять фото запросов и JSON результатов (относительно корня репо) |
+| `storage.retention_days` | Срок хранения; чистка при старте и `scripts/cleanup_search_queries.py` |
+| `feedback_log` | JSONL отзывов «то / не то вино» |
+| `upload.max_mb` / `content_types` | Лимит размера (413) и допустимые типы (415) для `POST /api/v1/search` |
+
+**Калибровка порогов** — `scripts/calibrate_confidence.py` прогоняет `owner_eval` через `ProductService.search` и печатает распределение `score_1` для верных / неверных ответов и предложения `medium_min` / `high_min`. YAML скрипт **не меняет**; итог — `agent_docs/reports/confidence_calibration.md`, новые значения вносятся вручную после согласования.
+
+```bash
+# через работающий API
+uv run python scripts/calibrate_confidence.py --endpoint http://127.0.0.1:8080/api/v1/search \
+  --report agent_docs/reports/confidence_calibration.md
+# без сервера (GPU занят → энкодер и OCR на CPU, YAML не трогаем)
+CUDA_VISIBLE_DEVICES= uv run python scripts/calibrate_confidence.py --in-process --ocr-device cpu
+```
+
+**Чистка хранилища** (cron):
+
+```bash
+uv run python scripts/cleanup_search_queries.py --dry-run      # что будет удалено
+uv run python scripts/cleanup_search_queries.py --days 3        # переопределить retention_days
+```
+
 ## OCR backend
 
 ```yaml
@@ -95,6 +147,8 @@ decision_log:
   path: data/tmp/eval_decisions.jsonl
   ocr_lines_cap: 32
 ```
+
+Каждая запись содержит `score_1`, `score_2`, `margin`; записи продуктового поиска дополнительно — `search_id`, `status`, `confidence_level`, `endpoint: "product"` (у eval поля `endpoint` нет).
 
 ```bash
 uv run python scripts/collect_eval_report.py \

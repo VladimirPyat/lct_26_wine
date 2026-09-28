@@ -1,6 +1,6 @@
 # Vine Scanner (LCT 2026 / Svoe Vino)
 
-Фото этикетки вина → одна карточка каталога (или `not_found` + аналоги). API, совместимый с eval организатора — на более поздних этапах.
+Фото этикетки вина → одна карточка каталога (или `not_found` + аналоги). API совместим с eval организатора; продуктовый JSON API — `/api/v1/*`.
 
 **Стек (кратко):** Python 3.11+ / `uv`, FastAPI, PostgreSQL + pgvector, SigLIP2 (энкодер изображений) + YOLO ONNX, PHOCR (подключение по этапам).
 
@@ -16,6 +16,23 @@
 | [manuals/manual_testing.md](manuals/manual_testing.md) | Ручные проверки (HITL), Stage 2 |
 | [agent_docs/plans/stages.md](agent_docs/plans/stages.md) | Дорожная карта этапов |
 | `docs/` | ТЗ и продуктовые требования (read-only для агентов) |
+
+## Эндпоинты
+
+| Метод / путь | Назначение |
+|---|---|
+| `GET /health` | Проверка живости |
+| `GET /static/wines/{slug}.webp` | Картинки каталога |
+| `POST /v1/eval/predict` | Eval организатора: multipart `image` → `{"slug": "..."}` |
+| `POST /api/v1/search` | Фото → карточка вина, уверенность, top-5, аналоги |
+| `GET /api/v1/search/{search_id}` | Сохранённый результат поиска |
+| `GET /api/v1/search/{search_id}/analogs` | Аналоги (`?limit=5`) |
+| `GET /api/v1/wines` | Каталог по фильтрам (`color`, `grape`, `region`, `sweetness`, `dish`, `exclude_manufacturer`, `limit`, `offset`) |
+| `GET /api/v1/wines/{slug}` | Карточка вина |
+| `GET /api/v1/dictionaries` | Справочники фильтров |
+| `POST /api/v1/feedback` | Отзыв «то / не то вино» |
+
+Примеры `curl` — [manuals/quickstart.md](manuals/quickstart.md#продуктовый-api-apiv1).
 
 
 ## Layout

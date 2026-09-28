@@ -2,7 +2,7 @@
 
 Как поднять окружение, схему БД, каталог и eval API. Детали архитектуры и конфигов — в соседних мануалах.
 
-**Статус:** Stage 2B — uvicorn + `POST /v1/eval/predict` + owner_eval set1.
+**Статус:** Stage 2B — uvicorn + `POST /v1/eval/predict` + owner_eval set1; Stage 3 — продуктовый API `/api/v1/*`.
 
 ## Зависимости
 
@@ -98,6 +98,37 @@ Smoke:
 curl -s -F "image=@./data/owner_eval/1/queries/04f3ce15.jpg" \
   http://127.0.0.1:8080/v1/eval/predict
 ```
+
+## Продуктовый API (`/api/v1`)
+
+Тот же uvicorn. Пороги и лимиты — `config/product.yaml` (см. [configuration_guide.md](configuration_guide.md)).
+
+| Метод / путь | Ответ |
+|---|---|
+| `POST /api/v1/search` (multipart **`image`**) | `SearchResult`: `search_id`, `status` (`found` / `low` / `not_found`), `confidence_level`, `winner`, `candidates` (top-5), `analogs` |
+| `GET /api/v1/search/{search_id}` | сохранённый `SearchResult` |
+| `GET /api/v1/search/{search_id}/analogs?limit=5` | `AnalogsResult` (`winner_filters` / `ocr_filters` / `vector`) |
+| `GET /api/v1/wines/{slug}` | `WineCard` |
+| `GET /api/v1/wines?color=&grape=&region=&sweetness=&dish=&exclude_manufacturer=&limit=5&offset=0` | `{"items": [...], "total": N}` |
+| `GET /api/v1/dictionaries` | цвета, сорта, регионы, сладость, блюда |
+| `POST /api/v1/feedback` (JSON) | 204 |
+
+Ошибки — `{"detail": "..."}`: 400 пустой / недекодируемый файл, 413 больше `upload.max_mb`, 415 тип не из `upload.content_types`, 422 неверные параметры, 404 нет поиска / вина, 503 пустой каталог.
+
+```bash
+B=http://127.0.0.1:8080/api/v1
+curl -s -F "image=@./data/owner_eval/1/queries/26ddb066.jpg" $B/search | tee /tmp/search.json
+SID=$(python3 -c "import json; print(json.load(open('/tmp/search.json'))['search_id'])")
+curl -s $B/search/$SID
+curl -s "$B/search/$SID/analogs?limit=5"
+curl -s -G $B/wines --data-urlencode color=Красное --data-urlencode grape=Саперави --data-urlencode limit=3
+curl -s $B/wines/agora-muskat-chernyj
+curl -s $B/dictionaries
+curl -s -o /dev/null -w "%{http_code}\n" -H 'Content-Type: application/json' \
+  -d "{\"search_id\":\"$SID\",\"verdict\":\"match\"}" $B/feedback      # 204
+```
+
+Фото запросов и JSON результатов — `data/tmp/search_queries/` (10 дней), отзывы — `data/tmp/search_feedback.jsonl`. Чистка по сроку — при старте и `uv run python scripts/cleanup_search_queries.py [--dry-run] [--days N]`.
 
 ## Owner eval set 1
 

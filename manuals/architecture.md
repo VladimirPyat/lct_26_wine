@@ -2,14 +2,16 @@
 
 Краткое описание компонентов, границ модулей и потоков данных. Не дублирует контракты и списки классов.
 
-**Статус:** Stage 2 — 2A LLM OCR + 2B eval predict.
+**Статус:** Stage 2 — 2A LLM OCR + 2B eval predict; Stage 3 — продуктовый API `/api/v1/*` (`CatalogProductService`).
 
 ## Компоненты
 
 | Компонент | Назначение |
 |-----------|------------|
-| `api` (FastAPI) | HTTP: `/health`, `/static/wines`, `POST /v1/eval/predict` |
+| `api` (FastAPI) | HTTP: `/health`, `/static/wines`, `POST /v1/eval/predict`, `/api/v1/*` (продукт) |
 | `api.runtime` | Старт: YOLO + энкодер SigLIP2 + DB; OCR лениво при первом rerank |
+| `api.eval_pipeline` | Общий пайплайн `run_search` (retrieve → decide → decision log) для eval и продукта |
+| `core.product` | DTO + `ProductService`; `CatalogProductService` (поиск, аналоги, каталог, справочники, отзывы) |
 | `core.retrieve` | Энкодер ONNX (SigLIP2; класс `DinoOnnxEncoder` — историческое имя) + `WineRetriever` (crop → encode → top-K) |
 | `core.policy` | Decision: margin / abs_min / OCR+fuzzy (confident rerank); JSONL decision log |
 | `core.ocr` | `IOCREngine`: `phocr` \| `llm` \| `mock` (`create_ocr_engine`) |
@@ -80,6 +82,54 @@ image path
 ```
 
 Retriever не вызывает OCR. Policy не знает FastAPI. LLM и PHOCR — один `IOCREngine`.
+
+Общий код — `api.eval_pipeline.run_search(runtime, path, log_fields=...)` → `SearchRun(bundle, decision, latency_ms)`. `predict_slug` (eval) и `CatalogProductService.search` (продукт) вызывают одну функцию, поэтому ответ eval не меняется. Вызовы моделей (ONNX / OCR) сериализованы общим локом: продуктовые роуты работают в threadpool.
+
+## Продуктовый поток (Stage 3)
+
+Контракт — `agent_docs/contracts/product_api.md`. JSON API (`src/api/routers/product.py`) и Jinja UI вызывают **один** in-process `ProductService` (`app.state.product_service`), UI не ходит в `/api/v1` по HTTP.
+
+```
+POST /api/v1/search (multipart image)
+    │  проверка: content-type ∈ upload.content_types, размер ≤ upload.max_mb
+    │  (потоково, во временный файл data/tmp/uploads), Pillow-декодирование
+    ▼
+CatalogProductService.search
+    ├─ копия фото → {queries_dir}/{search_id}{ext}      # search_id = uuid4 hex
+    ├─ run_search (тот же пайплайн, что eval) → decision
+    ├─ score_1 → status / confidence_level (пороги product.yaml → confidence)
+    │     score_1 < not_found_min  → not_found / low, winner = None
+    │     ≥ high_min → found/high;  ≥ medium_min → found/medium;  иначе low/low
+    ├─ low / not_found → аналоги по OCR-подсказкам
+    ├─ decision log + search_id, status, confidence_level, endpoint="product"
+    └─ SearchResult → {queries_dir}/{search_id}.json
+```
+
+### Аналоги
+
+| Случай | `source` | Фильтры |
+|---|---|---|
+| `low` / `not_found`, OCR нашёл цвет или сорт | `ocr_filters` | `color`, `grape` (первый найденный), `exclude_slugs=[winner]` |
+| `found`, запрос `GET /search/{id}/analogs` | `winner_filters` | цвет + первый сорт победителя, `exclude_manufacturer` = производитель победителя |
+| нет подсказок / фильтры дали 0 | `vector` | кандидаты top-K с rank 2..K |
+
+Если фильтры дали 0 — повтор без сорта (только цвет), затем `vector`. Выдача — до `limit` вин по `public_rating DESC NULLS LAST`, `id`; `total` — полное число совпадений.
+
+OCR-подсказки (`core/product/hints.py`, чистые функции без БД/OCR): строки OCR берутся из `decision.ocr_lines`, если rerank уже был, иначе OCR запускается на кропе. Цвет — словарь синонимов `analogs.color_synonyms` (ключи = `categories.name`, русские формы с окончаниями); сорта — целое название из справочника (все токены на этикетке, как `label_evidence`, с алиасами `fuzzy.aliases`); производитель — compact-совпадение с каталогом через `FuzzyReranker`. Ошибка OCR не валит поиск: аналоги уходят в `vector`.
+
+### Справочники
+
+Строятся **один раз** при создании сервиса (обновление = рестарт): цвета / регионы / сладость — значения `categories` / `regions` / `sweetness_levels`, которые есть хотя бы у одного вина; сорта — `wines.grape_variety`, разбитые по `,;/+` («н/д» отбрасывается); блюда — `unnest(wines.dishes)`. Дедупликация без учёта регистра, ё/е и пунктуации, сортировка без учёта регистра (`core/product/vocabulary.py`). Фильтр по значению справочника раскрывается во все исходные написания из БД.
+
+### Хранилище запросов и отзывы
+
+- `storage.queries_dir` (по умолчанию `data/tmp/search_queries/`, в `.gitignore`): `{id}{ext}` + `{id}.json`. Фото отдаётся только по точному id (`^[0-9a-f]{32}$`, capability URL), каталог не листается; путь проверяется на выход за пределы директории.
+- Файлы старше `storage.retention_days` удаляются при старте сервиса и скриптом `scripts/cleanup_search_queries.py` (cron, `--dry-run`, `--days`). Трогаются только файлы вида `{id}.*`.
+- Отзывы «то / не то вино» — строка JSONL в `feedback_log` (`data/tmp/search_feedback.jsonl`), не в БД и не в decision log: `ts, search_id, slug, verdict, status, confidence_level, winner_slug`.
+
+### Каталог
+
+`find_wines` / `get_wine` → `WineRepository.search_filters` + `count_filters` (одни и те же фильтры): `color` → `categories.name`, `grape` → целый элемент `grape_variety` (regex по разделителям `,;/+`, без учёта регистра), `dish` → пересечение с `dishes`, `exclude_manufacturer`, `exclude_slugs`. Каждый вызов сервиса — своя сессия (`session_scope`).
 
 ## Каталог (Stage 1.2 + YOLO crop encode)
 
