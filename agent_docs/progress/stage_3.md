@@ -73,3 +73,16 @@ READY_FOR_TEST (WEB-UI)
 - Report: `agent_docs/reports/test_web_ui.md`; §E pending on master
 
 TEST_PASS (WEB-UI A–D)
+
+## FIX-WEB-02 — shops map demo stub (@BugFixer, 2026-09-29)
+
+- «Найти в магазинах рядом» on the result page is now an openable demo: native `<dialog>`, 3×3 OSM tiles (zoom 15)
+  around geolocation (fallback central Moscow), 6–8 random shops with prices 900–1200 ₽, cheapest highlighted +
+  caption + sorted list, badge «Демо — цены и магазины случайные», OSM attribution. Client-side only
+  (`src/web/static/js/shops_map.js`); no API/backend changes; `tile.openstreetmap.org` owner-approved for this stub only.
+- `scripts/dev_ui_stub.py` — UI preview on `StubProductService` (127.0.0.1:8082); documented in `manuals/quickstart.md`.
+- Tests: `tests/web/test_shops_map.py` (new), D-3 allowlist for the two approved OSM URLs;
+  `pytest tests/web/` 129 passed, 1 xfailed; full suite: 9 failures = Postgres not running (unrelated).
+- Report: `agent_docs/reports/bug_web_shops_map.md`; @Planner: record web_ui.md §3/§6 external-host exception.
+
+FIXED (FIX-WEB-02 shops map stub)

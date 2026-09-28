@@ -1126,6 +1126,235 @@ a.tag:hover {
   justify-self: start;
 }
 
+.stub__soon--demo {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+/* ---------- Shops demo map (FIX-WEB-02) ---------- */
+
+.shops-dialog {
+  box-sizing: border-box;
+  width: min(560px, calc(100vw - 16px));
+  max-width: calc(100vw - 16px);
+  max-height: calc(100dvh - 16px);
+  padding: var(--space-4);
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-strong);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.shops-dialog::backdrop {
+  background: var(--color-overlay);
+}
+
+.shops-dialog[open] {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.shops-dialog__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.shops-dialog__title {
+  font-size: var(--font-size-xl);
+}
+
+.shops-dialog__head form {
+  margin-left: auto;
+}
+
+.shops-dialog__close {
+  width: var(--touch);
+  height: var(--touch);
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.shops-dialog__badge {
+  justify-self: start;
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-warn-soft);
+  color: var(--color-warn);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+.shops-map {
+  position: relative;
+  width: 100%;
+  max-width: 512px;
+  height: 320px;
+  justify-self: center;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
+  contain: paint;
+}
+
+.shops-map__note {
+  padding: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.shops-map__tiles-box {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+}
+
+.shops-map__tiles {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.shops-map__tile {
+  position: absolute;
+  display: block;
+  width: 256px;
+  height: 256px;
+  max-width: none;
+  user-select: none;
+}
+
+.shops-map__tile.is-failed {
+  visibility: hidden;
+}
+
+.shops-map__markers {
+  position: absolute;
+  inset: 0;
+}
+
+.shops-map__you {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #1f6feb;
+  box-shadow: 0 0 0 6px rgba(31, 111, 235, 0.2);
+  transform: translate(-50%, -50%);
+}
+
+.shops-marker {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  padding: 2px var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow);
+  line-height: 1.2;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+}
+
+.shops-marker__price {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.shops-marker__name {
+  color: var(--color-text-muted);
+  font-size: 0.6875rem;
+}
+
+.shops-marker.is-min {
+  z-index: 2;
+  padding: var(--space-1) var(--space-3);
+  border-color: var(--color-accent-strong);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  box-shadow: var(--shadow-strong);
+  transform: translate(-50%, -50%) scale(1.15);
+}
+
+.shops-marker.is-min .shops-marker__name {
+  color: var(--color-on-accent);
+}
+
+.shops-dialog__status {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.shops-dialog__min {
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.shops-dialog__min:empty,
+.shops-dialog__status:empty {
+  display: none;
+}
+
+.shops-list {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shops-list__item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
+  font-size: var(--font-size-sm);
+}
+
+.shops-list__item.is-min {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.shops-list__price {
+  white-space: nowrap;
+}
+
+.shops-dialog__attr {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.shops-dialog__attr a {
+  color: inherit;
+}
+
+.shops-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
 /* ---------- Catalog ---------- */
 
 .catalog {
