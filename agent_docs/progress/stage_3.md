@@ -158,3 +158,22 @@ Verification (worktree `.worktrees/api`, `UV_PROJECT_ENVIRONMENT=../../.venv UV_
   via the same app started with `logging.basicConfig(level=INFO)` + `uvicorn.run(...)`.
 
 READY_FOR_TEST (PROD-API-FIX1)
+
+## 2026-09-28 — @Tester (PROD-API-FIX1, `feat/product-api`, code `2eace1e`)
+
+- A: 8 old-chain tests rewritten to §4.2 (IDs kept, `-fix1`), PA-C2c tightened to `winner_filters` only; DEF-1 closed as obsolete
+  (PA-C1d-fix1). B: found analogs (no OCR call, blend first grape, limit/total), Latin grape / no grape / OCR unavailable in
+  `search`, `grape_aliases` (pure + DB keys + unknown-key warning). C: new `tests/test_ocr_selection.py` (selection, CUDA
+  detection, runtime wiring, startup log, no secret leak), policy `ocr_unavailable` / `ocr_failed` / PHOCR errors propagate,
+  LLM adapter → `OCRUnavailableError`, `/v1/eval/predict` with no OCR → top-1.
+- D: `eval_ocr_gate.py --margins 0.08` HEAD vs pre-fix1 `0d8cbdb` src → both exit 0, JSON byte-identical; owner_eval not
+  re-run (owner decision E) — existing `after_fix1_set{1,2}` vs `baseline_master_set{1,2}`: 52/52 `predicted_slug` identical.
+
+| Command | Exit |
+|---|---|
+| `uv run ruff check src/ tests/` | 0 |
+| `timeout 1200 uv run pytest tests/ -v -rs` | 0 — 278 passed, 0 failed, 2 skipped (live e2e: no server on :8081) |
+
+- Defects: none. Report: `agent_docs/reports/test_product_api_fix1.md`.
+
+TEST_PASS (PROD-API-FIX1)

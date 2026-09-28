@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import pytest
+from pydantic import ValidationError
 
-from core.config import load_ocr_rerank_settings
+from core.config import AnalogSettings, load_ocr_rerank_settings, load_product_settings
 from core.product.hints import (
     extract_color,
     extract_grapes,
@@ -186,3 +187,123 @@ def test_extract_hints_combined(reranker: FuzzyReranker) -> None:
     assert hints.grapes == ["Каберне Совиньон"]
     assert hints.manufacturer == "Винодельня Фанагория"
     assert hints.ocr_ran is True
+
+
+# --- grape_aliases (fix1) ------------------------------------------------
+
+ALIAS_GRAPES = [
+    "Каберне Совиньон",
+    "Гевюрцтраминер",
+    "Пино Гри",
+    "Пино Нуар",
+    "Санджовезе",
+]
+GRAPE_ALIASES: dict[str, list[str]] = {
+    "Санджовезе": ["sangiovese"],
+    "Пино Нуар": ["pinot noir", "pinot nero"],
+    "Гевюрцтраминер": ["gewurztraminer"],
+}
+
+
+@pytest.mark.parametrize(
+    ("lines", "expected"),
+    [
+        (["SANGIOVESE"], ["Санджовезе"]),
+        (["PINOT NOIR"], ["Пино Нуар"]),
+        (["Pinot Nero"], ["Пино Нуар"]),
+        (["NERO PINOT"], ["Пино Нуар"]),  # word order is free
+        (["PINOT"], []),
+        (["ПИНО"], []),
+        (["PINOT GRIS"], ["Пино Гри"]),
+        (["CABERNET SAUVIGNON"], ["Каберне Совиньон"]),
+        (["GEWÜRZTRAMINER"], ["Гевюрцтраминер"]),
+        (["ROSSO DI TOSCANA 2019"], []),
+    ],
+)
+def test_grape_aliases_latin(
+    reranker: FuzzyReranker, lines: list[str], expected: list[str]
+) -> None:
+    """[TEST-ID] PA-A5-fix1 латинские алиасы: фраза целиком, алиас → только свой ключ.
+    """
+    assert extract_grapes(lines, ALIAS_GRAPES, reranker, GRAPE_ALIASES) == expected
+
+
+def test_grape_alias_pinot_gris_not_noir(reranker: FuzzyReranker) -> None:
+    """[TEST-ID] PA-A5b-fix1 «PINOT GRIS» → «Пино Гри», не «Пино Нуар»."""
+    got = extract_grapes(["PINOT GRIS"], ALIAS_GRAPES, reranker, GRAPE_ALIASES)
+    assert "Пино Гри" in got
+    assert "Пино Нуар" not in got
+
+
+def test_grape_alias_key_outside_dictionary_ignored(reranker: FuzzyReranker) -> None:
+    """[TEST-ID] PA-A5c-fix1 ключ алиаса вне справочника не выводится."""
+    got = extract_grapes(
+        ["SANGIOVESE"], ["Мерло"], reranker, {"Санджовезе": ["sangiovese"]}
+    )
+    assert got == []
+
+
+@pytest.mark.parametrize(
+    "lines",
+    [
+        ["CABERNET SAUVIGNON"],
+        ["ПИНО"],
+        ["МУСКАТ БЕЛЫЙ"],
+        ["Каберне Совиньон / Мерло"],
+        ["SANGIOVESE"],
+        ["PINOT NOIR"],
+        [],
+    ],
+)
+@pytest.mark.parametrize("empty", [None, {}])
+def test_grape_aliases_absent_backward_compatible(
+    reranker: FuzzyReranker, lines: list[str], empty: dict | None
+) -> None:
+    """[TEST-ID] PA-A5d-fix1 без grape_aliases (None / {}) — как до fix1."""
+    assert extract_grapes(lines, GRAPES, reranker, empty) == extract_grapes(
+        lines, GRAPES, reranker
+    )
+
+
+def test_extract_hints_with_aliases(reranker: FuzzyReranker) -> None:
+    """[TEST-ID] PA-A5e-fix1 extract_hints передаёт grape_aliases в extract_grapes."""
+    hints = extract_hints(
+        ["SANGIOVESE", "ROSSO"],
+        reranker=reranker,
+        color_synonyms=COLOR_SYNONYMS,
+        grapes=ALIAS_GRAPES,
+        manufacturers=MANUFACTURERS,
+        ocr_ran=True,
+        grape_aliases=GRAPE_ALIASES,
+    )
+    assert hints.grapes == ["Санджовезе"]
+    assert hints.color == "Красное"
+    without = extract_hints(
+        ["SANGIOVESE", "ROSSO"],
+        reranker=reranker,
+        color_synonyms=COLOR_SYNONYMS,
+        grapes=ALIAS_GRAPES,
+        manufacturers=MANUFACTURERS,
+        ocr_ran=True,
+    )
+    assert without.grapes == []
+
+
+def test_repo_product_yaml_grape_aliases_load() -> None:
+    """[TEST-ID] PA-A5f-fix1 product.yaml грузится, grape_aliases непусты и валидны."""
+    settings = load_product_settings()
+    aliases = settings.analogs.grape_aliases
+    assert aliases
+    assert aliases["Санджовезе"] == ["sangiovese"]
+    assert set(aliases["Пино Нуар"]) == {"pinot noir", "pinot nero"}
+    assert all(key.strip() and values for key, values in aliases.items())
+    assert all(a.strip() for values in aliases.values() for a in values)
+
+
+@pytest.mark.parametrize(
+    "bad", [{"": ["x"]}, {"Мерло": ["merlot", " "]}]
+)
+def test_grape_aliases_validation(bad: dict[str, list[str]]) -> None:
+    """[TEST-ID] PA-A5g-fix1 пустой ключ / пустой алиас → ValidationError."""
+    with pytest.raises(ValidationError):
+        AnalogSettings(limit=5, grape_aliases=bad)

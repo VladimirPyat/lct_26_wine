@@ -92,7 +92,11 @@ def make_result(
     analogs = None
     if status != "found":
         analogs = AnalogsResult(
-            source="vector", filters={}, hints=hints or OcrHints(), wines=[], total=0
+            source="ocr_filters",
+            filters={},
+            hints=hints or OcrHints(),
+            wines=[],
+            total=0,
         )
     return SearchResult(
         search_id=search_id or uuid.uuid4().hex,

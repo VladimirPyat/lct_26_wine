@@ -9,6 +9,7 @@ import pytest
 
 from core.config import PolicySettings
 from core.contracts import RankedHit
+from core.ocr.base import OCRUnavailableError
 from core.policy.decision import decide
 
 
@@ -153,3 +154,93 @@ def test_abs_min_garbage_still_returns_top1() -> None:
     assert decision.score_1 == pytest.approx(0.05)
     assert decision.slug == "weak-top"
     ocr_factory.assert_not_called()
+
+
+# --- PROD-API-FIX1: OCR unavailable / failed ------------------------------
+
+
+def _near_tie() -> list[RankedHit]:
+    return [
+        _hit(1, "image-top", 0.55, title="Alpha Wine"),
+        _hit(2, "text-leader", 0.52, title="Beta Wine"),
+    ]
+
+
+def test_ocr_factory_none_skips_rerank() -> None:
+    """[TEST-ID] FIX1-P1 ocr_factory → None на near-tie: top-1,
+    rerank_reason=ocr_unavailable.
+    """
+    hits = _near_tie()
+    reranker = MagicMock()
+    decision = decide(
+        hits,
+        crop_path="/tmp/crop.jpg",
+        policy=_policy(margin_min=0.1, enable_rerank=True),
+        ocr_factory=lambda: None,
+        reranker=reranker,
+        rerank_top=5,
+    )
+    assert decision.slug == hits[0]["slug"]
+    assert decision.rerank_triggered is False
+    assert decision.rerank_reason == "ocr_unavailable"
+    assert decision.winner_after_rerank is None
+    assert decision.ocr_lines == []
+    assert decision.enable_rerank is True
+    reranker.rerank.assert_not_called()
+
+
+def test_ocr_unavailable_error_skips_rerank() -> None:
+    """[TEST-ID] FIX1-P2 recognize → OCRUnavailableError: top-1,
+    rerank_reason=ocr_failed.
+    """
+    hits = _near_tie()
+    ocr = MagicMock()
+    ocr.recognize.side_effect = OCRUnavailableError("LLM OCR failed (task=ocr_label)")
+    reranker = MagicMock()
+    decision = decide(
+        hits,
+        crop_path="/tmp/crop.jpg",
+        policy=_policy(margin_min=0.1, enable_rerank=True),
+        ocr_factory=MagicMock(return_value=ocr),
+        reranker=reranker,
+        rerank_top=5,
+    )
+    assert decision.slug == hits[0]["slug"]
+    assert decision.rerank_triggered is False
+    assert decision.rerank_reason == "ocr_failed"
+    assert decision.ocr_lines == []
+    ocr.recognize.assert_called_once_with("/tmp/crop.jpg")
+    reranker.rerank.assert_not_called()
+
+
+@pytest.mark.parametrize("error", [RuntimeError("PHOCR CUDA OOM"), OSError("onnx")])
+def test_other_ocr_errors_propagate(error: Exception) -> None:
+    """[TEST-ID] FIX1-P3 иные ошибки OCR (PHOCR) не проглатываются."""
+    ocr = MagicMock()
+    ocr.recognize.side_effect = error
+    with pytest.raises(type(error)):
+        decide(
+            _near_tie(),
+            crop_path="/tmp/crop.jpg",
+            policy=_policy(margin_min=0.1, enable_rerank=True),
+            ocr_factory=MagicMock(return_value=ocr),
+            reranker=MagicMock(),
+            rerank_top=5,
+        )
+
+
+def test_ocr_factory_none_not_called_on_large_margin() -> None:
+    """[TEST-ID] FIX1-P4 большой margin → фабрика OCR не вызывается, rerank_reason None.
+    """
+    factory = MagicMock(return_value=None)
+    decision = decide(
+        [_hit(1, "a", 0.9), _hit(2, "b", 0.5)],
+        crop_path="/tmp/crop.jpg",
+        policy=_policy(margin_min=0.1, enable_rerank=True),
+        ocr_factory=factory,
+        reranker=MagicMock(),
+        rerank_top=5,
+    )
+    assert decision.slug == "a"
+    assert decision.rerank_reason is None
+    factory.assert_not_called()

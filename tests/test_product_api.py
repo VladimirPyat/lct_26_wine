@@ -22,11 +22,13 @@ from PIL import Image
 
 from api.eval_pipeline import SearchRun
 from api.routers.product import router as product_router
+from core.ocr.base import OCRUnavailableError
 from core.policy.decision import PolicyDecision
 from core.product import catalog_service as catalog_mod
 from core.product.catalog_service import CatalogProductService
 from core.product.schemas import AnalogsResult, CatalogFilters, SearchResult, WineCard
 from core.product.stub import StubProductService
+from core.product.vocabulary import split_grapes, value_key
 from product_helpers import build_db_service, make_settings
 
 MB = 1024 * 1024
@@ -192,6 +194,8 @@ class FakePipeline:
         self.score_1 = 0.9
         self.ocr_lines: list[str] = []
         self.winner_index = 0  # >0 simulates an OCR rerank switch
+        self.rerank_triggered = True
+        self.rerank_reason: str | None = None
         self.calls: list[dict[str, object]] = []
 
     def __call__(self, runtime, image_path, *, log_fields=None) -> SearchRun:
@@ -216,11 +220,12 @@ class FakePipeline:
             score_1=hits[0]["score"],
             score_2=hits[1]["score"],
             enable_rerank=True,
-            rerank_triggered=True,
+            rerank_triggered=self.rerank_triggered,
             winner_before_rerank=hits[0]["slug"],
-            winner_after_rerank=winner,
+            winner_after_rerank=winner if self.rerank_triggered else None,
             ocr_lines=list(self.ocr_lines),
             hits=hits,  # type: ignore[arg-type]
+            rerank_reason=self.rerank_reason,
         )
         fields = dict(log_fields(decision)) if log_fields is not None else {}
         self.calls.append({"image_path": Path(image_path), "log_fields": fields})
@@ -317,9 +322,16 @@ def test_search_flow_status_and_persist(
     assert g.json() == body
 
 
+def _has_grape(wine: WineCard, grape: str) -> bool:
+    key = value_key(grape)
+    return any(value_key(part) == key for part in split_grapes(wine.grape_variety))
+
+
 @pytest.mark.db
 def test_search_low_uses_ocr_hint_analogs(flow) -> None:
-    """[TEST-ID] PA-C1b low + OCR «КРАСНОЕ» → ocr_filters, победитель исключён."""
+    """[TEST-ID] PA-C1b-fix1 low + OCR «КРАСНОЕ» без сорта → подсказка цвета, аналогов
+    нет.
+    """
     client, pipeline, _service = flow
     pipeline.score_1 = 0.6
     pipeline.ocr_lines = ["ВИНО СТОЛОВОЕ", "КРАСНОЕ СУХОЕ"]
@@ -329,17 +341,131 @@ def test_search_low_uses_ocr_hint_analogs(flow) -> None:
     assert result.analogs.source == "ocr_filters"
     assert result.analogs.hints.color == "Красное"
     assert result.analogs.hints.ocr_ran is True
+    assert result.analogs.filters.color is None
+    assert result.analogs.filters.grape is None
     assert result.analogs.filters.exclude_slugs == [result.winner.slug]
-    assert result.winner.slug not in {w.slug for w in result.analogs.wines}
-    assert all(w.color == "Красное" for w in result.analogs.wines)
-    assert result.analogs.total > len(result.analogs.wines)
+    assert result.analogs.wines == []
+    assert result.analogs.total == 0
 
 
 @pytest.mark.db
-def test_search_low_rerank_switch_vector_excludes_winner(flow) -> None:
-    """[TEST-ID] PA-C1d low + rerank выбрал rank 2, OCR без подсказок → vector.
+def test_search_low_ocr_grape_analogs(flow) -> None:
+    """[TEST-ID] PA-C1b2-fix1 low + OCR «КАБЕРНЕ СОВИНЬОН» → ocr_filters по сорту."""
+    client, pipeline, _service = flow
+    pipeline.score_1 = 0.6
+    pipeline.ocr_lines = ["КАБЕРНЕ СОВИНЬОН", "КРАСНОЕ СУХОЕ"]
+    result = SearchResult.model_validate(_post_png(client).json())
+    assert result.status == "low"
+    analogs = result.analogs
+    assert analogs is not None
+    assert analogs.source == "ocr_filters"
+    assert analogs.filters.grape == "Каберне Совиньон"
+    assert analogs.filters.color is None
+    assert analogs.hints.color == "Красное"
+    assert analogs.filters.exclude_slugs == [result.winner.slug]
+    assert analogs.wines
+    assert analogs.total >= len(analogs.wines)
+    assert result.winner.slug not in {w.slug for w in analogs.wines}
+    assert all(_has_grape(w, "Каберне Совиньон") for w in analogs.wines)
 
-    Аналоги не должны содержать сам победитель (как в ocr_filters / winner_filters).
+
+@pytest.mark.db
+def test_search_low_latin_grape_analogs(flow) -> None:
+    """[TEST-ID] PA-C1e-fix1 low + «CABERNET SAUVIGNON» / «RED DRY WINE» → сорт, цвет в
+    hints.
+    """
+    client, pipeline, _service = flow
+    pipeline.score_1 = 0.6
+    pipeline.ocr_lines = ["CABERNET SAUVIGNON", "RED DRY WINE"]
+    result = SearchResult.model_validate(_post_png(client).json())
+    assert result.status == "low"
+    analogs = result.analogs
+    assert analogs is not None
+    assert analogs.source == "ocr_filters"
+    assert analogs.filters.grape == "Каберне Совиньон"
+    assert analogs.filters.color is None
+    assert analogs.hints.color == "Красное"
+    assert analogs.hints.ocr_ran is True
+    assert analogs.filters.exclude_slugs == [result.winner.slug]
+    assert analogs.wines
+    assert result.winner.slug not in {w.slug for w in analogs.wines}
+    assert all(_has_grape(w, "Каберне Совиньон") for w in analogs.wines)
+
+
+@pytest.mark.db
+def test_search_not_found_without_grape_empty(flow) -> None:
+    """[TEST-ID] PA-C1f-fix1 not_found + «ROSSO 2019» → пусто, total 0, без исключений.
+    """
+    client, pipeline, _service = flow
+    pipeline.score_1 = 0.4
+    pipeline.ocr_lines = ["ROSSO 2019"]
+    result = SearchResult.model_validate(_post_png(client).json())
+    assert result.status == "not_found"
+    assert result.winner is None
+    analogs = result.analogs
+    assert analogs is not None
+    assert analogs.source == "ocr_filters"
+    assert analogs.filters.grape is None
+    assert analogs.filters.exclude_slugs == []
+    assert analogs.wines == []
+    assert analogs.total == 0
+
+
+class _FailingOcr:
+    def recognize(self, _path: str) -> list[str]:
+        msg = "LLM OCR failed (task=ocr_label)"
+        raise OCRUnavailableError(msg)
+
+
+@pytest.mark.db
+@pytest.mark.parametrize(
+    "mode", ["policy_unavailable", "policy_failed", "no_engine", "engine_raises"]
+)
+def test_search_low_ocr_unavailable(
+    flow, monkeypatch: pytest.MonkeyPatch, mode: str
+) -> None:
+    """[TEST-ID] PA-C1g-fix1 OCR недоступен в low-поиске → 200, ocr_ran=False, аналогов
+    нет.
+    """
+    client, pipeline, service = flow
+    pipeline.score_1 = 0.6
+    pipeline.ocr_lines = []
+    pipeline.rerank_triggered = False
+    ocr_calls: list[str] = []
+    if mode in {"policy_unavailable", "policy_failed"}:
+        pipeline.rerank_reason = (
+            "ocr_unavailable" if mode == "policy_unavailable" else "ocr_failed"
+        )
+
+        def get_ocr() -> None:
+            ocr_calls.append("get_ocr")
+
+        monkeypatch.setattr(service._runtime, "get_ocr", get_ocr, raising=False)
+    elif mode == "no_engine":
+        monkeypatch.setattr(service._runtime, "get_ocr", lambda: None, raising=False)
+    else:
+        monkeypatch.setattr(
+            service._runtime, "get_ocr", lambda: _FailingOcr(), raising=False
+        )
+    r = _post_png(client)
+    assert r.status_code == 200, r.text
+    result = SearchResult.model_validate(r.json())
+    assert result.status == "low"
+    assert result.analogs is not None
+    assert result.analogs.hints.ocr_ran is False
+    assert result.analogs.source == "ocr_filters"
+    assert result.analogs.wines == []
+    assert result.analogs.total == 0
+    # Policy already skipped OCR → the service must not call OCR again.
+    assert ocr_calls == []
+
+
+@pytest.mark.db
+def test_search_low_rerank_switch_no_grape_empty(flow) -> None:
+    """[TEST-ID] PA-C1d-fix1 low + rerank выбрал rank 2: без сорта → пусто; с сортом →
+    rank 2 исключён.
+
+    DEF-1 (vector analogs включали победителя) закрыт как obsolete.
     """
     client, pipeline, _service = flow
     pipeline.score_1 = 0.6
@@ -349,8 +475,19 @@ def test_search_low_rerank_switch_vector_excludes_winner(flow) -> None:
     assert result.status == "low"
     assert result.winner.slug == result.candidates[1].slug
     assert result.analogs is not None
-    assert result.analogs.source == "vector"
-    assert result.winner.slug not in {w.slug for w in result.analogs.wines}
+    assert result.analogs.source == "ocr_filters"
+    assert result.analogs.wines == []
+    assert result.analogs.total == 0
+
+    pipeline.ocr_lines = ["2019", "КАБЕРНЕ СОВИНЬОН"]
+    result = SearchResult.model_validate(_post_png(client).json())
+    winner = result.candidates[1].slug
+    assert result.winner.slug == winner
+    assert result.analogs is not None
+    assert result.analogs.source == "ocr_filters"
+    assert result.analogs.filters.exclude_slugs == [winner]
+    assert result.analogs.wines
+    assert winner not in {w.slug for w in result.analogs.wines}
 
 
 @pytest.mark.db
@@ -383,18 +520,23 @@ def test_search_unsupported_real_format_400(flow) -> None:
 
 @pytest.mark.db
 def test_found_analogs_endpoint(flow) -> None:
-    """[TEST-ID] PA-C2c found → GET /analogs: winner_filters без его производителя."""
+    """[TEST-ID] PA-C2c-fix1 found → GET /analogs: winner_filters без его производителя,
+    без цвета.
+    """
     client, pipeline, _service = flow
     pipeline.score_1 = 0.95
     result = SearchResult.model_validate(_post_png(client).json())
     r = client.get(f"/api/v1/search/{result.search_id}/analogs?limit=3")
     assert r.status_code == 200
     analogs = AnalogsResult.model_validate(r.json())
-    assert analogs.source in {"winner_filters", "vector"}
+    assert analogs.source == "winner_filters"
+    assert analogs.filters.color is None
+    assert analogs.filters.exclude_manufacturer == result.winner.manufacturer
+    assert analogs.filters.exclude_slugs == [result.winner.slug]
+    assert analogs.hints.ocr_ran is False
     assert len(analogs.wines) <= 3
     assert result.winner.slug not in {w.slug for w in analogs.wines}
-    if analogs.source == "winner_filters":
-        assert all(w.manufacturer != result.winner.manufacturer for w in analogs.wines)
+    assert all(w.manufacturer != result.winner.manufacturer for w in analogs.wines)
 
 
 @pytest.mark.db
