@@ -24,3 +24,39 @@ Append-only. Plan: `agent_docs/plans/web_product.md`.
   `test_wine_repository` (limit = catalog size instead of 50), `manual_testing.md`, `tester_1_2_catalog_load.md`
 - `test_policy_confident`: pin `margin_min=0.08` in test policy (prod `ocr_rerank.yaml` is 0.01 → synthetic 0.02 gaps skipped OCR)
 - Commands: `ruff check src/ tests/` exit 0; `mypy src/core/product/` exit 0; `pytest tests/ -k "not owner_eval"` 82 passed; `-k owner_eval` 4 passed
+
+## 2026-09-28 — Coder (WEB-UI, branch `feat/web-ui`, worktree `.worktrees/web`)
+
+- STATUS: READY_FOR_TEST (WEB-001 … WEB-007)
+- Added `src/web/`: `__init__.py` (exports `router`, `STATIC_DIR`), `router.py` (pages `/`, `POST /search`,
+  `/result/{id}` [+`?analogs=1`, `?fb=1&verdict=`], `/result/{id}/photo`, `POST /result/{id}/feedback`, `/wine/{slug}`,
+  `/catalog`, `/me`; route class renders `error.html` on unhandled errors), `views.py` (dataclass view models,
+  catalog URLs/chips), `templating.py` (autoescape, `StrictUndefined` when `VINE_WEB_STRICT=1`; filters
+  `confidence_label`, `rating_glasses`, `rating_text`, `num`, `is_http_url` + test `http_url`);
+  templates `base.html`, `components/{wine_card,confidence_badge,analogs,feedback,stub_feature,filters}.html`,
+  `pages/{scan,result,wine,catalog,me,error}.html`; static `css/{tokens,app}.css`,
+  `js/{ui,upload,camera,lightbox,store}.js`, `img/` (prototype assets + `bottle_placeholder.svg`)
+- `src/api/main.py`: only `app.mount("/ui-static", …)` + `app.include_router(web_router)` (stub line untouched)
+- Manuals (RU): `quickstart.md` (UI run, stub file-name states, HTTPS for phone camera), `architecture.md` (UI layer,
+  stub vs real service), `manual_testing.md` (UI checklist stub), `index.md` synced
+- Deviations: `candidate_strip.html` not created (contract §3: candidates are not shown in UI); extra `js/ui.js`
+  (filters slide-over, «Скоро» toast, image fallback); extra localStorage key `svoe_vino:v1:titles` (slug→title cache
+  for /me lists); feedback redirect is `?fb=1&verdict=<v>#feedback` (verdict needed for the mismatch state);
+  upload type decided by content signature (JPEG/PNG/WebP magic) ∩ `upload.content_types`, declared type only picks
+  400 vs 415 for undecodable files
+- Commands: `uv sync --extra ml --extra db --extra dev` (from lock, no changes to pyproject/uv.lock);
+  `uv run ruff check src/web/ src/api/main.py` exit 0; `uv run mypy src/web/ --ignore-missing-imports` → 1 error in
+  `src/core/config.py:8` (pre-existing unused `type: ignore`, file untouched), `src/web` clean;
+  `uv run pytest tests/ -v -k "not owner_eval"` → 82 passed, 4 deselected
+- Smoke (TestClient, `VINE_WEB_STRICT=1`, app = web_router + `/ui-static` + StubProductService + load_product_settings):
+  all pages 200; found/low/not_found states, `?analogs=1`, photo (private cache), feedback PRG match/mismatch,
+  404 (bad/unknown id, unknown slug, unknown photo), upload 400 empty/no file/garbage, 413 >15 MB, 415 text/gif,
+  PNG + WebP(octet-stream) accepted, temp uploads cleaned, catalog filters/chips/empty/exclude/bad page,
+  autoescape + `javascript:` product_url hidden, 500 page without trace. Real app on :8082 also starts (full lifespan).
+- Screenshots: 49 PNG in `agent_docs/reports/web_ui_screens/` (gitignored) — 9 pages × 360×740, 390×844, 768×1024,
+  1280×800, 1920×1080 + filters panel open, /me guest/favorites, wine logged-in; headless Chromium via CDP;
+  `scrollWidth > innerWidth` = false on all 45 page×size shots
+- Known limitation: app-level 404 for paths outside web routes (e.g. `/etc/photo`) stays FastAPI JSON (no app
+  exception handler — main.py scope restricted)
+
+READY_FOR_TEST (WEB-UI)
