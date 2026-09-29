@@ -7,6 +7,7 @@ import logging
 import shutil
 import time
 import uuid
+from collections import Counter
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
@@ -16,13 +17,13 @@ from PIL import Image, UnidentifiedImageError
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from api.eval_pipeline import SearchRun, recognize_crop, run_search
+from api.eval_pipeline import SearchRun, log_search, recognize_crop, run_search
 from api.runtime import EvalRuntime
 from core.config import ConfidenceSettings, ProductSettings
 from core.contracts import RankedHit
 from core.ocr.base import OCRUnavailableError
 from core.policy.decision import PolicyDecision
-from core.product.hints import extract_hints
+from core.product.hints import build_grape_families, extract_hints
 from core.product.schemas import (
     AnalogSource,
     AnalogsResult,
@@ -42,7 +43,12 @@ from core.product.storage import (
     photo_path,
     result_path,
 )
-from core.product.vocabulary import Vocabulary, build_vocabulary, split_grapes
+from core.product.vocabulary import (
+    Vocabulary,
+    build_vocabulary,
+    split_grapes,
+    value_key,
+)
 from db.models import Category, Region, SweetnessLevel, Wine
 from db.repository import WineRepository
 from db.session import session_scope
@@ -182,34 +188,39 @@ class CatalogProductService:
             }
 
         try:
-            run = run_search(self._runtime, stored_photo, log_fields=log_fields)
+            run = run_search(
+                self._runtime, stored_photo, log_fields=log_fields, emit_log=False
+            )
         except Exception:
             stored_photo.unlink(missing_ok=True)
             raise
         decision = run.decision
         status, level = classify_confidence(decision.score_1, thresholds)
         candidates = _candidates(decision.hits)
-        hints = self._hints(run) if status != "found" else None
+        hints, hint_lines = self._hints(run) if status != "found" else (None, None)
 
-        with session_scope(self._runtime.session_factory) as session:
-            repo = WineRepository(session)
-            winner: WineCard | None = None
-            if status != "not_found":
-                wine = repo.get_by_slug(decision.slug)
-                if wine is None:
-                    msg = f"winner slug missing from catalog: {decision.slug}"
-                    raise RuntimeError(msg)
-                winner = wine_card(wine)
-            analogs = (
-                None
-                if hints is None
-                else self._hint_analogs(
-                    repo,
-                    hints,
-                    winner_slug=winner.slug if winner is not None else None,
-                    limit=self._settings.analogs.limit,
-                )
-            )
+        winner: WineCard | None = None
+        analogs: AnalogsResult | None = None
+        try:
+            with session_scope(self._runtime.session_factory) as session:
+                repo = WineRepository(session)
+                if status != "not_found":
+                    wine = repo.get_by_slug(decision.slug)
+                    if wine is None:
+                        msg = f"winner slug missing from catalog: {decision.slug}"
+                        raise RuntimeError(msg)
+                    winner = wine_card(wine)
+                if hints is not None:
+                    analogs = self._hint_analogs(
+                        repo,
+                        hints,
+                        winner_slug=winner.slug if winner is not None else None,
+                        limit=self._settings.analogs.limit,
+                    )
+        finally:
+            fields = dict(log_fields(decision))
+            fields.update(self._analogs_log_fields(hints, hint_lines, analogs))
+            log_search(self._runtime, run, fields)
 
         result = SearchResult(
             search_id=search_id,
@@ -314,11 +325,21 @@ class CatalogProductService:
         self._colors = build_vocabulary(colors)
         self._regions = build_vocabulary(regions)
         self._sweetness = build_vocabulary(sweetness)
-        self._grapes = build_vocabulary(
+        grape_rows = [
             grape
             for variety in session.scalars(select(Wine.grape_variety))
             for grape in split_grapes(variety)
+        ]
+        self._grapes = build_vocabulary(grape_rows)
+        grape_counts = Counter(
+            name for name in map(self._grapes.canonical, grape_rows) if name
         )
+        self._grape_families = build_grape_families(
+            self._grapes.values, grape_counts, self._settings.analogs.color_synonyms
+        )
+        self._grape_families_by_key = {
+            value_key(head): members for head, members in self._grape_families.items()
+        }
         self._dishes = build_vocabulary(
             str(dish)
             for dish in session.scalars(select(func.unnest(Wine.dishes)))
@@ -352,26 +373,29 @@ class CatalogProductService:
             len(self._manufacturers),
         )
 
-    def _hints(self, run: SearchRun) -> OcrHints:
-        """OCR-подсказки неизвестного вина; нет OCR / сбой → ``ocr_ran=False``."""
+    def _hints(self, run: SearchRun) -> tuple[OcrHints, list[str] | None]:
+        """OCR-подсказки неизвестного вина + строки OCR, по которым они собраны.
+
+        Нет OCR / сбой → ``ocr_ran=False`` и строки ``None``.
+        """
         decision = run.decision
         if decision.rerank_reason in _OCR_SKIPPED:
             logger.warning("analogs OCR skipped: %s", decision.rerank_reason)
-            return OcrHints(ocr_ran=False)
+            return OcrHints(ocr_ran=False), None
         lines: list[str] | None = list(decision.ocr_lines)
         if not decision.rerank_triggered:
             try:
                 lines = recognize_crop(self._runtime, run.bundle.crop_path)
             except OCRUnavailableError as err:
                 logger.warning("analogs OCR failed: %s", err)
-                return OcrHints(ocr_ran=False)
+                return OcrHints(ocr_ran=False), None
             except Exception:
                 logger.exception("analogs OCR failed")
-                return OcrHints(ocr_ran=False)
+                return OcrHints(ocr_ran=False), None
         if lines is None:
             logger.warning("analogs OCR skipped: no OCR engine")
-            return OcrHints(ocr_ran=False)
-        return extract_hints(
+            return OcrHints(ocr_ran=False), None
+        hints = extract_hints(
             lines,
             reranker=self._runtime.reranker,
             color_synonyms=self._settings.analogs.color_synonyms,
@@ -379,7 +403,24 @@ class CatalogProductService:
             manufacturers=self._manufacturers,
             ocr_ran=True,
             grape_aliases=self._grape_aliases,
+            grape_families=self._grape_families,
         )
+        return hints, lines
+
+    def _analogs_log_fields(
+        self,
+        hints: OcrHints | None,
+        lines: list[str] | None,
+        analogs: AnalogsResult | None,
+    ) -> dict[str, object]:
+        """Поля decision log про аналоги неизвестного вина (OCR, подсказки, фильтр)."""
+        cap = self._runtime.ocr_rerank.decision_log.ocr_lines_cap
+        return {
+            "analogs_ocr_lines": lines[:cap] if lines is not None else None,
+            "analogs_hints": hints.model_dump() if hints is not None else None,
+            "analogs_grape": analogs.filters.grape if analogs is not None else None,
+            "analogs_total": analogs.total if analogs is not None else None,
+        }
 
     def _hint_analogs(
         self,
@@ -389,12 +430,22 @@ class CatalogProductService:
         winner_slug: str | None,
         limit: int,
     ) -> AnalogsResult:
-        """Неизвестное вино: фильтр — только первый OCR-сорт (без цвета)."""
+        """Неизвестное вино: фильтр — первый OCR-сорт или его семейство (без цвета)."""
         filters = CatalogFilters(
-            grape=hints.grapes[0] if hints.grapes else None,
+            grape=self._analogs_grape(hints.grapes),
             exclude_slugs=[winner_slug] if winner_slug is not None else [],
         )
         return self._grape_analogs(repo, "ocr_filters", filters, hints, limit)
+
+    def _analogs_grape(self, grapes: Sequence[str]) -> str | None:
+        """Сорт для фильтра аналогов: всё семейство («Каберне») → имя семейства."""
+        if not grapes:
+            return None
+        if len(grapes) > 1:
+            for head, members in self._grape_families.items():
+                if list(grapes) == members:
+                    return head
+        return grapes[0]
 
     def _winner_analogs(
         self, repo: WineRepository, winner: WineCard, *, limit: int
@@ -457,11 +508,21 @@ class CatalogProductService:
                 return None
             return list(vocab.resolve(value)) or [value]
 
+        def grapes_any(value: str | None) -> list[str] | None:
+            members = (
+                self._grape_families_by_key.get(value_key(value))
+                if value is not None and not self._grapes.resolve(value)
+                else None
+            )
+            if members is None:
+                return many(self._grapes, value)
+            return [variant for m in members for variant in self._grapes.resolve(m)]
+
         return {
             "category_name": one(self._colors, filters.color),
             "region_name": one(self._regions, filters.region),
             "sweetness_name": one(self._sweetness, filters.sweetness),
-            "grape_names_any": many(self._grapes, filters.grape),
+            "grape_names_any": grapes_any(filters.grape),
             "dishes_any": many(self._dishes, filters.dish),
             "exclude_manufacturer": filters.exclude_manufacturer,
             "exclude_slugs": list(filters.exclude_slugs) or None,

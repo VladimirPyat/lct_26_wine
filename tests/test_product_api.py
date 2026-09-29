@@ -197,8 +197,14 @@ class FakePipeline:
         self.rerank_triggered = True
         self.rerank_reason: str | None = None
         self.calls: list[dict[str, object]] = []
+        self.logged: list[dict[str, object]] = []
 
-    def __call__(self, runtime, image_path, *, log_fields=None) -> SearchRun:
+    def log_search(self, _runtime, _run, fields=None) -> None:
+        self.logged.append(dict(fields or {}))
+
+    def __call__(
+        self, runtime, image_path, *, log_fields=None, emit_log=True
+    ) -> SearchRun:
         hits = [
             {
                 "wine_id": i,
@@ -230,7 +236,12 @@ class FakePipeline:
         fields = dict(log_fields(decision)) if log_fields is not None else {}
         self.calls.append({"image_path": Path(image_path), "log_fields": fields})
         bundle = SimpleNamespace(crop_path=str(image_path), hits=hits)
-        return SearchRun(bundle=bundle, decision=decision, latency_ms={})  # type: ignore[arg-type]
+        return SearchRun(
+            bundle=bundle,  # type: ignore[arg-type]
+            decision=decision,
+            latency_ms={},
+            query_image=str(image_path),
+        )
 
 
 @pytest.fixture
@@ -239,6 +250,7 @@ def flow(
 ) -> Iterator[tuple[TestClient, FakePipeline, CatalogProductService]]:
     pipeline = FakePipeline(db_service)
     monkeypatch.setattr(catalog_mod, "run_search", pipeline)
+    monkeypatch.setattr(catalog_mod, "log_search", pipeline.log_search)
     # Fresh storage + feedback log per test, thresholds from test settings.
     settings = make_settings(tmp_path, high_min=0.8, medium_min=0.65, not_found_min=0.5)
     monkeypatch.setattr(db_service, "_settings", settings)
@@ -307,6 +319,13 @@ def test_search_flow_status_and_persist(
     assert fields["status"] == status
     assert fields["confidence_level"] == level
     assert fields["endpoint"] == "product"
+    logged = pipeline.logged[-1]
+    assert logged["search_id"] == result.search_id
+    if status == "found":
+        assert logged["analogs_hints"] is None
+    else:
+        assert logged["analogs_hints"] is not None
+        assert "analogs_ocr_lines" in logged
 
     # photo + JSON persisted under exact id; upload temp file removed
     qdir = Path(service._queries_dir)

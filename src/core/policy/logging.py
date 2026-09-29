@@ -13,6 +13,37 @@ from core.policy.decision import PolicyDecision
 
 logger = logging.getLogger(__name__)
 
+# Console summary only; the JSONL record keeps the full list.
+_SUMMARY_OCR_LINES = 8
+
+
+def summary_line(record: dict[str, Any]) -> str:
+    """Одна строка для консоли: топ-K со score, решение, OCR, аналоги, время."""
+    parts = [f"search {record.get('endpoint') or 'eval'}"]
+    if record.get("search_id"):
+        parts.append(f"id={record['search_id']}")
+    if record.get("status"):
+        parts.append(f"status={record['status']}")
+    parts.append(f"winner={record.get('winner')}")
+    parts.append(f"rerank={record.get('rerank_reason') or '-'}")
+    top = " | ".join(f"{hit['slug']} {hit['score']:.3f}" for hit in record["top_k"])
+    parts.append(f"top{len(record['top_k'])}=[{top}]")
+    ocr = record.get("analogs_ocr_lines") or record.get("ocr_lines")
+    if ocr:
+        shown = json.dumps(ocr[:_SUMMARY_OCR_LINES], ensure_ascii=False)
+        parts.append(f"ocr={shown}")
+    hints = record.get("analogs_hints")
+    if hints is not None:
+        parts.append(
+            f"analogs(grape={record.get('analogs_grape') or '-'}, "
+            f"total={record.get('analogs_total')}, "
+            f"manufacturer={hints.get('manufacturer') or '-'})"
+        )
+    total_ms = record.get("latency_ms", {}).get("total")
+    if total_ms is not None:
+        parts.append(f"{total_ms:.0f}ms")
+    return " ".join(parts)
+
 
 def emit_decision_log(
     decision: PolicyDecision,
@@ -61,6 +92,7 @@ def emit_decision_log(
     }
     if extra:
         record.update(extra)
+    logger.info("%s", summary_line(record))
 
     try:
         path.parent.mkdir(parents=True, exist_ok=True)

@@ -30,6 +30,7 @@ class SearchRun:
     bundle: RetrieveBundle
     decision: PolicyDecision
     latency_ms: dict[str, float]
+    query_image: str
 
 
 def run_search(
@@ -37,11 +38,14 @@ def run_search(
     image_path: str | Path,
     *,
     log_fields: Callable[[PolicyDecision], Mapping[str, object]] | None = None,
+    emit_log: bool = True,
 ) -> SearchRun:
     """Прогнать фото через retrieve → decide и записать строку decision log.
 
     ``log_fields`` добавляет поля в запись лога (например, статус продукта),
-    вычисленные по готовому решению. Пустой каталог → ``EmptyCatalogError``.
+    вычисленные по готовому решению. ``emit_log=False`` — запись делает
+    вызывающий через ``log_search`` (когда в неё нужно добавить данные, известные
+    позже). Пустой каталог → ``EmptyCatalogError``.
     """
     path = Path(image_path)
     if not path.is_file():
@@ -75,17 +79,32 @@ def run_search(
         **decision.latency_ms,
         "total": total_ms,
     }
+    run = SearchRun(
+        bundle=bundle, decision=decision, latency_ms=latency_ms, query_image=str(path)
+    )
+    if emit_log:
+        log_search(
+            runtime, run, log_fields(decision) if log_fields is not None else None
+        )
+    return run
+
+
+def log_search(
+    runtime: EvalRuntime,
+    run: SearchRun,
+    fields: Mapping[str, object] | None = None,
+) -> None:
+    """Записать строку decision log по готовому прогону (+ поля вызывающего)."""
     extra: dict[str, object] = {
-        "used_fallback": bundle.used_fallback,
-        "crop_path": bundle.crop_path,
-        "query_image": str(path),
+        "used_fallback": run.bundle.used_fallback,
+        "crop_path": run.bundle.crop_path,
+        "query_image": run.query_image,
         "encoder_model": runtime.encoder_model,
         "embedding_dim": runtime.encoder.embedding_dim,
     }
-    if log_fields is not None:
-        extra.update(log_fields(decision))
-    _log_decision(runtime, decision, latency_ms, extra=extra)
-    return SearchRun(bundle=bundle, decision=decision, latency_ms=latency_ms)
+    if fields is not None:
+        extra.update(fields)
+    _log_decision(runtime, run.decision, run.latency_ms, extra=extra)
 
 
 def recognize_crop(runtime: EvalRuntime, crop_path: str) -> list[str] | None:

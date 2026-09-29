@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from core.config import AnalogSettings, load_ocr_rerank_settings, load_product_settings
 from core.product.hints import (
+    build_grape_families,
     extract_color,
     extract_grapes,
     extract_hints,
@@ -113,6 +114,44 @@ def test_grape_blend_on_label(reranker: FuzzyReranker) -> None:
     """[TEST-ID] PA-A2d бленд на этикетке → оба сорта справочника."""
     got = extract_grapes(["Каберне Совиньон / Мерло"], GRAPES, reranker)
     assert set(got) == {"Каберне Совиньон", "Мерло"}
+
+
+FAMILY_GRAPES = [*GRAPES, "Каберне Фран"]
+FAMILY_COUNTS = {"Каберне Совиньон": 197, "Каберне Фран": 75, "Пино Нуар": 40}
+
+
+def test_grape_families_by_first_word() -> None:
+    """Семейство — первое слово многословного сорта, члены по частоте."""
+    families = build_grape_families(FAMILY_GRAPES, FAMILY_COUNTS)
+    assert families["Каберне"] == ["Каберне Совиньон", "Каберне Фран"]
+    assert families["Пино"] == ["Пино Нуар", "Пино Гри"]
+    assert "Мускат" not in families  # standalone grape, matched as itself
+    assert "Совиньон" in families
+    assert "Мерло" not in families
+
+
+def test_grape_family_skips_color_heads(reranker: FuzzyReranker) -> None:
+    """«Красные сорта винограда» не семейство: «КРАСНОЕ» не даёт сорт."""
+    grapes = [*FAMILY_GRAPES, "Красные сорта винограда"]
+    families = build_grape_families(grapes, FAMILY_COUNTS, COLOR_SYNONYMS)
+    assert "Красные" not in families
+    assert extract_grapes(["К Р А С Н О Е"], grapes, reranker, None, families) == []
+
+
+def test_grape_family_fallback_ocr_typo(reranker: FuzzyReranker) -> None:
+    """«КАБЕРНІ» без второго слова (OCR: І вместо Е) → всё семейство Каберне."""
+    families = build_grape_families(FAMILY_GRAPES, FAMILY_COUNTS)
+    got = extract_grapes(
+        ["КАБЕРНІ", "ВАЛЕРИЙ", "ЗАХАРЬИН"], FAMILY_GRAPES, reranker, None, families
+    )
+    assert got == ["Каберне Совиньон", "Каберне Фран"]
+
+
+def test_grape_family_not_used_when_full_name_found(reranker: FuzzyReranker) -> None:
+    """Полное название нашлось → только оно, без семейства."""
+    families = build_grape_families(FAMILY_GRAPES, FAMILY_COUNTS)
+    got = extract_grapes(["КАБЕРНЕ ФРАН"], FAMILY_GRAPES, reranker, None, families)
+    assert got == ["Каберне Фран"]
 
 
 def test_grape_none(reranker: FuzzyReranker) -> None:

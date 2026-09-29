@@ -279,7 +279,7 @@ curl -s -o /dev/null -w "%{http_code}\n" -H 'Content-Type: application/json' \
 
 ### 3.4. Логи
 
-Приложение пишет логи в stderr (`docker compose logs app` или терминал uvicorn). Уровень — `VINE_LOG_LEVEL` (`DEBUG` / `INFO` / `WARNING`, по умолчанию `INFO`); в Docker — строкой `VINE_LOG_LEVEL=DEBUG` в `.env`.
+Приложение пишет логи в stderr (`docker compose logs app` или терминал uvicorn). На каждый поиск — строка `search …` с топ-5 и score, решением, OCR и аналогами; полная запись — в `data/tmp/eval_decisions.jsonl`. Уровень — `VINE_LOG_LEVEL` (`DEBUG` / `INFO` / `WARNING`, по умолчанию `INFO`); в Docker — строкой `VINE_LOG_LEVEL=DEBUG` в `.env`.
 
 ### 3.5. Если что-то не так
 

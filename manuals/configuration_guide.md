@@ -20,7 +20,7 @@
 
 ## Логи приложения
 
-Uvicorn настраивает только свои логгеры (`uvicorn.*`), поэтому приложение при старте само выводит свои логи (`api.*`, `core.*`, `db.*`, `llm.*`) в stderr в формате `время уровень логгер: сообщение`. Уровень — `VINE_LOG_LEVEL` (по умолчанию `INFO`). Если логирование уже настроено хостом (pytest, внешний запускатель), приложение его не трогает. Полезные строки старта: модель и провайдеры энкодера, `OCR engine: configured=… effective=… reason=…`, `product dictionaries: …`. Решения по каждому запросу — отдельный JSONL (`decision_log`, см. ниже).
+Uvicorn настраивает только свои логгеры (`uvicorn.*`), поэтому приложение при старте само выводит свои логи (`api.*`, `core.*`, `db.*`, `llm.*`) в stderr в формате `время уровень логгер: сообщение`. Уровень — `VINE_LOG_LEVEL` (по умолчанию `INFO`). Если логирование уже настроено хостом (pytest, внешний запускатель), приложение его не трогает. Полезные строки старта: модель и провайдеры энкодера, `OCR engine: configured=… effective=… reason=…`, `product dictionaries: …`. На каждый поиск (eval и продукт) — одна строка `core.policy.logging: search …`: статус, победитель, `rerank_reason`, `top5=[slug score | …]`, строки OCR, для неизвестного вина — `analogs(grape=…, total=…, manufacturer=…)`, время. Полная запись решения — отдельный JSONL (`decision_log`, см. ниже).
 
 ## Энкодер изображений (`config/database.yaml`)
 
@@ -176,7 +176,7 @@ decision_log:
   ocr_lines_cap: 32
 ```
 
-Каждая запись содержит `score_1`, `score_2`, `margin`; записи продуктового поиска дополнительно — `search_id`, `status`, `confidence_level`, `endpoint: "product"` (у eval поля `endpoint` нет).
+Каждая запись содержит `score_1`, `score_2`, `margin`; записи продуктового поиска дополнительно — `search_id`, `status`, `confidence_level`, `endpoint: "product"` (у eval поля `endpoint` нет). Для low / not_found продукт пишет и данные аналогов: `analogs_ocr_lines` (строки OCR, по которым собраны подсказки — если rerank не запускался, `ocr_lines` пустые), `analogs_hints` (цвет, сорта, производитель), `analogs_grape` (применённый фильтр), `analogs_total`.
 
 ```bash
 uv run python scripts/collect_eval_report.py \
