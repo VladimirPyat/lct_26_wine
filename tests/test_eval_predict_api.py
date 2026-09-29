@@ -141,7 +141,7 @@ def test_eval_predict_without_ocr_returns_top1(
     settings = settings.model_copy(
         update={
             "policy": settings.policy.model_copy(
-                update={"enable_rerank": True, "margin_min": 0.1}
+                update={"enable_rerank": True, "margin_min": 0.1, "margin_tiers": []}
             )
         }
     )

@@ -144,11 +144,21 @@ class OcrSettings(BaseModel):
         return name
 
 
+class MarginTier(BaseModel):
+    """OCR trigger for one image-confidence band: ``score_1 >= min_score``."""
+
+    min_score: float
+    margin_min: float
+
+
 class PolicySettings(BaseModel):
     """Eval decision knobs (see ``eval_predict.md``)."""
 
     top_k: int = Field(gt=0)
     margin_min: float
+    # First tier (by min_score, high → low) with score_1 >= min_score sets the
+    # OCR margin; no tiers / no match → ``margin_min``.
+    margin_tiers: list[MarginTier] = Field(default_factory=list)
     abs_min: float
     enable_rerank: bool
     enable_not_found_gate: bool = False
@@ -158,6 +168,17 @@ class PolicySettings(BaseModel):
         default_factory=lambda: [["manufacturer", "grape"], ["manufacturer", "brand"]]
     )
     max_img_drop: float | None = None
+    # Color rule after OCR: label color (these synonyms → categories.name) that
+    # contradicts the winner switches to the best top-K hit of that color whose
+    # manufacturer OCR confirms. Empty → off.
+    color_synonyms: dict[str, list[str]] = Field(default_factory=dict)
+
+    def margin_min_for(self, score_1: float) -> float:
+        """Порог разрыва для OCR при данной уверенности top-1."""
+        for tier in sorted(self.margin_tiers, key=lambda t: t.min_score, reverse=True):
+            if score_1 >= tier.min_score:
+                return tier.margin_min
+        return self.margin_min
 
     @field_validator("strong_combos")
     @classmethod

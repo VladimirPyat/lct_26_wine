@@ -167,7 +167,12 @@ def main() -> int:
             for k in args.top_ks:
                 for m in args.margins:
                     policy = settings.policy.model_copy(
-                        update={"margin_min": m, "top_k": k, "rerank_mode": mode}
+                        update={
+                            "margin_min": m,
+                            "margin_tiers": [],
+                            "top_k": k,
+                            "rerank_mode": mode,
+                        }
                     )
                     per_q = []
                     for q in queries:

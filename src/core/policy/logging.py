@@ -73,7 +73,7 @@ def emit_decision_log(
         "score_2": decision.score_2,
         "margin": decision.margin,
         "abs_min": policy.abs_min,
-        "margin_min": policy.margin_min,
+        "margin_min": policy.margin_min_for(decision.score_1),
         "garbage": decision.garbage,
         "enable_rerank": decision.enable_rerank,
         "rerank_triggered": decision.rerank_triggered,

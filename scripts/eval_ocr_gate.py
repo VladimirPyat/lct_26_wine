@@ -159,6 +159,7 @@ def main(argv: list[str] | None = None) -> int:
             policy = base_policy.model_copy(
                 update={
                     "margin_min": margin_min,
+                    "margin_tiers": [],
                     "enable_rerank": mode != "off",
                     "rerank_mode": "always" if mode == "off" else mode,
                 }

@@ -3,65 +3,30 @@
 from __future__ import annotations
 
 import re
-import unicodedata
 from collections.abc import Mapping, Sequence
 
 from core.product.schemas import OcrHints
 from core.product.vocabulary import value_key
+from core.text.color import WORD_SPLIT as _WORD_SPLIT
+from core.text.color import extract_color
+from core.text.color import fold as _fold
+from core.text.color import ocr_words as _ocr_words
+from core.text.color import synonym_hits as _synonym_hits
 from core.text.fuzzy import FuzzyReranker
 from core.text.normalize import compact_alnum, normalize_text, tokenize
 
-_WORD_SPLIT = re.compile(r"[^\w]+", re.UNICODE)
-_CYRILLIC = re.compile(r"[а-я]")
-# Russian color words inflect (красное / красного / красный): a Cyrillic
-# synonym also matches as a prefix when the ending adds at most this many letters.
-_MAX_INFLECTION = 3
+__all__ = [
+    "build_grape_families",
+    "extract_color",
+    "extract_grapes",
+    "extract_hints",
+    "extract_manufacturer",
+]
+
 _GRAPE_TOKEN_MIN_LEN = 3
 _FAMILY_SPLIT = re.compile(r"[\s\-]+")
 # Same floor as fuzzy token matching (ocr_rerank.yaml hybrid.fuzzy.token_min_len).
 _FAMILY_HEAD_MIN_LEN = 4
-
-
-def _fold(text: str) -> str:
-    """normalize_text + снятие диакритики (rosé → rose)."""
-    decomposed = unicodedata.normalize("NFKD", normalize_text(text))
-    return "".join(ch for ch in decomposed if not unicodedata.combining(ch))
-
-
-def _ocr_words(lines: Sequence[str]) -> list[str]:
-    words: list[str] = []
-    for line in lines:
-        words.extend(word for word in _WORD_SPLIT.split(_fold(line)) if word)
-    return words
-
-
-def _synonym_hits(word: str, synonym: str) -> bool:
-    if word == synonym:
-        return True
-    return (
-        bool(_CYRILLIC.search(synonym))
-        and word.startswith(synonym)
-        and len(word) - len(synonym) <= _MAX_INFLECTION
-    )
-
-
-def extract_color(
-    lines: Sequence[str], color_synonyms: Mapping[str, Sequence[str]]
-) -> str | None:
-    """Цвет каталога (``categories.name``) по словарю синонимов из ``product.yaml``.
-
-    Побеждает цвет с наибольшим числом совпавших слов; при равенстве —
-    первый в порядке YAML. Нет совпадений → ``None``.
-    """
-    words = _ocr_words(lines)
-    best: str | None = None
-    best_hits = 0
-    for color, synonyms in color_synonyms.items():
-        folded = [_fold(s) for s in synonyms if _fold(s)]
-        hits = sum(1 for word in words if any(_synonym_hits(word, s) for s in folded))
-        if hits > best_hits:
-            best, best_hits = color, hits
-    return best
 
 
 def _alias_matches(

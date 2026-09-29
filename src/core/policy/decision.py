@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from core.config import PolicySettings
 from core.contracts import RankedHit, SearchResult, WineRecord
 from core.ocr.base import IOCREngine, OCRUnavailableError
+from core.text.color import extract_color
 from core.text.fuzzy import FuzzyReranker, LabelEvidence
 from core.text.normalize import expand_token_aliases, normalize_text
 
@@ -69,7 +70,7 @@ def decide(
 
     skip_rerank = (
         not policy.enable_rerank
-        or margin >= policy.margin_min
+        or margin >= policy.margin_min_for(score_1)
         or len(hits) == 1
     )
     latency: dict[str, float] = {"ocr": 0.0, "rerank": 0.0}
@@ -128,6 +129,10 @@ def decide(
         winner, reason, evidence = _confident_winner(
             hits[0], leader, lines, reranker, policy
         )
+    color = _color_winner(winner, list(hits[:pool]), lines, reranker, policy)
+    if color is not None:
+        winner, reason = color[0], "color_mismatch"
+        evidence = {**evidence, "_color": color[1]}
     latency["rerank"] = (time.perf_counter() - t1) * 1000.0
 
     return PolicyDecision(
@@ -176,6 +181,32 @@ def _confident_winner(
     if policy.max_img_drop is not None and drop > policy.max_img_drop:
         return keep, "img_drop", log
     return leader["slug"], "strong_text", log
+
+
+def _color_winner(
+    winner: str,
+    pool: Sequence[RankedHit],
+    lines: Sequence[str],
+    reranker: FuzzyReranker,
+    policy: PolicySettings,
+) -> tuple[str, dict[str, object]] | None:
+    """Цвет на этикетке противоречит победителю → лучший по картинке кандидат
+    этого цвета, чьего производителя подтверждает OCR; иначе ``None``."""
+    if not policy.color_synonyms:
+        return None
+    label = extract_color(lines, policy.color_synonyms)
+    if label is None:
+        return None
+    key = normalize_text(label)
+    current = next((hit for hit in pool if hit["slug"] == winner), None)
+    if current is None or normalize_text(current["category"]) == key:
+        return None
+    for hit in pool:
+        if normalize_text(hit["category"]) != key:
+            continue
+        if _evidence(reranker, lines, hit).manufacturer:
+            return hit["slug"], {"label": label, "replaced": winner}
+    return None
 
 
 def _evidence(

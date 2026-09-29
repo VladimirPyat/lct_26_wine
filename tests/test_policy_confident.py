@@ -81,6 +81,7 @@ def _decide(
         update={
             "rerank_mode": "confident",
             "margin_min": _TEST_MARGIN_MIN,
+            "margin_tiers": [],
             **policy_overrides,
         }
     )
@@ -220,6 +221,112 @@ def test_margin_above_min_skips_ocr(
     assert decision.rerank_triggered is False
     assert decision.rerank_reason is None
     assert decision.slug == "agora-yachting-shiraz"
+
+
+@pytest.mark.parametrize(
+    ("score_1", "expected"), [(0.95, 0.03), (0.80, 0.03), (0.70, 0.15), (0.40, 1.0)]
+)
+def test_prod_margin_tiers(
+    settings: OcrRerankSettings, score_1: float, expected: float
+) -> None:
+    """[OCR-TIERS] high → 0.03; medium → 0.15; low → always OCR."""
+    assert settings.policy.margin_min_for(score_1) == pytest.approx(expected)
+
+
+def test_margin_tiers_fall_back_to_margin_min(settings: OcrRerankSettings) -> None:
+    policy = settings.policy.model_copy(
+        update={"margin_tiers": [{"min_score": 0.8, "margin_min": 0.03}]}
+    )
+    policy = type(policy).model_validate(policy.model_dump())
+    assert policy.margin_min_for(0.5) == pytest.approx(policy.margin_min)
+
+
+def test_medium_confidence_tier_triggers_ocr(
+    settings: OcrRerankSettings, reranker: FuzzyReranker
+) -> None:
+    """[OCR-TIERS] gap 0.10 at score_1 0.70 → OCR (medium 0.15), not at 0.90."""
+    medium, factory = _decide(
+        [_shiraz(0.70), _cab(0.60)], _OCR_CAB, settings, reranker,
+        margin_tiers=settings.policy.margin_tiers,
+    )
+    assert medium.rerank_triggered is True
+    factory.assert_called_once()
+    high, factory = _decide(
+        [_shiraz(0.90), _cab(0.80)], _OCR_CAB, settings, reranker,
+        margin_tiers=settings.policy.margin_tiers,
+    )
+    assert high.rerank_triggered is False
+    factory.assert_not_called()
+
+
+_GOLUBITSKOE = "Поместье Голубицкое"
+_OCR_RED_BLEND = ["GOLUBITSKOE", "ESTATE -", "RED", "BLEND", "2023"]
+
+
+def _colored(
+    wine_id: int, slug: str, score: float, category: str, maker: str = _GOLUBITSKOE
+) -> RankedHit:
+    return RankedHit(
+        wine_id=wine_id,
+        slug=slug,
+        score=score,
+        title=slug.replace("-", " ").title(),
+        manufacturer=maker,
+        category=category,
+        image_path=f"/static/wines/{slug}.webp",
+        grape_variety="Каберне Совиньон",
+    )
+
+
+def _red_blend_hits() -> list[RankedHit]:
+    return [
+        _colored(1, "roze-blend", 0.78, "Розовое"),
+        _colored(2, "pino-nuar-rozovoe", 0.66, "Розовое", maker="Другая"),
+        _colored(3, "red-blend", 0.62, "Красное"),
+    ]
+
+
+def test_color_mismatch_switches_to_label_color(
+    settings: OcrRerankSettings, reranker: FuzzyReranker
+) -> None:
+    """[OCR-COLOR] RED on a rosé winner → best red hit with confirmed producer."""
+    decision, _ = _decide(
+        _red_blend_hits(), _OCR_RED_BLEND, settings, reranker,
+        margin_tiers=settings.policy.margin_tiers,
+    )
+    assert decision.slug == "red-blend"
+    assert decision.rerank_reason == "color_mismatch"
+    assert decision.evidence["_color"] == {"label": "Красное", "replaced": "roze-blend"}
+
+
+def test_color_rule_needs_confirmed_manufacturer(
+    settings: OcrRerankSettings, reranker: FuzzyReranker
+) -> None:
+    """[OCR-COLOR] red candidate of another producer → keep the image winner."""
+    hits = _red_blend_hits()
+    hits[2] = _colored(3, "red-blend", 0.62, "Красное", maker="Фанагория")
+    decision, _ = _decide(
+        hits, _OCR_RED_BLEND, settings, reranker,
+        margin_tiers=settings.policy.margin_tiers,
+    )
+    assert decision.slug == "roze-blend"
+    assert decision.rerank_reason != "color_mismatch"
+
+
+def test_color_rule_off_or_matching_color(
+    settings: OcrRerankSettings, reranker: FuzzyReranker
+) -> None:
+    off, _ = _decide(
+        _red_blend_hits(), _OCR_RED_BLEND, settings, reranker, color_synonyms={},
+        margin_tiers=settings.policy.margin_tiers,
+    )
+    assert off.slug == "roze-blend"
+    rose, _ = _decide(
+        _red_blend_hits(), ["GOLUBITSKOE", "ROSE", "BLEND"], settings, reranker,
+        margin_tiers=settings.policy.margin_tiers,
+    )
+    assert rose.slug == "roze-blend"
+    assert rose.rerank_reason != "color_mismatch"
 
 
 def test_decision_log_contains_confident_fields(

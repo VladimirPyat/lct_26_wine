@@ -53,7 +53,8 @@ YOLO crop → SigLIP2 encode (letterbox 256, L2) → pgvector top_k
     │
     ▼
 policy.decide
-    ├─ skip OCR if !enable_rerank OR margin ≥ margin_min OR single hit
+    ├─ skip OCR if !enable_rerank OR margin ≥ margin_min(score_1) OR single hit
+    │    (margin_tiers: high ≥0.80 → 0.03, medium ≥0.65 → 0.15, low → 1.0)
     ├─ нет OCR-движка (effective=none)      → skip, rerank_reason=ocr_unavailable
     ├─ LLM-OCR упал (OCRUnavailableError)   → skip, rerank_reason=ocr_failed
     └─ else IOCREngine.recognize + FuzzyReranker on shortlist
@@ -65,6 +66,8 @@ policy.decide
               └─ слабо / не отличает / конфликт /
                  падение cosine > max_img_drop      → top-1 (weak_text, not_distinguishing,
                                                             text_conflict, img_drop)
+         └─ правило цвета (color_synonyms): цвет этикетки ≠ категория победителя
+              → лучший top-K этого цвета с подтверждённым производителем (color_mismatch)
     │
     ├── HTTP 200: {"slug": "<winner>"}   # всегда slug при непустых hits
     └── JSONL decision log (не в теле ответа)
