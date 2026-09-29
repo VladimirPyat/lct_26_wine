@@ -12,6 +12,43 @@
 </article>
 {% endmacro %}
 
+{# Demo map (FIX-WEB-02): shops_map.js fills the dialog; random shops/prices, OSM tiles. #}
+{% macro shops_feature() %}
+<article class="stub shops" data-shops>
+  <div class="stub__head">
+    <h3 class="stub__title">Найти в магазинах рядом</h3>
+    <span class="stub__soon stub__soon--demo">Демо</span>
+  </div>
+  <p class="stub__text">Покажем, где купить это вино поблизости.</p>
+  <button type="button" class="btn btn--ghost btn--small" data-shops-open
+          aria-haspopup="dialog" aria-controls="shops-dialog">Показать на карте</button>
+  <dialog class="shops-dialog" id="shops-dialog" data-shops-dialog aria-labelledby="shops-dialog-title">
+    <div class="shops-dialog__head">
+      <h2 class="shops-dialog__title" id="shops-dialog-title">Магазины рядом</h2>
+      <form method="dialog">
+        <button type="submit" class="shops-dialog__close" aria-label="Закрыть">×</button>
+      </form>
+    </div>
+    <p class="shops-dialog__badge">Демо — цены и магазины случайные</p>
+    <div class="shops-map" data-shops-map>
+      <p class="shops-map__note">Для демо-карты нужен JavaScript.</p>
+    </div>
+    <p class="shops-dialog__status" data-shops-status></p>
+    <p class="shops-dialog__min" data-shops-min></p>
+    <ol class="shops-list" data-shops-list></ol>
+    <p class="shops-dialog__attr">
+      © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>
+    </p>
+    <div class="shops-dialog__actions">
+      <button type="button" class="btn btn--ghost btn--small" data-shops-refresh hidden>Обновить</button>
+      <form method="dialog">
+        <button type="submit" class="btn btn--primary btn--small">Закрыть</button>
+      </form>
+    </div>
+  </dialog>
+</article>
+{% endmacro %}
+
 {% macro stub_features(sommelier) %}
 <section class="section stubs" aria-labelledby="stubs-title">
   <h2 class="section__title" id="stubs-title">Ещё возможности</h2>
@@ -26,7 +63,7 @@
       {% endfor %}
     </ul>
     {% endcall %}
-    {{ stub_feature('Найти в магазинах рядом', 'Покажем, где купить это вино поблизости.') }}
+    {{ shops_feature() }}
     {{ stub_feature('Чат', 'Задайте вопрос о вине и получите ответ.') }}
   </div>
 </section>

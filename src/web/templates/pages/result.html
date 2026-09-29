@@ -8,6 +8,7 @@
 {% block page_class %}result result--{{ view.status }}{% endblock %}
 {% block scripts %}
 <script type="module" src="{{ url_for('ui_static', path='js/lightbox.js').path }}"></script>
+<script type="module" src="{{ url_for('ui_static', path='js/shops_map.js').path }}"></script>
 {% endblock %}
 {% block content %}
 <div hidden data-search-meta
