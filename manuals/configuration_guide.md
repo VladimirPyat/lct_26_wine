@@ -18,6 +18,26 @@
 | `docker-compose.yml` | сервис `db`, порт `5432` |
 | Переменные окружения | `VINE_LOG_LEVEL` (уровень логов приложения: `DEBUG` / `INFO` / `WARNING`, по умолчанию `INFO`); `LD_LIBRARY_PATH` (GPU: библиотеки CUDA из venv, см. quickstart); `VINE_RESET_EMBEDDINGS=1` (только для смены размерности эмбеддинга) |
 
+### Применение изменений в Docker
+
+В полном Docker (`docker-compose.full.yml`, quickstart часть 1) папки `config/`, `src/` и `scripts/` **копируются в образ** при сборке. Поэтому после правки YAML (пороги OCR, `product.yaml`) или кода нужно пересобрать образ и пересоздать контейнер; простого `restart` недостаточно. Модели (`bin/`), данные (`data/`) и фото каталога подключаются из папок репозитория, для них пересборка не нужна.
+
+```bash
+export COMPOSE_FILE=docker-compose.full.yml
+docker compose up -d --build app                   # обычно достаточно: Docker видит изменённые файлы
+docker compose build --no-cache app && docker compose up -d --force-recreate app   # принудительно, без кэша слоёв
+```
+
+`--no-cache` собирает образ с нуля (дольше, заново ставятся зависимости); `--force-recreate` пересоздаёт контейнер, даже если образ не изменился. БД и веса PHOCR лежат в томах и при этом не теряются.
+
+Проверить, что контейнер видит новый конфиг:
+
+```bash
+docker compose exec app grep -A4 margin_tiers /app/config/ocr_rerank.yaml
+```
+
+Или по логу решения: поле `margin_min` в `data/tmp/eval_decisions.jsonl` — фактически применённый порог OCR для этого запроса.
+
 ## Логи приложения
 
 Uvicorn настраивает только свои логгеры (`uvicorn.*`), поэтому приложение при старте само выводит свои логи (`api.*`, `core.*`, `db.*`, `llm.*`) в stderr в формате `время уровень логгер: сообщение`. Уровень — `VINE_LOG_LEVEL` (по умолчанию `INFO`). Если логирование уже настроено хостом (pytest, внешний запускатель), приложение его не трогает. Полезные строки старта: модель и провайдеры энкодера, `OCR engine: configured=… effective=… reason=…`, `product dictionaries: …`. На каждый поиск (eval и продукт) — одна строка `core.policy.logging: search …`: статус, победитель, `rerank_reason`, `top5=[slug score | …]`, строки OCR, для неизвестного вина — `analogs(grape=…, total=…, manufacturer=…)`, время. Полная запись решения — отдельный JSONL (`decision_log`, см. ниже).

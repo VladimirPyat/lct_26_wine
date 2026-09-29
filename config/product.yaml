@@ -1,7 +1,7 @@
 confidence:            # cosine of image top-1; PLACEHOLDERS until calibration (SIG-ABS-001)
   high_min: 0.80
   medium_min: 0.65
-  not_found_min: 0.50
+  not_found_min: 0.55
 analogs:
   limit: 5
   color_synonyms:      # OCR token → categories.name
