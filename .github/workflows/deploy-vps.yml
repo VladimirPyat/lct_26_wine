@@ -1,5 +1,6 @@
 # One-button deploy to the VPS (Actions → "Deploy VPS" → Run workflow).
 # SSH to the server → checkout the requested ref → scripts/deploy/deploy_vps.sh (build on the server).
+# If the deploy or its health checks fail → checkout the previously deployed commit, redeploy it, job = failed.
 #
 # Repository secrets: VPS_HOST, VPS_USER, VPS_SSH_KEY (private key of a dedicated deploy pair),
 #   VPS_KNOWN_HOSTS (output of `ssh-keyscan -p <port> <host>`).
@@ -66,13 +67,30 @@ jobs:
             git status --short --untracked-files=no >&2
             exit 1
           fi
-          prev="$(git rev-parse --short HEAD)"
+          prev_full="$(git rev-parse HEAD)"; prev="${prev_full:0:7}"
+          history=data/tmp/deploy/state/deploy_history.log
+          mkdir -p "$(dirname "$history")"
           git fetch --prune origin "$ref"
           git checkout --detach FETCH_HEAD
+          new="$(git rev-parse --short HEAD)"
           echo "deploying $(git log -1 --format='%h %s') (was $prev)"
           args=()
           [[ "$replace_db" == "true" ]] && args+=(--yes)
-          scripts/deploy/deploy_vps.sh "${args[@]}"
-          mkdir -p data/tmp/deploy/state
-          echo "$(date -Is) $(git rev-parse HEAD) ref=$ref prev=$prev" >> data/tmp/deploy/state/deploy_history.log
+          if scripts/deploy/deploy_vps.sh "${args[@]}"; then
+            echo "$(date -Is) ok $new ref=$ref prev=$prev" >> "$history"
+            exit 0
+          fi
+          echo "::error::deploy of $new failed — rolling back to $prev"
+          git checkout --detach "$prev_full"
+          # remove containers of services the failed version added (they may hold ports)
+          docker compose -f docker-compose.vps.yml down --remove-orphans || true
+          if scripts/deploy/deploy_vps.sh; then
+            echo "$(date -Is) FAILED $new ref=$ref, rolled back to $prev" >> "$history"
+            echo "::error::rolled back to $prev; the site runs the previous version"
+          else
+            echo "$(date -Is) FAILED $new ref=$ref, ROLLBACK to $prev FAILED" >> "$history"
+            echo "::error::rollback to $prev failed too — check the server manually"
+          fi
+          [[ "$replace_db" == "true" ]] && echo "::warning::DB volume was replaced; old data is in the newest vine_vps_pgdata_bak_* volume (VINE_PG_VOLUME)"
+          exit 1
           REMOTE

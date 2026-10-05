@@ -1,0 +1,11 @@
+# Reverse proxy in front of the app (docker-compose.vps.yml, service `caddy`).
+# VINE_SITE_ADDRESS = VINE_DOMAIN from .env, or ":80" (plain HTTP on any host / IP) when no domain is set.
+# With a domain Caddy obtains and renews a Let's Encrypt certificate itself and redirects HTTP → HTTPS;
+# ports 80 and 443 must be reachable from the internet. Certificates persist in the caddy_data volume.
+{$VINE_SITE_ADDRESS} {
+	encode zstd gzip
+	request_body {
+		max_size 20MB
+	}
+	reverse_proxy app:8080
+}

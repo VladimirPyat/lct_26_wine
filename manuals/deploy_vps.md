@@ -12,7 +12,7 @@
 
 - Ubuntu 22.04+ / Debian 12, **x86_64** (архив базы — сырой data-dir Postgres, ARM не подойдёт);
 - 2 vCPU, 4 GB RAM, ~10 GB свободного диска (образ ≈2 GB, модели ≈0,5 GB, картинки ≈130 MB, сборка образа временно занимает больше);
-- открытые порты 22 (SSH) и 80 (HTTP).
+- открытые порты 22 (SSH), 80 (HTTP) и 443 (HTTPS) — и в файрволе машины, и в панели провайдера (группы безопасности), если она есть.
 
 ## 2. Подготовка сервера (один раз)
 
@@ -41,7 +41,7 @@ echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 Файрвол (если используется `ufw`):
 
 ```bash
-sudo ufw allow 22/tcp && sudo ufw allow 80/tcp && sudo ufw enable
+sudo ufw allow 22/tcp && sudo ufw allow 80/tcp && sudo ufw allow 443 && sudo ufw enable
 ```
 
 ## 3. Код
@@ -77,7 +77,7 @@ nano .env          # QWEN_API_KEY=<ключ>
 scp .env user@<ip>:lct_26_wine/.env      # при нужном ключе: scp -i ~/.ssh/<ключ> ...
 ```
 
-`APP_ENV=vps` и `DATABASE_URL` для контейнера задаёт `docker-compose.vps.yml`, поэтому dev-значения из скопированного `.env` им не мешают. Обязателен только `QWEN_API_KEY`. Опционально: `VINE_PORT` (по умолчанию 80), `VINE_LOG_LEVEL`, `VINE_PG_VOLUME`.
+`APP_ENV=vps` и `DATABASE_URL` для контейнера задаёт `docker-compose.vps.yml`, поэтому dev-значения из скопированного `.env` им не мешают. Обязателен только `QWEN_API_KEY`. Для HTTPS — `VINE_DOMAIN` (раздел 5a). Опционально: `VINE_HTTP_PORT` / `VINE_HTTPS_PORT` (публичные порты Caddy, по умолчанию 80 / 443), `VINE_APP_PORT` (приложение на `127.0.0.1`, по умолчанию 8080), `VINE_LOG_LEVEL`, `VINE_PG_VOLUME`.
 
 ## 5. Запуск
 
@@ -90,16 +90,29 @@ scripts/deploy/deploy_vps.sh
 
 1. `scripts/deploy/fetch_assets.sh` — скачивает с Google Drive всё из `scripts/deploy/assets.lock`, проверяет sha256: модели → `bin/`, `images.tar.zst` → распаковка в `static/wines/`, `pgdata.tar.zst` → `data/tmp/deploy/`;
 2. `scripts/deploy/restore_db_volume.sh` — создаёт том `vine_vps_pgdata` из архива, поднимает `db`, печатает число вин и число slug без картинки (ожидается `wines in DB: 2091`, без картинки — `0`);
-3. `docker compose -f docker-compose.vps.yml up -d --build` — сборка CPU-образа и старт;
-4. ожидание `/health`.
+3. `docker compose -f docker-compose.vps.yml up -d --build --remove-orphans` — сборка CPU-образа и старт `db`, `app`, `caddy`;
+4. проверка `/health`: приложение напрямую (`127.0.0.1:8080`), затем через Caddy (HTTPS с валидным сертификатом, если задан `VINE_DOMAIN`, иначе HTTP). Любая неудача → код выхода ≠ 0.
+
+Наружу смотрит только Caddy (порты 80/443), приложение слушает лишь `127.0.0.1:8080`.
 
 Проверка снаружи:
 
 ```bash
-curl http://<ip>/health     # {"status":"ok","profile":"vps"}
+curl http://<ip>/health              # без домена: {"status":"ok","profile":"vps"}
+curl https://<домен>/health          # с VINE_DOMAIN
 ```
 
-Интерфейс — `http://<ip>/`, eval-эндпоинт — `http://<ip>/v1/eval/predict`.
+Интерфейс — `https://<домен>/` (или `http://<ip>/` без домена), eval-эндпоинт — `/v1/eval/predict` там же. Камера в браузере работает только по HTTPS.
+
+## 5a. HTTPS (Caddy + Let's Encrypt)
+
+Сертификат выдаётся на доменное имя. Если своего домена нет — `sslip.io`: имя `<ip с дефисами>.sslip.io` резолвится в этот IP (для `176.53.174.61` → `176-53-174-61.sslip.io`), регистрировать ничего не нужно. Проверка: `dig +short 176-53-174-61.sslip.io` возвращает IP сервера.
+
+1. В `.env` на сервере: `VINE_DOMAIN=176-53-174-61.sslip.io` (или свой домен с A-записью на IP).
+2. Порты 80 и 443 открыты снаружи (раздел 1) — Let's Encrypt проверяет домен запросом на порт 80.
+3. Деплой (кнопкой или `scripts/deploy/deploy_vps.sh`). Caddy сам получает сертификат (обычно 10–60 с), продлевает его и перенаправляет HTTP → HTTPS. Сертификаты хранятся в томе `vine-vps_caddy_data` и переживают перезапуски.
+
+После включения домена сайт открывается только по имени; запросы по голому IP Caddy не обслуживает. Вернуться к HTTP без домена — убрать `VINE_DOMAIN` из `.env` и повторить деплой. Конфиг прокси — `config/caddy/Caddyfile`.
 
 Скачивание моделей без запуска — `scripts/deploy/fetch_assets.sh`; проверка, всё ли на месте, — `scripts/deploy/fetch_assets.sh --check`. Если Drive оборвал загрузку — просто запустите скрипт ещё раз: уже скачанные файлы с верным sha256 пропускаются.
 
@@ -138,6 +151,8 @@ GitHub → **Actions** → **Deploy VPS** → **Run workflow**:
 - `replace_db` — галочка = `--yes` (заменить том базы из архива в `assets.lock`, старый — в бэкап).
 
 Workflow (`.github/workflows/deploy-vps.yml`) заходит на сервер по SSH, переключает репозиторий на `ref` (`git fetch` + `checkout --detach`) и запускает `scripts/deploy/deploy_vps.sh`: образ пересобирается на сервере (слой зависимостей кэшируется — обычно пара минут), затем проверка `/health`. Если на сервере изменены файлы из git, деплой останавливается, ничего не перезаписывая (`.env`, `bin/`, `data/` не в git — их это не касается). История: `data/tmp/deploy/state/deploy_history.log`.
+
+**Автооткат.** Если `deploy_vps.sh` упал (сборка, старт или любая проверка `/health`), workflow сам возвращает предыдущий развёрнутый коммит, останавливает контейнеры (`compose down --remove-orphans`, тома не трогаются) и разворачивает его заново; запуск помечается красным, в логе — `rolled back to <коммит>`. Пока идёт откат, сайт недоступен 1–3 минуты. Если не поднялась и старая версия — в логе `rollback ... failed too`, тогда разбираться на сервере вручную. База при откате не возвращается: если был включён `replace_db`, прежние данные лежат в томе `vine_vps_pgdata_bak_<дата>` (см. «Новый каталог» ниже).
 
 Одноразовая настройка:
 
@@ -215,7 +230,9 @@ docker compose -f docker-compose.vps.yml up -d
 | `Unable to find image 'pgvector/pgvector:pg16@sha256:...'` и ошибка сети / DNS (`i/o timeout`, `failed to resolve reference`) на шаге `2/4 database volume` | архив базы скачан нормально — не докачался образ Postgres из Docker Hub (на нём распаковывается архив и работает база). Скачать вручную: `docker pull pgvector/pgvector:pg16@sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b`, затем `scripts/deploy/deploy_vps.sh --yes` (том успел создаться пустым; модели и картинки повторно не скачиваются). Если DNS сбоит регулярно — `DNS=1.1.1.1 8.8.8.8` в `/etc/systemd/resolved.conf.d/dns.conf`, `sudo systemctl restart systemd-resolved docker` |
 | `volume ... exists with other data` | том уже есть с другой базой (или пустой после оборванной распаковки) — `deploy_vps.sh --yes` (с бэкапом) |
 | `app did not become healthy` | скрипт печатает логи; частые причины — нет `QWEN_API_KEY`, нет моделей в `bin/` (`fetch_assets.sh --check`) |
-| порт 80 занят | `VINE_PORT=8080` в `.env`, повторить `deploy_vps.sh` |
+| порт 80 / 443 занят | `VINE_HTTP_PORT=8080` / `VINE_HTTPS_PORT=8443` в `.env` (сертификат Let's Encrypt при этом не выпустится — ему нужны именно 80/443), повторить `deploy_vps.sh` |
+| `FAILED https://<домен> (caddy)` | Caddy не получил сертификат: `docker compose -f docker-compose.vps.yml logs caddy`. Частые причины — закрыт 80/443 в панели провайдера, домен не указывает на IP, лимит Let's Encrypt (подождать час) |
+| страница не открывается в браузере, а `curl` работает | браузер открывает `https://` — без `VINE_DOMAIN` HTTPS нет, набрать `http://<ip>/` явно |
 | OOM / контейнер перезапускается | проверить swap (`swapon --show`), `docker stats`; лимиты — `mem_limit` в `docker-compose.vps.yml` |
 | `permission denied ... docker.sock` | не перелогинились после `usermod -aG docker` |
 
