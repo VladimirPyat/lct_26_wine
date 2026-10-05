@@ -1,0 +1,78 @@
+# One-button deploy to the VPS (Actions → "Deploy VPS" → Run workflow).
+# SSH to the server → checkout the requested ref → scripts/deploy/deploy_vps.sh (build on the server).
+#
+# Repository secrets: VPS_HOST, VPS_USER, VPS_SSH_KEY (private key of a dedicated deploy pair),
+#   VPS_KNOWN_HOSTS (output of `ssh-keyscan -p <port> <host>`).
+# Repository variables (optional): VPS_PORT (default 22), VPS_APP_DIR (default ~/lct_26_wine).
+# Setup: manuals/deploy_vps.md §7.
+name: Deploy VPS
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch, tag or full commit SHA to deploy"
+        required: true
+        default: master
+      replace_db:
+        description: "Replace the DB volume from the archive in assets.lock (--yes, old volume backed up)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-vps
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      REF: ${{ inputs.ref }}
+      REPLACE_DB: ${{ inputs.replace_db }}
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_PORT: ${{ vars.VPS_PORT || '22' }}
+      VPS_APP_DIR: ${{ vars.VPS_APP_DIR || '~/lct_26_wine' }}
+    steps:
+      - name: Validate input
+        run: |
+          [[ "$REF" =~ ^[A-Za-z0-9._/-]+$ ]] || { echo "invalid ref: $REF" >&2; exit 1; }
+          [[ -n "$VPS_HOST" && -n "$VPS_USER" ]] || { echo "secrets VPS_HOST / VPS_USER not set" >&2; exit 1; }
+
+      - name: SSH key
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Deploy
+        run: |
+          remote="bash -s -- $(printf '%q ' "$REF" "$VPS_APP_DIR" "$REPLACE_DB")"
+          ssh -i ~/.ssh/deploy_key -p "$VPS_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o ServerAliveInterval=30 "$VPS_USER@$VPS_HOST" "$remote" <<'REMOTE'
+          set -euo pipefail
+          ref="$1"; app_dir="${2/#\~/$HOME}"; replace_db="$3"
+          cd "$app_dir"
+          if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
+            echo "tracked files modified on the server — commit/revert them first:" >&2
+            git status --short --untracked-files=no >&2
+            exit 1
+          fi
+          prev="$(git rev-parse --short HEAD)"
+          git fetch --prune origin "$ref"
+          git checkout --detach FETCH_HEAD
+          echo "deploying $(git log -1 --format='%h %s') (was $prev)"
+          args=()
+          [[ "$replace_db" == "true" ]] && args+=(--yes)
+          scripts/deploy/deploy_vps.sh "${args[@]}"
+          mkdir -p data/tmp/deploy/state
+          echo "$(date -Is) $(git rev-parse HEAD) ref=$ref prev=$prev" >> data/tmp/deploy/state/deploy_history.log
+          REMOTE

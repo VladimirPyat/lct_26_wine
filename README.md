@@ -20,6 +20,7 @@ Eval организатора — эндпоинт `http://127.0.0.1:8080/v1/eva
 | Документ | Назначение |
 |----------|------------|
 | [manuals/quickstart.md](manuals/quickstart.md) | Запуск: полный в Docker (GPU) → база + индексация → решение → скрипт заказчика; вариант «только база в Docker» (хост / CPU); подробности |
+| [manuals/deploy_vps.md](manuals/deploy_vps.md) | Деплой на VPS без GPU: одна команда `scripts/deploy/deploy_vps.sh`, обновление, откат |
 | [manuals/user_interface.md](manuals/user_interface.md) | Веб-интерфейс: экраны, состояния результата, аналоги, «Мои вина» |
 | [manuals/architecture.md](manuals/architecture.md) | Архитектура: модули, пайплайн поиска, policy, аналоги, логи |
 | [manuals/configuration_guide.md](manuals/configuration_guide.md) | Настройки (`config/*.yaml`, `.env`, переменные окружения) |

@@ -114,7 +114,7 @@ owner_eval set 2 top-1 25/25, app RSS ≈1.13 GB, db ≈36 MB.
 
 ### TICKET-DEPLOY-001 — Manual: deploy on a fresh VPS
 
-**Status:** OPEN (do when the first real server deploy happens)
+**Status:** DONE 2026-10-05 — `manuals/deploy_vps.md` (first real deploy passed; HTTPS → Caddy next)
 
 - [ ] `manuals/deploy_vps.md` (RU): requirements (Ubuntu 22.04+/Debian 12, 2 vCPU / 4 GB, x86_64);
   Docker Engine + compose plugin — link to https://docs.docker.com/engine/install/ubuntu/ (+ post-install
@@ -135,7 +135,10 @@ owner_eval set 2 top-1 25/25, app RSS ≈1.13 GB, db ≈36 MB.
 
 ### TICKET-DEPLOY-002 — GitHub Actions: CI + one-button deploy
 
-**Status:** OPEN (do before the first update after go-live)
+**Status:** deploy button DONE 2026-10-05 (`.github/workflows/deploy-vps.yml`: SSH → `git fetch` +
+`checkout --detach <ref>` → `deploy_vps.sh`, image built on the server, no GHCR; secrets `VPS_HOST`,
+`VPS_USER`, `VPS_SSH_KEY`, `VPS_KNOWN_HOSTS`, vars `VPS_PORT`, `VPS_APP_DIR`; setup in
+`manuals/deploy_vps.md` §7). Open: `ci.yml`; GHCR build only if server-side build becomes a problem.
 
 - [ ] `.github/workflows/ci.yml` (PR + push): `uv sync --extra ml --extra db --extra dev` → ruff → mypy → pytest;
   DB/model-dependent tests skipped when assets/Postgres absent (marker or service container)
