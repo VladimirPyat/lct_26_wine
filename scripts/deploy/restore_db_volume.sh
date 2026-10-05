@@ -45,7 +45,10 @@ for tool in docker zstd sha256sum; do
 done
 [[ -f "$ARCHIVE" ]] || { echo "no $ARCHIVE — run scripts/deploy/fetch_assets.sh first" >&2; exit 1; }
 
-DB_IMAGE="$(dc config --images | grep -m1 'pgvector/')"
+# full output first: `dc ... | grep -m1` can kill compose with SIGPIPE under pipefail
+IMAGES="$(dc config --images)"
+DB_IMAGE="$(grep -m1 'pgvector/' <<<"$IMAGES" || true)"
+[[ -n "$DB_IMAGE" ]] || { echo "no pgvector image in $COMPOSE_FILE (images: $IMAGES)" >&2; exit 1; }
 ARCHIVE_SHA="$(sha256sum "$ARCHIVE" | cut -d' ' -f1)"
 echo "volume=$VOLUME image=$DB_IMAGE archive=$ARCHIVE"
 
