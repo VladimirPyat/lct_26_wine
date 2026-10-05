@@ -8,6 +8,8 @@ from typing import Literal
 import yaml  # type: ignore[import-untyped]
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from core.env import profile_overlay_path
+
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _DEFAULT_DATABASE_YAML = _REPO_ROOT / "config" / "database.yaml"
 _DEFAULT_COMPUTE_CROPPER_YAML = _REPO_ROOT / "config" / "compute_cropper.yaml"
@@ -19,8 +21,10 @@ class ComputeSettings(BaseModel):
     device: str
     cv_threads: int
     ort_threads: int
+    # Parallel image-encoder ORT runs per process; 0 = unlimited.
+    max_concurrent_inference: int = 0
 
-    @field_validator("cv_threads", "ort_threads")
+    @field_validator("cv_threads", "ort_threads", "max_concurrent_inference")
     @classmethod
     def thread_limits_must_be_non_negative(cls, value: int) -> int:
         if value < 0:
@@ -276,12 +280,35 @@ class ProductSettings(BaseModel):
     upload: UploadSettings
 
 
-def _load_yaml_mapping(yaml_path: Path) -> dict[object, object]:
+def _read_yaml_mapping(yaml_path: Path) -> dict[object, object]:
     raw = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
     if not isinstance(raw, dict):
         msg = f"config must be a mapping: {yaml_path}"
         raise TypeError(msg)
     return raw
+
+
+def _deep_merge(
+    base: dict[object, object], overlay: dict[object, object]
+) -> dict[object, object]:
+    """Mappings merge recursively; lists and scalars from ``overlay`` replace."""
+    merged = dict(base)
+    for key, value in overlay.items():
+        current = merged.get(key)
+        if isinstance(current, dict) and isinstance(value, dict):
+            merged[key] = _deep_merge(current, value)
+        else:
+            merged[key] = value
+    return merged
+
+
+def _load_yaml_mapping(yaml_path: Path) -> dict[object, object]:
+    """Base YAML + ``config/profiles/<APP_ENV>/<same name>`` overlay when present."""
+    raw = _read_yaml_mapping(yaml_path)
+    overlay = profile_overlay_path(yaml_path)
+    if overlay is None:
+        return raw
+    return _deep_merge(raw, _read_yaml_mapping(overlay))
 
 
 def load_database_settings(

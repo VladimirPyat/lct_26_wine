@@ -1,0 +1,9 @@
+# VPS overlay (APP_ENV=vps, 2 vCPU / 4 GB): deep-merged over config/compute_cropper.yaml.
+compute:
+  device: cpu
+  cv_threads: 2
+  ort_threads: 2
+  max_concurrent_inference: 1   # parallel requests queue instead of oversubscribing 2 cores
+
+cropper:
+  device: cpu

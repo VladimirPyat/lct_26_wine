@@ -1,0 +1,4 @@
+# VPS overlay (APP_ENV=vps): deep-merged over config/ocr_rerank.yaml.
+# No GPU → OCR through the external LLM API (key name in .env, see src/llm/tasks/).
+ocr:
+  engine: llm

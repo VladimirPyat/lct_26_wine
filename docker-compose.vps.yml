@@ -1,0 +1,69 @@
+# VPS run (2 vCPU / 4 GB, no GPU): Postgres from a restored volume + CPU app image.
+#   scripts/deploy/deploy_vps.sh            # fetch assets → restore DB volume → build/up → health
+#   docker compose -f docker-compose.vps.yml up -d --build
+# The DB volume is created by scripts/deploy/restore_db_volume.sh from pgdata.tar.zst (raw PG data dir),
+# so the db image must stay byte-identical to the one the archive was taken with (pinned digest).
+# Own project name + volume → never touches the local docker-compose.full.yml stack (`vine`).
+name: vine-vps
+
+services:
+  db:
+    image: ${VINE_DB_IMAGE:-pgvector/pgvector:pg16@sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b}
+    environment:
+      POSTGRES_USER: vine
+      POSTGRES_PASSWORD: vine
+      POSTGRES_DB: vine
+    command:
+      - postgres
+      - -c
+      - shared_buffers=128MB
+      - -c
+      - effective_cache_size=512MB
+      - -c
+      - work_mem=8MB
+      - -c
+      - max_connections=20
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vine -d vine"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    logging: &logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+
+  app:
+    image: ${VINE_IMAGE:-vine-scanner:cpu}
+    build:
+      context: .
+      args:
+        VARIANT: cpu
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - path: .env
+        required: true
+    environment:
+      APP_ENV: vps
+      DATABASE_URL: postgresql+psycopg://vine:vine@db:5432/vine
+    ports:
+      - "${VINE_PORT:-80}:8080"
+    volumes:
+      - ./bin:/app/bin:ro
+      - ./data:/app/data
+      - ./static/wines:/app/static/wines:ro
+    mem_limit: 2500m
+    logging: *logging
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+    external: true
+    name: ${VINE_PG_VOLUME:-vine_vps_pgdata}

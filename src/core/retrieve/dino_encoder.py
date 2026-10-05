@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import logging
+import threading
 from collections.abc import Sequence
+from contextlib import AbstractContextManager, nullcontext
 from pathlib import Path
 
 import cv2
@@ -34,6 +36,8 @@ class DinoOnnxEncoder:
     ORT device/threads come from ``ComputeSettings`` (``compute_cropper.yaml``).
     Catalog encode batches via ``dino.encode_batch_size``.
     """
+
+    _gate: AbstractContextManager[object] = nullcontext()
 
     def __init__(
         self,
@@ -69,6 +73,8 @@ class DinoOnnxEncoder:
                 sess_options=options,
                 providers=chosen,
             )
+        if compute.max_concurrent_inference > 0:
+            self._gate = threading.BoundedSemaphore(compute.max_concurrent_inference)
         self._input_name = self._session.get_inputs()[0].name
         outputs_by_name = {out.name: out for out in self._session.get_outputs()}
         if _OUTPUT_POOLER not in outputs_by_name:
@@ -97,13 +103,14 @@ class DinoOnnxEncoder:
             self._encode_batch_size = dino.encode_batch_size
         logger.info(
             "Encoder ONNX model=%s providers=%s embedding_dim=%s input_size=%s "
-            "resize_mode=%s encode_batch_size=%s",
+            "resize_mode=%s encode_batch_size=%s max_concurrent_inference=%s",
             model_path.name,
             self._session.get_providers(),
             self._embedding_dim,
             self._input_size,
             self._resize_mode,
             self._encode_batch_size,
+            compute.max_concurrent_inference,
         )
 
     @property
@@ -131,10 +138,7 @@ class DinoOnnxEncoder:
         # Soft path returned None — re-run raising so callers keep exception types.
         chw = self._preprocess_path(path)
         nchw = np.ascontiguousarray(chw[np.newaxis, ...])
-        outputs = self._session.run(
-            [_OUTPUT_POOLER],
-            {self._input_name: nchw},
-        )
+        outputs = self._run_session(nchw)
         return self._finalize_vector(np.asarray(outputs[0][0]), path)
 
     def encode_images(self, paths: Sequence[str]) -> list[list[float] | None]:
@@ -169,10 +173,7 @@ class DinoOnnxEncoder:
 
             stacked = np.ascontiguousarray(np.stack(ok_chw, axis=0))
             try:
-                outputs = self._session.run(
-                    [_OUTPUT_POOLER],
-                    {self._input_name: stacked},
-                )
+                outputs = self._run_session(stacked)
                 batch_out = np.asarray(outputs[0])
                 for j, global_i in enumerate(ok_indices):
                     try:
@@ -196,6 +197,15 @@ class DinoOnnxEncoder:
                 for j, global_i in enumerate(ok_indices):
                     results[global_i] = self._run_one(ok_chw[j], paths[global_i])
         return results
+
+    def _run_session(self, nchw: np.ndarray) -> list[np.ndarray]:
+        """ORT run under ``compute.max_concurrent_inference`` (CPU servers: 1)."""
+        with self._gate:
+            outputs: list[np.ndarray] = self._session.run(
+                [_OUTPUT_POOLER],
+                {self._input_name: nchw},
+            )
+        return outputs
 
     def _preprocess_path(self, path: str) -> np.ndarray:
         """Load image → CHW float32 (no batch dim). Raises on failure."""
@@ -249,10 +259,7 @@ class DinoOnnxEncoder:
         """Single-image ORT + finalize; ``None`` on ORT/postprocess failure."""
         nchw = np.ascontiguousarray(chw[np.newaxis, ...])
         try:
-            outputs = self._session.run(
-                [_OUTPUT_POOLER],
-                {self._input_name: nchw},
-            )
+            outputs = self._run_session(nchw)
             return self._finalize_vector(np.asarray(outputs[0][0]), path)
         except Exception as exc:
             logger.debug("DINO serial ORT skip path=%s: %s", path, exc)

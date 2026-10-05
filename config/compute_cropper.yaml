@@ -4,10 +4,11 @@ yolo_model_path: bin/yolo_detect_labels_2.onnx
 # phocr_weights_dir: bin/phocr
 
 compute:
-  # Local demo: cuda. CPU upload server: set cpu (+ keep onnxruntime, not -gpu).
+  # Local demo: cuda. CPU server: APP_ENV=vps (config/profiles/vps/).
   device: cuda         # cpu | cuda — PHOCR + image encoder ORT EP only (not YOLO)
   cv_threads: 0        # 0 = library default
   ort_threads: 0
+  max_concurrent_inference: 0   # parallel encoder runs; 0 = unlimited
 
 cropper:
   device: cpu   # cpu | cuda | auto — YOLO ORT only; default cpu (online-safe)

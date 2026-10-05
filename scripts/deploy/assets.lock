@@ -1,0 +1,10 @@
+# Deploy assets (assets-v1, 2026-10-05). Read by scripts/deploy/fetch_assets.sh.
+# Columns: name  google_drive_file_id  sha256  kind  dest
+#   kind file    → downloaded straight to <dest>/<name>
+#   kind tar     → archive cached in data/tmp/deploy/, extracted (tar.zst, flat) into <dest>/
+#   kind archive → only cached in data/tmp/deploy/ (consumed by restore_db_volume.sh)
+# Files must be shared "Anyone with the link". New version → upload, replace id + sha256 here.
+siglip2_wine_p1_epoch_3_int8.onnx  1M6itqqPzi9UT-8QkuHM1N3zIqPgHikRE  e9c7d456a13172b0ea439ab8c5757a7b5c75bc9594cb7aa39d21f282be8c96cf  file     bin
+yolo_detect_labels_2.onnx          1uKGYwkL7Ycm5QMgsWDl5KrTOpwwtCrtg  60c92574e47021e2228e5b91e0d9dde8e018b1d2379e9696c5404551ac5b517c  file     bin
+images.tar.zst                     1jCET4T0Q5J09Q1c64piKoEtPPGacUX1i  d468f9bff29dfc032b39eb035d6316ddbe319a3451190a91723bd97a4b356310  tar      static/wines
+pgdata.tar.zst                     1lRHCCUWxVG8tkDqUyWKz-EFW5XMRxsLY  e26a08648daa4cef8007ff4bbeb5fe8ad814385d48cc4f7d9d1885383eab6b39  archive  -

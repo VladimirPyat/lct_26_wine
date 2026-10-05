@@ -57,8 +57,8 @@ policy:
   # OCR when score_1 - score_2 < margin_min of the first tier with score_1 >= min_score.
   # Bands match product.yaml confidence (high 0.80 / medium 0.65).
   margin_tiers:
-    - {min_score: 0.80, margin_min: 0.03}   # high: near-ties only (identical images)
-    - {min_score: 0.65, margin_min: 0.16}   # medium
+    - {min_score: 0.87, margin_min: 0.03}   # high: near-ties only (identical images)
+    - {min_score: 0.65, margin_min: 0.15}   # medium
     - {min_score: 0.0, margin_min: 1.0}     # low: always
   abs_min: 0.2
   enable_rerank: true

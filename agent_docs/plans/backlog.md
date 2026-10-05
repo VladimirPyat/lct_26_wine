@@ -100,8 +100,53 @@ CPU ≈1.1 с без OCR (encode SigLIP fp32 ~1 с, PHOCR 5–7 с). Сейча�
 - [ ] env-override (напр. `VINE_DEVICE=cpu|cuda|auto`, `VINE_OCR_ENGINE`) поверх YAML; дефолты не меняются
 - [ ] (опц., нужен ✅ на `pyproject.toml` + `uv.lock`) вынести `phocr` из `ml` в отдельный extra (`ocr-local`):
   тянет `datasets`/pyarrow/pandas, `onnx`, второй OpenCV — не нужен CPU-сборке с LLM OCR
-- [ ] (опц.) int8-квантизация SigLIP для CPU (ожидаемо ×2–3; требует переимпорт каталога + `owner_eval`)
-- [ ] `manuals/configuration_guide.md` + `quickstart.md`: профили GPU / CPU, команды установки
+- [x] (опц.) int8-квантизация SigLIP для CPU — сделано 2026-10-05 без переимпорта: запросы int8, каталог fp32
+  (`scripts/quantize_encoder.py`, `bin/siglip2_wine_p1_epoch_3_int8.onnx`; см. `deploy_vps.md`)
+- [x] профили конфигов `APP_ENV=dev|vps` (оверлеи `config/profiles/vps/`) — 2026-10-05, вместо env-override по ключам
+- [ ] `manuals/configuration_guide.md` + `quickstart.md`: профили GPU / CPU, команды установки → TICKET-DEPLOY-001
+
+## VPS deploy follow-ups (2026-10-05)
+
+Plan: [`deploy_vps.md`](deploy_vps.md). Done (steps 1–4): profiles `APP_ENV=dev|vps` + encoder concurrency gate,
+`Dockerfile` `VARIANT=cpu|gpu`, `docker-compose.vps.yml`, `.env.vps.example`, `scripts/deploy/{assets.lock,
+fetch_assets.sh,restore_db_volume.sh,deploy_vps.sh}`. Local full-stack check: `/health` profile=vps,
+owner_eval set 2 top-1 25/25, app RSS ≈1.13 GB, db ≈36 MB.
+
+### TICKET-DEPLOY-001 — Manual: deploy on a fresh VPS
+
+**Status:** OPEN (do when the first real server deploy happens)
+
+- [ ] `manuals/deploy_vps.md` (RU): requirements (Ubuntu 22.04+/Debian 12, 2 vCPU / 4 GB, x86_64);
+  Docker Engine + compose plugin — link to https://docs.docker.com/engine/install/ubuntu/ (+ post-install
+  `usermod -aG docker`); optional 2 GB swap; firewall 22/80
+- [ ] code: `git clone https://github.com/VladimirPyat/lct_26_wine.git /opt/vine` (public repo → HTTPS,
+  no GitHub key on the server); if the repo becomes private → server-side read-only **deploy key**
+  (`ssh-keygen -t ed25519`, add in repo Settings → Deploy keys), never copy a personal key
+- [ ] secrets: `scp .env user@host:/opt/vine/.env` from the dev machine **or** `cp .env.vps.example .env` + edit;
+  needs `QWEN_API_KEY`; `APP_ENV=vps` is forced by compose
+- [ ] run `scripts/deploy/deploy_vps.sh`; check `curl http://<ip>/health` → `profile: vps`;
+  optional `scripts/bench_encoder_cpu.py` latency on the real CPU
+- [ ] update / rollback: `git pull && scripts/deploy/deploy_vps.sh`; new catalog → new `pgdata.tar.zst` +
+  `assets.lock` + `deploy_vps.sh --yes` (backup volume `<vol>_bak_<ts>`; rollback via `VINE_PG_VOLUME`)
+- [ ] how to cut a new DB archive locally (stop db → tar volume → zstd → sha256 → Drive → `assets.lock`);
+  db image digest must match `docker-compose.vps.yml`
+- [ ] retention cron for `scripts/cleanup_search_queries.py` (daily, inside app container)
+- [ ] sync `manuals/index.md`, README link, `configuration_guide.md` (profiles section), `quickstart.md`
+
+### TICKET-DEPLOY-002 — GitHub Actions: CI + one-button deploy
+
+**Status:** OPEN (do before the first update after go-live)
+
+- [ ] `.github/workflows/ci.yml` (PR + push): `uv sync --extra ml --extra db --extra dev` → ruff → mypy → pytest;
+  DB/model-dependent tests skipped when assets/Postgres absent (marker or service container)
+- [ ] `.github/workflows/deploy.yml` (`workflow_dispatch` only; input `ref`):
+  build `Dockerfile` `VARIANT=cpu` (buildx cache) → push `ghcr.io/vladimirpyat/lct_26_wine:sha-<short>` + `latest`
+  → SSH to VPS: `git fetch && git checkout <ref> && VINE_IMAGE=ghcr.io/...:sha-<short> scripts/deploy/deploy_vps.sh`
+  (compose `pull` instead of local build when `VINE_IMAGE` is a registry tag) → `/health`;
+  on failure re-up previous tag (`data/tmp/deploy/state/current_tag`)
+- [ ] secrets: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY` (dedicated deploy key pair: private in GitHub Secrets,
+  public in server `~/.ssh/authorized_keys`); GHCR package public or read token on the VPS
+- [ ] `deploy_vps.sh`: skip `--build` when `VINE_IMAGE` points to a registry (pull instead)
 
 ## Related (done / not tickets)
 

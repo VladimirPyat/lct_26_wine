@@ -5,32 +5,17 @@ from __future__ import annotations
 import os
 from collections.abc import Generator
 from contextlib import contextmanager
-from pathlib import Path
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-
-
-def _load_dotenv(path: Path) -> None:
-    """Minimal .env loader (keys already in os.environ win)."""
-    if not path.is_file():
-        return
-    for raw in path.read_text(encoding="utf-8").splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, _, value = line.partition("=")
-        key = key.strip()
-        value = value.strip().strip("'").strip('"')
-        os.environ.setdefault(key, value)
+from core.env import load_dotenv
 
 
 def get_database_url() -> str:
     """Resolve ``DATABASE_URL`` (host app → Compose Postgres). Never log the value."""
-    _load_dotenv(_REPO_ROOT / ".env")
+    load_dotenv()
     url = os.environ.get("DATABASE_URL")
     if not url:
         msg = (

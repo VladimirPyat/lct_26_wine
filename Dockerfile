@@ -1,7 +1,11 @@
-# Vine Scanner app image (GPU). CUDA 13 / cuDNN 9 come as pip wheels (onnxruntime-gpu[cuda,cudnn]);
-# the host needs only the NVIDIA driver (>= 580) + NVIDIA Container Toolkit.
+# Vine Scanner app image. VARIANT selects the ONNX Runtime build:
+#   gpu (default) — onnxruntime-gpu; CUDA 13 / cuDNN 9 come as pip wheels; host needs NVIDIA driver
+#                   >= 580 + NVIDIA Container Toolkit (docker-compose.full.yml).
+#   cpu           — plain onnxruntime, no CUDA libs (docker-compose.vps.yml, APP_ENV=vps).
 # Models (bin/), catalog data (data/) and catalog images (static/wines/) are mounted, not copied.
-FROM python:3.12-slim
+ARG VARIANT=gpu
+
+FROM python:3.12-slim AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -10,8 +14,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     UV_NO_SYNC=1 \
     UV_PROJECT_ENVIRONMENT=/app/.venv \
     VIRTUAL_ENV=/app/.venv \
-    PATH=/app/.venv/bin:$PATH \
-    LD_LIBRARY_PATH=/app/.venv/lib/python3.12/site-packages/nvidia/cu13/lib:/app/.venv/lib/python3.12/site-packages/nvidia/cudnn/lib
+    PATH=/app/.venv/bin:$PATH
 
 # OpenCV (pulled by PHOCR) needs libGL / glib at import time
 RUN apt-get update \
@@ -23,9 +26,17 @@ COPY --from=ghcr.io/astral-sh/uv:0.9.24 /uv /uvx /bin/
 WORKDIR /app
 
 COPY pyproject.toml uv.lock requirements-gpu.txt ./
+
+FROM base AS deps-cpu
+RUN uv sync --frozen --extra ml --extra db
+
+FROM base AS deps-gpu
 RUN uv sync --frozen --extra ml --extra db \
     && uv pip uninstall onnxruntime \
     && uv pip install -r requirements-gpu.txt
+ENV LD_LIBRARY_PATH=/app/.venv/lib/python3.12/site-packages/nvidia/cu13/lib:/app/.venv/lib/python3.12/site-packages/nvidia/cudnn/lib
+
+FROM deps-${VARIANT} AS runtime
 
 COPY alembic.ini ./
 COPY alembic/ alembic/

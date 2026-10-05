@@ -15,6 +15,7 @@ from api.routers.eval import router as eval_router
 from api.routers.product import router as product_router
 from api.runtime import EvalRuntime, build_eval_runtime
 from core.config import load_product_settings
+from core.env import active_profile
 from core.product.catalog_service import CatalogProductService
 from web import STATIC_DIR as _WEB_STATIC
 from web import router as web_router
@@ -45,6 +46,7 @@ logger = logging.getLogger(__name__)
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _STATIC_WINES = _REPO_ROOT / "static" / "wines"
 _TMP_UPLOADS = _REPO_ROOT / "data" / "tmp" / "uploads"
+_PROFILE = active_profile()
 
 
 def _warm_up_ocr(runtime: EvalRuntime) -> None:
@@ -69,6 +71,7 @@ def _warm_up_ocr(runtime: EvalRuntime) -> None:
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Load YOLO/DINO/DB once and warm up PHOCR before serving."""
     _TMP_UPLOADS.mkdir(parents=True, exist_ok=True)
+    logger.info("config profile: %s (APP_ENV)", _PROFILE)
     logger.info("building eval runtime (YOLO + DINO + DB)…")
     app.state.eval_runtime = build_eval_runtime(_REPO_ROOT)
     logger.info(
@@ -112,4 +115,4 @@ app.include_router(web_router)
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok"}
+    return {"status": "ok", "profile": _PROFILE}

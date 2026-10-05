@@ -1,0 +1,6 @@
+# VPS overlay (APP_ENV=vps): deep-merged over config/database.yaml.
+# int8 encoder for queries only; catalog embeddings in the DB stay fp32 (restored volume).
+# Dynamic int8 scales depend on the whole batch → always encode one image per run.
+dino_model_path: bin/siglip2_wine_p1_epoch_3_int8.onnx
+dino:
+  encode_batch_size: 1
